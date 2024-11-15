@@ -107,14 +107,14 @@
   <!-- Script to Display Current User -->
   <script>
   window.onload = function() {
-    var currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
+    var currentuser = localStorage.getItem('currentuser');
+    if (currentuser) {
       // Create the element for the person icon
       const personIcon = document.createElement('i');
       personIcon.classList.add('bi', 'bi-person', 'me-2'); // Add Bootstrap icon classes with margin
 
       // Set the text content to the username
-      document.getElementById('current-user').innerHTML = personIcon.outerHTML + currentUser;
+      document.getElementById('current-user').innerHTML = personIcon.outerHTML + currentuser;
     }
 
     // Optional: You can add a click event if needed for further actions

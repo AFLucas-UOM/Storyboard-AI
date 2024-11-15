@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, session, send_from_directory, jsonify
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import os, json
 
 app = Flask(__name__)
@@ -17,6 +17,16 @@ def email_exists(email):
                     return True  # Email exists
     return False  # Email does not exist
 
+# Function to authenticate user based on email and password
+def authenticate_user(email, password):
+    if os.path.exists(USER_JSON_PATH):
+        with open(USER_JSON_PATH, 'r') as f:
+            users = json.load(f)
+            for user in users:
+                if user['email'] == email and check_password_hash(user['password'], password):
+                    return user  # Return user data including 'name'
+    return None  # Invalid credentials
+
 # Main route (Home Page)
 @app.route('/')
 def index():
@@ -26,14 +36,28 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # Example credentials check
-        if username == 'test' and password == 'password':
-            session['user'] = username
-            return redirect(url_for('dashboard'))
-        else:
-            return render_template('login.html', error="Invalid credentials")
+        # Use JSON data for the login attempt
+        if request.is_json:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+            
+            # Attempt to authenticate the user
+            user = authenticate_user(email, password)
+            
+            if user:
+                session['user'] = user['email']  # Store user email in session
+                return jsonify({
+                    "success": True,
+                    "message": "Login successful",
+                    "redirect": url_for('index2'),
+                    "name": user['name']  # Return the user's name only
+                })
+            else:
+                return jsonify({"success": False, "message": "Invalid credentials"})
+        
+        return jsonify({"success": False, "message": "Request must be JSON"})
+    
     return render_template('login.html')
 
 @app.route('/check-email', methods=['POST'])

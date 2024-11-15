@@ -665,13 +665,6 @@ section,
   color: var(--accent-color); /* Accent color for visible state */
 }
 
-.captcha-container {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 /*----------------------------------------------
 # login - Home
 ----------------------------------------------*/
@@ -692,4 +685,139 @@ section,
 
 #user-info span {
   white-space: nowrap;
+}
+
+/*--------------------------------------------------------------
+# Login Section
+--------------------------------------------------------------*/
+        /* Card Styling */
+        .login-card {
+          background-color: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+          padding: 30px;
+          width: 100%;
+          text-align: center;
+      }
+/* Login Container (Card) */
+.login-container {
+  background-color: #ffffff; /* White card */
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  padding: 30px;
+  width: 100%;
+  max-width: 450px; /* Fixed max width for form */
+  text-align: center;
+}
+
+/* Header Styles inside the Card */
+.login-container h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333333; /* Dark gray text */
+}
+
+/*--------------------------------------------------------------
+# Login Form Specific Styles
+--------------------------------------------------------------*/
+
+/* Form Container */
+#loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Space between form fields */
+  padding: 6px;
+}
+
+/* Label Styles */
+#loginForm label {
+  font-size: 14px;
+  color: #555555; /* Medium gray for labels */
+  text-align: left;
+  font-weight: 500;
+}
+
+/* Input Styles */
+#loginForm input {
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #d1d5db; /* Light gray border */
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+#loginForm input:focus {
+  border-color: var(--accent-color); /* Blue border on focus */
+}
+
+/* Button Styles */
+#loginForm button {
+  background-color: var(--accent-color); /* Accent color for button */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+  margin-top: 15px; /* Space above the button */
+}
+
+#loginForm button:hover {
+  background-color: #1179dae9; /* Darker blue on hover */
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+/* Input Validation - Error Message */
+#loginForm .error-message {
+  color: red; /* Red color for error messages */
+  font-size: 14px;
+  margin-top: -10px; /* Place below input fields */
+}
+
+/* Error Input Field Styles */
+#loginForm input.error {
+  border-color: red; /* Red border for invalid fields */
+}
+
+/* Success Message Styles */
+#loginForm .success-message {
+  color: green; /* Green color for success messages */
+  font-size: 14px;
+  margin-top: 15px;
+}
+
+.login-footer {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #6b7280; /* Cool gray text */
+}
+
+.login-footer a {
+  color: var(--accent-color); /* Blue link */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Eye icon styles */
+#toggle-password {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+/* Icon when password is hidden (default state) */
+#toggle-password.bi-eye-slash {
+  color: #555; /* Slightly dark icon */
+}
+
+/* Icon when password is visible */
+#toggle-password.bi-eye {
+  color: var(--accent-color); /* Accent color for visible state */
 }
