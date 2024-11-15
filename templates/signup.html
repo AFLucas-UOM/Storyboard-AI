@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Storyboard-AI - Your personal storyteller, animator, reader, designer, producer, and narrator.">
+    <meta name="author" content="Andrea Filiberto Lucas & Sean David Muscat">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags for Social Media -->
+    <meta property="og:title" content="Storyboard-AI - Your Personal Storyteller">
+    <meta property="og:description" content="Storyboard-AI creates personalized stories with animation, narration, and design tailored to you.">
+    <meta property="og:image" content="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}">
+    <meta property="og:type" content="website">
+    <title>Home - Storyboard-AI</title>
+    
+    <!-- Favicons -->
+    <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Vendor CSS Files -->
+    <link href="{{ url_for('serve_assets', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ url_for('serve_assets', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('serve_assets', filename='vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('serve_assets', filename='vendor/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    
+    <!-- Main CSS File -->
+    <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
+  
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 600px) {
+            .signup-container {
+                width: 90%;
+            }
+        }
+
+        .error-message, .success-message {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: red;
+        }
+
+        .success-message {
+            color: green;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        /* Styles for password visibility toggle */
+        .bi-eye, .bi-eye-slash {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <h2>Create Account</h2>
+        <!-- Message display area -->
+        <div id="message" class="error-message"></div>
+
+        <form id="signupForm">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+            <label for="password">Password</label>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required style="letter-spacing: 0.5px;">
+                <i id="toggle-password" class="bi bi-eye-slash" style="margin-right: 4px;"></i> <!-- Eye icon for password visibility -->
+            </div>
+
+            <label for="confirm-password">Confirm Password</label>
+            <div class="password-container">
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required style="letter-spacing: 0.5px;">
+                <i id="toggle-confirm-password" class="bi bi-eye-slash" style="margin-right: 4px"></i> <!-- Eye icon for confirm password visibility -->
+            </div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="signup-footer">
+            Already have an account? <a href="/login">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const messageDiv = document.getElementById('message');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const togglePasswordIcon = document.getElementById('toggle-password');
+        const toggleConfirmPasswordIcon = document.getElementById('toggle-confirm-password');
+    
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();  // Prevent the form from submitting normally
+    
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+    
+            // Reset previous messages
+            messageDiv.textContent = '';
+            messageDiv.className = ''; // Reset the class to remove any previous styling
+    
+            // Validate fields
+            if (!validateEmail(email)) {
+                showMessage("Please enter a valid email.", 'error');
+                return;
+            }
+    
+            if (password.length < 8 || !/\d/.test(password)) {
+                showMessage("Password must be at least 8 characters long and include at least one number.", 'error');
+                return;
+            }
+    
+            if (password !== confirmPassword) {
+                showMessage("Passwords do not match.", 'error');
+                return;
+            }
+    
+            try {
+                // Check if the email is already in use
+                const emailCheckResponse = await fetch('/check-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+    
+                const emailCheckData = await emailCheckResponse.json();
+                if (emailCheckData.exists) {
+                    showMessage("An account with this email already exists.", 'error');
+                    return;
+                }
+    
+                // Submit registration data
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password, confirmPassword }),
+                });
+    
+                const data = await response.json();
+                if (data.success) {
+                    // Save name as currentuser in localStorage
+                    localStorage.setItem('currentuser', name);
+    
+                    showMessage("Account created successfully! Redirecting...", 'success');
+                    setTimeout(() => { 
+                        window.location.href = "/home";
+                    }, 2000);  // Redirect after 2 seconds
+                } else {
+                    showMessage(data.message || "Failed to create an account.", 'error');
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showMessage("An error occurred. Please try again.", 'error');
+            }
+        });
+    
+        // Email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+    
+        // Display messages
+        function showMessage(message, type) {
+            messageDiv.textContent = message;
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+        }
+    
+        // Prevent copying, cutting, and pasting in password fields
+        passwordField.addEventListener('copy', (e) => e.preventDefault());
+        passwordField.addEventListener('cut', (e) => e.preventDefault());
+        passwordField.addEventListener('paste', (e) => e.preventDefault());
+    
+        confirmPasswordField.addEventListener('copy', (e) => e.preventDefault());
+        confirmPasswordField.addEventListener('cut', (e) => e.preventDefault());
+        confirmPasswordField.addEventListener('paste', (e) => e.preventDefault());
+    
+        // Toggle password visibility
+        togglePasswordIcon.addEventListener('click', () => {
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                togglePasswordIcon.classList.remove('bi-eye-slash');
+                togglePasswordIcon.classList.add('bi-eye');
+            } else {
+                passwordField.type = 'password';
+                togglePasswordIcon.classList.remove('bi-eye');
+                togglePasswordIcon.classList.add('bi-eye-slash');
+            }
+        });
+    
+        // Toggle confirm password visibility
+        toggleConfirmPasswordIcon.addEventListener('click', () => {
+            if (confirmPasswordField.type === 'password') {
+                confirmPasswordField.type = 'text';
+                toggleConfirmPasswordIcon.classList.remove('bi-eye-slash');
+                toggleConfirmPasswordIcon.classList.add('bi-eye');
+            } else {
+                confirmPasswordField.type = 'password';
+                toggleConfirmPasswordIcon.classList.remove('bi-eye');
+                toggleConfirmPasswordIcon.classList.add('bi-eye-slash');
+            }
+        });
+    </script>    
+</body>
+</html>

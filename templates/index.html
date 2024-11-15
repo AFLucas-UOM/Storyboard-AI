@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Storyboard-AI - Your personal storyteller, animator, reader, designer, producer, and narrator.">
+  <meta name="author" content="Andrea Filiberto Lucas & Sean David Muscat">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph Meta Tags for Social Media -->
+  <meta property="og:title" content="Storyboard-AI - Your Personal Storyteller">
+  <meta property="og:description" content="Storyboard-AI creates personalized stories with animation, narration, and design tailored to you.">
+  <meta property="og:image" content="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}">
+  <meta property="og:type" content="website">
+  <title>Home - Storyboard-AI</title>
+
+  <!-- Favicons -->
+  <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}">
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('serve_assets', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
+</head>
+
+<body class="index-page">
+  <!-- Header Section -->
+  <header id="header" class="header d-flex flex-column justify-content-center" role="banner">
+    <i class="header-toggle d-xl-none bi bi-list" aria-label="Toggle navigation menu"></i>
+    <nav id="navmenu" class="navmenu" role="navigation">
+      <ul>
+        <li><a href="" class="active" aria-current="page"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
+        <li><a href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right"></i><span>Login</span></a></li>
+        <li><a href="{{ url_for('signup') }}"><i class="bi bi-person-plus"></i><span>Signup</span></a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content Section -->
+  <main class="main">
+    <!-- Hero Section -->
+    <section id="hero" class="hero section light-background" aria-labelledby="hero-title">
+      <img src="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg" loading="lazy">
+      <div class="container" data-aos="zoom-out">
+        <div class="row justify-content-center">
+          <div class="col-lg-9 text-center">
+            <h2 id="hero-title">Welcome to Storyboard-AI 👋🏻</h2>
+            <p>I am your personal <span class="typed" data-typed-items="Storyteller!, Animator!, Reader!, Designer!, Producer!, Narrator!">Storyteller</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Hero Section -->
+  </main>
+
+  <!-- Footer Section -->
+  <footer id="footer" class="footer position-relative light-background" role="contentinfo">
+    <div class="credits">
+      Designed by <a href="mailto:andrea.f.lucas.22@um.edu.mt" target="_blank" style="font-size: 15px;">Andrea Filiberto Lucas</a>
+      & <a href="mailto:sean.muscat.22@um.edu.mt" target="_blank" style="font-size: 15px;">Sean David Muscat</a>
+    </div>
+    <div class="credits">
+      Template from <a href="https://bootstrapmade.com/" style="font-size: 14px;">Bootstrap</a>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center" aria-label="Scroll to top"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ url_for('serve_assets', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/php-email-form/validate.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/aos/aos.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/typed.js/typed.umd.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/purecounter/purecounter_vanilla.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/waypoints/noframework.waypoints.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/glightbox/js/glightbox.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/imagesloaded/imagesloaded.pkgd.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/isotope-layout/isotope.pkgd.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.js') }}" defer></script>
+
+  <!-- Main JS File -->
+  <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Storyboard-AI - Your personal storyteller, animator, reader, designer, producer, and narrator.">
+  <meta name="author" content="Andrea Filiberto Lucas & Sean David Muscat">
+  <title>404 - Storyboard-AI</title>
+
+  <!-- Favicons -->
+  <link rel="icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/favicon.png') }}">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('serve_assets', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
+
+</head>
+
+<body class="404-page">
+
+  <!-- Header Section -->
+  <header id="header" class="header d-flex flex-column justify-content-center">
+    <i class="header-toggle d-xl-none bi bi-list"></i>
+    <nav id="navmenu" class="navmenu"></nav>
+  </header>
+
+  <!-- Main Content Section -->
+  <main class="main">
+    <section id="hero" class="hero section light-background">
+      <img src="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}" alt="404 Background" class="hero-bg" loading="lazy">
+      <div class="container" data-aos="zoom-out">
+        <div class="row justify-content-center">
+          <div class="col-lg-9 text-center">
+            <h2>Oops! Page Not Found</h2>
+            <p>The page you’re seeking is a chapter that’s <span class="typed" data-typed-items="lost in the Spice Mines of Kessel., avoiding Tatooine's sun., exploring the Jedi Temple., hiding in the Death Star., fighting a Sith Lord., one with the Force., with the Avengers., fighting Thanos., in the Quantum Realm., saving the multiverse., binge-watching 'The Witcher'., in Tony Stark's workshop., hidden in the X-Mansion., saving Gotham.">...</span></p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary mt-4">Go to Home</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer Section -->
+  <footer id="footer" class="footer position-relative light-background">
+    <div class="credits">
+      Designed by <a href="mailto:andrea.f.lucas.22@um.edu.mt" target="_blank">Andrea Filiberto Lucas</a> & <a href="mailto:sean.muscat.22@um.edu.mt" target="_blank">Sean David Muscat</a>
+    </div>
+    <div class="credits">
+      Template from <a href="https://bootstrapmade.com/">Bootstrap</a>
+    </div>
+  </footer>
+
+  <!-- Scroll Top Button -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ url_for('serve_assets', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/php-email-form/validate.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/aos/aos.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/typed.js/typed.umd.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/purecounter/purecounter_vanilla.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/waypoints/noframework.waypoints.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/glightbox/js/glightbox.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/imagesloaded/imagesloaded.pkgd.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/isotope-layout/isotope.pkgd.min.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.js') }}" defer></script>
+
+  <!-- Main JS File -->
+  <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+
+</body>
+
+</html>
