@@ -36,6 +36,12 @@
 </head>
 
 <body class="index-page">
+  <!-- Current User Display -->
+  <div id="user-info" class="text-end" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <a href="#" id="current-user" class="text-white font-weight-bold d-flex align-items-center">
+      <!-- Person icon will be injected here -->
+    </a>
+  </div>
   <!-- Header Section -->
   <header id="header" class="header d-flex flex-column justify-content-center" role="banner">
     <i class="header-toggle d-xl-none bi bi-list" aria-label="Toggle navigation menu"></i>
@@ -97,6 +103,29 @@
 
   <!-- Main JS File -->
   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+
+  <!-- Script to Display Current User -->
+  <script>
+  window.onload = function() {
+    var currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      // Create the element for the person icon
+      const personIcon = document.createElement('i');
+      personIcon.classList.add('bi', 'bi-person', 'me-2'); // Add Bootstrap icon classes with margin
+
+      // Set the text content to the username
+      document.getElementById('current-user').innerHTML = personIcon.outerHTML + currentUser;
+    }
+
+    // Optional: You can add a click event if needed for further actions
+    document.getElementById('current-user').addEventListener('click', function(e) {
+      e.preventDefault();  // Prevent default anchor behavior (scrolling)
+      // Add any custom behavior for the click here
+      console.log("User profile clicked!");
+      // You can navigate to a different section or page here if desired
+    });
+  };
+  </script>
 </body>
 
 </html>
