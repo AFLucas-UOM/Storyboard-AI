@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, session, send_from_directory, jsonify
+from flask import Flask, render_template, redirect, url_for, request, session, send_from_directory, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 import os, json
+from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
@@ -41,22 +42,44 @@ def login():
             data = request.get_json()
             email = data.get('email')
             password = data.get('password')
+            remember_me = data.get('rememberMe', False)  # Get "Remember Me" status
             
             # Attempt to authenticate the user
             user = authenticate_user(email, password)
             
             if user:
                 session['user'] = user['email']  # Store user email in session
+
+                # If Remember Me is selected, set a persistent cookie
+                if remember_me:
+                    resp = make_response(jsonify({
+                        "success": True,
+                        "message": "Login successful",
+                        "redirect": url_for('index2'),
+                        "name": user['name']
+                    }))
+                    # Set cookie to remember user for 30 days
+                    resp.set_cookie('email', user['email'], max_age=timedelta(days=30))
+                    resp.set_cookie('name', user['name'], max_age=timedelta(days=30))
+                    return resp
+
                 return jsonify({
                     "success": True,
                     "message": "Login successful",
                     "redirect": url_for('index2'),
-                    "name": user['name']  # Return the user's name only
+                    "name": user['name']
                 })
             else:
                 return jsonify({"success": False, "message": "Invalid credentials"})
         
         return jsonify({"success": False, "message": "Request must be JSON"})
+    
+    # Check for cookies if user is not logged in through session
+    email = request.cookies.get('email')
+    name = request.cookies.get('name')
+    if email and name:
+        session['user'] = email  # Restore session if cookies exist
+        return redirect(url_for('index2'))
     
     return render_template('login.html')
 
@@ -121,10 +144,27 @@ def signup():
 def index2():
     return render_template('index2.html')
 
+# Main route (Home Page)
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
 # Serve files from the 'assets' folder
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory('assets', filename)
+
+# Signout route
+@app.route('/signout')
+def signout():
+    session.pop('user', None)  # Remove user from session
+
+    # Reset the "Remember Me" cookies and forcefully expire them
+    resp = make_response(redirect(url_for('index')))  # Redirect to home page
+    resp.set_cookie('email', '', expires=0)  # Expire the 'email' cookie immediately
+    resp.set_cookie('name', '', expires=0)   # Expire the 'name' cookie immediately
+
+    return resp
 
 # Custom 404 error handler
 @app.errorhandler(404)

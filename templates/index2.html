@@ -36,22 +36,16 @@
 </head>
 
 <body class="index-page">
-  <!-- Current User Display -->
-  <div id="user-info" class="text-end" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-    <a href="#" id="current-user" class="text-white font-weight-bold d-flex align-items-center">
-      <!-- Person icon will be injected here -->
-    </a>
-  </div>
   <!-- Header Section -->
   <header id="header" class="header d-flex flex-column justify-content-center" role="banner">
     <i class="header-toggle d-xl-none bi bi-list" aria-label="Toggle navigation menu"></i>
     <nav id="navmenu" class="navmenu" role="navigation">
       <ul>
         <li><a href="" class="active" aria-current="page"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
-        <li><a href="#"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
+        <li><a href="/profile"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
         <li><a href="#"><i class="bi bi-chat-left-dots"></i><span>Chatbot</span></a></li>
         <li><a href="#"><i class="bi bi-clock-history"></i><span>History</span></a></li>
-        <li><a href="#"><i class="bi bi-images navicon"></i><span>Generated Images</span></a></li>
+        <li><a href="#" id="signout-btn"><i class="bi bi-box-arrow-right"></i><span>Signout</span></a></li>
       </ul>
     </nav>
   </header>
@@ -64,8 +58,8 @@
       <div class="container" data-aos="zoom-out">
         <div class="row justify-content-center">
           <div class="col-lg-9 text-center">
-            <h2 id="hero-title">Welcome to Storyboard-AI 👋🏻</h2>
-            <p>I am your personal <span class="typed" data-typed-items="Storyteller!, Animator!, Reader!, Designer!, Producer!, Narrator!">Storyteller</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
+            <h2 id="hero-title">Hello, <span id="current-user-name">User</span> 👋🏻</h2>
+            <p>Storyboard-AI your personal <span class="typed" data-typed-items="Animator!, Reader!, Designer!, Producer!, Narrator!">Storyteller</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
           </div>
         </div>
       </div>
@@ -106,26 +100,48 @@
 
   <!-- Script to Display Current User -->
   <script>
-  window.onload = function() {
-    var currentuser = localStorage.getItem('currentuser');
-    if (currentuser) {
-      // Create the element for the person icon
-      const personIcon = document.createElement('i');
-      personIcon.classList.add('bi', 'bi-person', 'me-2'); // Add Bootstrap icon classes with margin
-
-      // Set the text content to the username
-      document.getElementById('current-user').innerHTML = personIcon.outerHTML + currentuser;
+    window.onload = function() {
+      // Display current user if logged in
+      var currentuser = localStorage.getItem('currentuser');
+      if (currentuser) {
+        // Set the user's name in the hero section
+        document.getElementById('current-user-name').textContent = currentuser;
+      }
+  
+      // Signout functionality
+      document.getElementById('signout-btn').addEventListener('click', function(e) {
+        e.preventDefault();  // Prevent default anchor behavior (scrolling)
+        
+        // Remove the user from localStorage
+        localStorage.removeItem('currentuser');
+  
+        // Clear cookies
+        clearCookies();
+  
+        // Clear user info from the UI
+        document.getElementById('current-user-name').textContent = 'User'; // Reset the displayed username
+  
+        // Optionally, redirect to the homepage or login page after sign-out
+        window.location.href = "/";  // Adjust the URL to your desired redirection path (e.g., homepage or login page)
+      });
+    };
+  
+    // Function to clear cookies
+    function clearCookies() {
+      // Get all cookies and split them into individual ones
+      const cookies = document.cookie.split(";");
+  
+      // Loop through all cookies and set their expiration date to the past to delete them
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+  
+        // Clear the cookie by setting the expiration date to the past
+        document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; 
+      }
     }
-
-    // Optional: You can add a click event if needed for further actions
-    document.getElementById('current-user').addEventListener('click', function(e) {
-      e.preventDefault();  // Prevent default anchor behavior (scrolling)
-      // Add any custom behavior for the click here
-      console.log("User profile clicked!");
-      // You can navigate to a different section or page here if desired
-    });
-  };
-  </script>
+  </script>  
 </body>
 
 </html>

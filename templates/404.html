@@ -44,11 +44,25 @@
           <div class="col-lg-9 text-center">
             <h2>Oops! Page Not Found</h2>
             <p>The page you’re seeking is a chapter that’s <span class="typed" data-typed-items="lost in the Spice Mines of Kessel., avoiding Tatooine's sun., exploring the Jedi Temple., hiding in the Death Star., fighting a Sith Lord., one with the Force., with the Avengers., fighting Thanos., in the Quantum Realm., saving the multiverse., binge-watching 'The Witcher'., in Tony Stark's workshop., hidden in the X-Mansion., saving Gotham.">...</span></p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary mt-4">Go to Home</a>
+            <a id="home-link" href="#" class="btn btn-primary mt-4">Go to Home</a>
           </div>
         </div>
       </div>
     </section>
+    <script>
+      // Check if there is a current user (this example assumes you're using localStorage)
+      const currentuser = localStorage.getItem('currentuser'); // or check with sessionStorage or another method
+    
+      // Get the 'Go to Home' button
+      const homeButton = document.getElementById('home-link');
+    
+      // Set the link based on the presence of a current user
+      if (currentuser) {
+        homeButton.href = "/home";  // Redirect to /home if the user is logged in
+      } else {
+        homeButton.href = "/";  // Redirect to the root (home) page if no user is logged in
+      }
+    </script>
   </main>
 
   <!-- Footer Section -->

@@ -44,7 +44,7 @@
             align-items: center;
             min-height: 100vh;
         }
-
+    
         /* Card Styling */
         .login-card {
             background-color: #ffffff;
@@ -55,37 +55,37 @@
             max-width: 405px; /* Fixed max width for form */
             text-align: center;
         }
-
+    
         /* Header */
         .login-card h2 {
             font-size: 28px;
             font-weight: 600;
             color: #333333;
         }
-
+    
         @media (max-width: 600px) {
             .login-card {
                 width: 90%;
             }
         }
-
+    
         .error-message, .success-message {
             font-size: 14px;
             margin-top: 10px;
         }
-
+    
         .error-message {
             color: red;
         }
-
+    
         .success-message {
             color: green;
         }
-
+    
         .password-container {
             position: relative;
         }
-
+    
         .password-container i {
             position: absolute;
             right: 10px;
@@ -93,12 +93,12 @@
             transform: translateY(-50%);
             cursor: pointer;
         }
-
+    
         /* Styles for password visibility toggle */
         .bi-eye, .bi-eye-slash {
             font-size: 20px;
         }
-    </style>
+    </style>     
 </head>
 
 <body>
@@ -106,24 +106,30 @@
         <h2>Welcome Back 🧑🏻‍💻</h2>
         <!-- Message display area -->
         <div id="message" class="error-message"></div>
-
+    
         <!-- login.html -->
         <form method="POST" action="{{ url_for('login') }}" id="loginForm">
-            <label for="email">Email:</label>
+            <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Enter your email" required>
-
-            <label for="password">Password:</label>
+            
+            <label for="password">Password</label>
             <div class="password-container">
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                <i id="toggle-password" class="bi bi-eye-slash"></i> <!-- Eye icon for password visibility toggle -->
+                <input type="password" id="password" name="password" placeholder="Enter your password" required style="letter-spacing: 0.5px;">
+                <i id="toggle-password" class="bi bi-eye-slash" style="margin-right: 4px;"></i> <!-- Eye icon for password visibility -->
             </div>
-
+        
+            <div style="display: flex; margin-top: 10px;">
+                <input type="checkbox" id="rememberMe" name="rememberMe" style="margin-left: -157px; transform: scale(0.7);">
+                <label for="rememberMe" style="font-size: 14px; margin-left: -150px; cursor: pointer;">Remember Me</label>
+            </div>
+        
             <button type="submit">Login</button>
         </form>
+        
         <div class="login-footer">
             Don't have an account? <a href="/signup">Sign Up</a>
         </div>
-    </div>
+    </div>    
 
     <script>
         const loginForm = document.getElementById('loginForm');
@@ -136,6 +142,7 @@
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked; // Get remember me status
 
             // Reset previous messages
             messageDiv.textContent = '';
@@ -154,7 +161,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, password }),
+                    body: JSON.stringify({ email, password, rememberMe }),  // Add rememberMe to the request
                 });
 
                 const data = await response.json();
