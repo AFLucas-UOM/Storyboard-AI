@@ -9,8 +9,13 @@
   <title>404 - Storyboard-AI</title>
 
   <!-- Favicons -->
-  <link rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" type="image/png">
-  <link rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}">
+  <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
+
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">

@@ -14,9 +14,14 @@
     <meta property="og:type" content="website">
     <title>Login - Storyboard-AI</title>
     
-    <!-- Favicons -->
-    <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}">
-    <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}">
+  <!-- Favicons -->
+  <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
+
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -32,7 +37,10 @@
     
     <!-- Main CSS File -->
     <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
-  
+
+   <!-- Main JS File -->
+   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+   
     <style>
         body {
             font-family: 'Poppins', sans-serif;

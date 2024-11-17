@@ -1,11 +1,3 @@
-/**
-* Template Name: MyResume
-* Template URL: https://bootstrapmade.com/free-html-bootstrap-template-my-resume/
-* Updated: Jun 29 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
-
 (function() {
   "use strict";
 
@@ -227,3 +219,23 @@
   document.addEventListener('scroll', navmenuScrollspy);
 
 })();
+
+document.addEventListener("DOMContentLoaded", function () {
+  const currentHour = new Date().getHours();
+  const isNightTime = currentHour >= 18 || currentHour < 5;
+
+  // Get the favicon and apple-touch-icon elements
+  const favicon = document.getElementById("favicon");
+  const appleTouchIcon = document.getElementById("apple-touch-icon");
+
+  if (favicon && appleTouchIcon) {
+      // Switch icons based on the time
+      const darkFavicon = favicon.getAttribute("data-dark-icon");
+      const lightFavicon = favicon.getAttribute("data-light-icon");
+
+      const newIcon = isNightTime ? darkFavicon : lightFavicon;
+      favicon.setAttribute("href", newIcon);
+      appleTouchIcon.setAttribute("href", newIcon);
+  }
+});
+

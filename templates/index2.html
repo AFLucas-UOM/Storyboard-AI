@@ -16,8 +16,13 @@
   <title>Home - Storyboard-AI</title>
 
   <!-- Favicons -->
-  <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}">
-  <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}">
+  <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
+
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
+    data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -121,7 +126,7 @@
         // Clear user info from the UI
         document.getElementById('current-user-name').textContent = 'User'; // Reset the displayed username
   
-        // Optionally, redirect to the homepage or login page after sign-out
+        // Redirect to the homepage or login page after sign-out
         window.location.href = "/";  // Adjust the URL to your desired redirection path (e.g., homepage or login page)
       });
     };
