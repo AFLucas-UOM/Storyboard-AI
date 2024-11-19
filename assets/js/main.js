@@ -239,3 +239,41 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  const signoutBtn = document.getElementById("signout-btn");
+
+  // Function to clear all cookies
+  function clearCookies() {
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    }
+  }
+
+  // Function to reset the UI
+  function resetUI() {
+    const usernameDisplay = document.getElementById("current-user-first-name");
+    if (usernameDisplay) {
+      usernameDisplay.textContent = "User"; // Default name
+    }
+  }
+
+  // Event listener for signout
+  signoutBtn.addEventListener("click", function (event) {
+    event.preventDefault(); // Prevent default button behavior
+
+    // Clear localStorage
+    localStorage.removeItem("currentuser");
+
+    // Clear cookies
+    clearCookies();
+
+    // Reset the UI
+    resetUI();
+
+    // Redirect to the homepage or login page
+    window.location.href = "/"; // Change to your login/home page URL
+  });
+});
