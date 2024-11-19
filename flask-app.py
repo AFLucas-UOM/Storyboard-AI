@@ -15,7 +15,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def serve_assets(filename):
     return send_from_directory('assets', filename)
 
-
 # Function to check if the email already exists in the database (credentials.json)
 def email_exists(email):
     if os.path.exists(USER_JSON_PATH):
@@ -158,6 +157,7 @@ def update_profile():
 
     user = next((u for u in user_credentials if u['email'] == email), None)
     if user:
+        # Handle profile picture removal or upload
         if request.form.get('remove_profile_pic') == "true":
             existing_pic = user.get('profile_pic')
             if existing_pic and existing_pic != DEFAULT_PFP:
@@ -174,12 +174,21 @@ def update_profile():
                 profile_pic = f"{name}_{pic_filename}"
                 pic.save(os.path.join('static/img/PFPs', profile_pic))
 
-        user.update({
-            'name': name,
-            'email': email,
-            'password': password,
-            'profile_pic': profile_pic
-        })
+        # Hash the new password before saving
+        if password:
+            hashed_password = generate_password_hash(password)
+            user.update({
+                'name': name,
+                'email': email,
+                'password': hashed_password,
+                'profile_pic': profile_pic
+            })
+        else:
+            user.update({
+                'name': name,
+                'email': email,
+                'profile_pic': profile_pic
+            })
 
         with open(USER_JSON_PATH, 'w') as f:
             json.dump(user_credentials, f)
