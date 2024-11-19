@@ -183,7 +183,46 @@
       document.getElementById('remove-profile-pic').value = "true";
       document.getElementById('profile-img').src = "{{ url_for('static', filename='img/PFPs/default.png') }}";
     }
+  </script>
+  <script>
+    // Password validation check
+    function validatePassword() {
+      const password = document.getElementById('password').value;
+  
+      // Check if the password is at least 8 characters long and contains at least one number
+      if (password.length < 8 || !/\d/.test(password)) {
+        showMessage("Password must be at least 8 characters long & include at least one number!", 'error');
+        return false; // Prevent form submission
+      }
+      return true; // Allow form submission
+    }
+  
+    // Show message function
+    function showMessage(message, type) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add(type); // 'error' or 'success'
+      messageElement.textContent = message;
 
+      // Create a wrapper div for the message to ensure it is positioned at the bottom right
+      const messageWrapper = document.createElement('div');
+      messageWrapper.classList.add('message-wrapper');
+      messageWrapper.appendChild(messageElement);
+
+      // Append the message to the body, so it appears at the bottom right of the screen
+      document.body.appendChild(messageWrapper);
+
+      // Remove message after 3 seconds
+      setTimeout(() => messageWrapper.remove(), 4000); 
+    }
+
+    // Handle form submission
+    document.querySelector('form').onsubmit = function(event) {
+      if (!validatePassword()) {
+        event.preventDefault(); // Prevent form from being submitted
+      }
+    };
+  
+    // Password visibility toggle
     function togglePassword() {
       const passwordField = document.getElementById('password');
       const passwordIcon = document.getElementById('password-icon');
@@ -193,5 +232,6 @@
       passwordIcon.classList.toggle('bi-eye-slash'); 
     }
   </script>
+  
 </body>
 </html>

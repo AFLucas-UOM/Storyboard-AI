@@ -946,3 +946,36 @@ button[type="submit"]:hover {
   cursor: pointer; /* Indicate that the image is clickable */
   display: block; /* Show text when hovering over the image */
 }
+
+/* Style for error message */
+.error {
+  background-color: #f8d7da; /* Light red background */
+  color: #721c24; /* Dark red text */
+  padding: 12px 20px; /* Increased padding for better spacing */
+  margin: 10px 0; /* Margin for spacing between other elements */
+  border-radius: 8px; /* Slightly more rounded corners */
+  border: 1px solid #f5c6cb; /* Soft border color */
+  font-weight: bold; /* Make the text stand out */
+  text-align: center; /* Center the text */
+  font-size: 16px; /* Slightly larger font for readability */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow to give it some depth */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for fade out effect */
+}
+
+/* Wrapper for positioning the message */
+.message-wrapper {
+  position: fixed; /* Fixed positioning to keep it in place */
+  bottom: 20px; /* Positioned at the bottom of the screen */
+  right: 20px; /* Positioned on the right side */
+  z-index: 9999; /* Ensure it stays above other elements */
+  max-width: 400px; /* Maximum width for the message box */
+  display: flex;
+  justify-content: center; /* Center the error message horizontally */
+  align-items: center; /* Center the message vertically */
+}
+
+/* Hover effect for the error message (optional) */
+.message-wrapper .error:hover {
+  transform: translateY(-5px); /* Lift the box slightly when hovered */
+  opacity: 0.9; /* Slightly fade on hover */
+}

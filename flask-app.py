@@ -219,5 +219,6 @@ def clear_cookies():
     resp.set_cookie('name', '', expires=0, path='/')
     resp.set_cookie('session', '', expires=0, path='/')
     return resp
+
 if __name__ == '__main__':
     app.run(debug=True)
