@@ -220,5 +220,9 @@ def clear_cookies():
     resp.set_cookie('session', '', expires=0, path='/')
     return resp
 
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
