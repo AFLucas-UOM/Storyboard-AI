@@ -852,6 +852,7 @@ section,
 .form-group input[type="password"] {
   width: 100%;
   padding: 12px;
+  padding-right: 1.2cm !important;
   border: 1px solid #ced4da;
   border-radius: 5px;
   font-size: 1rem;
