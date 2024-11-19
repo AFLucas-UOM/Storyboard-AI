@@ -105,47 +105,62 @@
 
   <!-- Script to Display Current User -->
   <script>
-    window.onload = function() {
-      // Display current user if logged in
-      var currentuser = localStorage.getItem('currentuser');
-      if (currentuser) {
-        // Set the user's name in the hero section
-        document.getElementById('current-user-name').textContent = currentuser;
-      }
-  
-      // Signout functionality
-      document.getElementById('signout-btn').addEventListener('click', function(e) {
-        e.preventDefault();  // Prevent default anchor behavior (scrolling)
-        
-        // Remove the user from localStorage
-        localStorage.removeItem('currentuser');
-  
-        // Clear cookies
-        clearCookies();
-  
-        // Clear user info from the UI
-        document.getElementById('current-user-name').textContent = 'User'; // Reset the displayed username
-  
-        // Redirect to the homepage or login page after sign-out
-        window.location.href = "/";  // Adjust the URL to your desired redirection path (e.g., homepage or login page)
-      });
-    };
-  
-    // Function to clear cookies
-    function clearCookies() {
-      // Get all cookies and split them into individual ones
-      const cookies = document.cookie.split(";");
-  
-      // Loop through all cookies and set their expiration date to the past to delete them
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-  
-        // Clear the cookie by setting the expiration date to the past
-        document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; 
-      }
+  window.onload = function() {
+    // Display current user if logged in
+    var currentuser = localStorage.getItem('currentuser');
+    if (currentuser) {
+      // Set the user's name in the hero section
+      document.getElementById('current-user-name').textContent = currentuser;
     }
+
+    // Signout functionality
+    document.getElementById('signout-btn').addEventListener('click', function(e) {
+      e.preventDefault();  // Prevent default anchor behavior (scrolling)
+      
+      // Remove the user from localStorage
+      localStorage.removeItem('currentuser');
+
+      // Clear cookies
+      clearCookies();
+
+      // Clear user info from the UI
+      document.getElementById('current-user-name').textContent = 'User'; // Reset the displayed username
+
+      // Send request to server to clear HttpOnly cookies
+      fetch('/clear-cookies', { method: 'POST' })
+        .then(response => {
+          if (response.ok) {
+            console.log('Server-side cookies cleared');
+          }
+        });
+
+      // Redirect to the homepage or login page after sign-out
+      window.location.href = "/";  // Adjust the URL to your desired redirection path (e.g., homepage or login page)
+    });
+  };
+
+  // Function to clear cookies accessible via JavaScript
+  function clearCookies() {
+    const cookieNames = ["email", "name", "session"];
+    
+    cookieNames.forEach(cookieName => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname};`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${window.location.hostname};`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}; secure;`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${window.location.hostname}; secure;`;
+    });
+
+    // Clear all other cookies
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname};`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${window.location.hostname};`; // For subdomains
+    }
+  }
   </script>  
 </body>
 

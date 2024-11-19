@@ -242,13 +242,33 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   const signoutBtn = document.getElementById("signout-btn");
 
-  // Function to clear all cookies
+  // Function to clear specific cookies
   function clearCookies() {
+    // List the names of cookies you want to remove
+    const cookieNames = ["email", "name", "session"];
+
+    // Loop through the cookie names and delete them for different paths and domains
+    cookieNames.forEach(cookieName => {
+      // Clear cookies for the current domain and path
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname};`; // For subdomains
+      // Clear cookies for secure (https) connections, if needed
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};secure`;
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname};secure`; // For subdomains
+    });
+
+    // Optionally clear all cookies
     const cookies = document.cookie.split(";");
-    for (const cookie of cookies) {
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
       const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+
+      // Clear the cookie for all paths and domains
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname};`;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};secure`;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname};secure`;
     }
   }
 
@@ -267,11 +287,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Clear localStorage
     localStorage.removeItem("currentuser");
 
-    // Clear cookies
+    // Clear specific cookies
     clearCookies();
 
     // Reset the UI
     resetUI();
+
+    // Send request to server to clear HttpOnly cookies
+    fetch('/clear-cookies', { method: 'POST' })
+      .then(response => {
+        if (response.ok) {
+          console.log('Server-side cookies cleared');
+        }
+      });
 
     // Redirect to the homepage or login page
     window.location.href = "/"; // Change to your login/home page URL

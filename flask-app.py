@@ -212,5 +212,12 @@ def page_not_found(e):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@app.route('/clear-cookies', methods=['POST'])
+def clear_cookies():
+    resp = make_response('Cookies cleared')
+    resp.set_cookie('email', '', expires=0, path='/')
+    resp.set_cookie('name', '', expires=0, path='/')
+    resp.set_cookie('session', '', expires=0, path='/')
+    return resp
 if __name__ == '__main__':
     app.run(debug=True)
