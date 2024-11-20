@@ -17,6 +17,11 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit for profile pictures
 def serve_assets(filename):
     return send_from_directory('assets', filename)
 
+# Function to pretty-print and write to the credentials JSON file
+def save_credentials_pretty(data):
+    with open(USER_JSON_PATH, 'w') as f:
+        json.dump(data, f, indent=4)  # Pretty-print with 4 spaces for indentation
+
 # Function to check if the email already exists in the database (credentials.json)
 def email_exists(email):
     if os.path.exists(USER_JSON_PATH):
@@ -124,8 +129,7 @@ def signup():
                     existing_users = json.load(f)
 
             existing_users.append(user_data)
-            with open(USER_JSON_PATH, 'w') as f:
-                json.dump(existing_users, f, indent=4)
+            save_credentials_pretty(existing_users)  # Save with pretty formatting
 
             return jsonify({"success": True, "message": "Account created successfully!"})
         
@@ -210,11 +214,11 @@ def update_profile():
                 'profile_pic': profile_pic
             })
 
-        # Save the updated credentials
-        with open(USER_JSON_PATH, 'w') as f:
-            json.dump(user_credentials, f)
+        # Save the updated credentials with pretty formatting
+        save_credentials_pretty(user_credentials)
 
     return redirect(url_for('profile'))
+
 
 @app.route('/signout')
 def signout():
