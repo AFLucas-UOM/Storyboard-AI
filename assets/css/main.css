@@ -233,7 +233,7 @@ h6 {
   position: fixed;
   bottom: 0;
   width: 100%;
-  z-index: 100;
+  margin-top: auto; /* Push the footer to the bottom */
 }
 
 .footer h3 {
