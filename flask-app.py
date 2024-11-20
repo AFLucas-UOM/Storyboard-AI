@@ -143,7 +143,9 @@ def profile():
         user_credentials = load_credentials()
         user = next((u for u in user_credentials if u['email'] == user_email), None)
         if user:
-            return render_template('profile.html', user=user)
+            # Exclude the password field from the user data
+            user_without_password = {key: value for key, value in user.items() if key != 'password'}
+            return render_template('profile.html', user=user_without_password)
     return redirect(url_for('login'))
 
 @app.route('/update_profile', methods=['POST'])
@@ -155,6 +157,7 @@ def update_profile():
 
     user_credentials = load_credentials()
 
+    # Find the user by email
     user = next((u for u in user_credentials if u['email'] == email), None)
     if user:
         # Handle profile picture removal or upload
@@ -174,15 +177,23 @@ def update_profile():
                 profile_pic = f"{name}_{pic_filename}"
                 pic.save(os.path.join('static/img/PFPs', profile_pic))
 
-        # Hash the new password before saving
+        # Update the user profile
         if password:
-            hashed_password = generate_password_hash(password)
-            user.update({
-                'name': name,
-                'email': email,
-                'password': hashed_password,
-                'profile_pic': profile_pic
-            })
+            # Check if the new password differs from the current password
+            if not check_password_hash(user['password'], password):
+                hashed_password = generate_password_hash(password)
+                user.update({
+                    'name': name,
+                    'email': email,
+                    'password': hashed_password,
+                    'profile_pic': profile_pic
+                })
+            else:
+                user.update({
+                    'name': name,
+                    'email': email,
+                    'profile_pic': profile_pic
+                })
         else:
             user.update({
                 'name': name,
@@ -190,6 +201,7 @@ def update_profile():
                 'profile_pic': profile_pic
             })
 
+        # Save the updated credentials
         with open(USER_JSON_PATH, 'w') as f:
             json.dump(user_credentials, f)
 
