@@ -3,13 +3,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os, json
 from datetime import timedelta
 from werkzeug.utils import secure_filename
+import bleach  # For sanitizing inputs
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
+app.permanent_session_lifetime = timedelta(minutes=60)  # Session expiry after 60 minutes of inactivity
 
 USER_JSON_PATH = os.path.join(app.static_folder, 'credentials.json')  # Path to 'static/credentials.json'
 DEFAULT_PFP = 'default.png'  # Default Profile Picture
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit for profile pictures
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
@@ -31,6 +34,10 @@ def authenticate_user(email, password):
             return next((user for user in users if user['email'] == email and check_password_hash(user['password'], password)), None)
     return None  # Invalid credentials
 
+# Sanitize input to avoid XSS
+def sanitize_input(input_data):
+    return bleach.clean(input_data)
+
 # Main route (Home Page)
 @app.route('/')
 def index():
@@ -42,8 +49,8 @@ def login():
     if request.method == 'POST':
         if request.is_json:
             data = request.get_json()
-            email = data.get('email')
-            password = data.get('password')
+            email = sanitize_input(data.get('email'))
+            password = sanitize_input(data.get('password'))
             remember_me = data.get('rememberMe', False)
             
             user = authenticate_user(email, password)
@@ -83,7 +90,7 @@ def login():
 
 @app.route('/check-email', methods=['POST'])
 def check_email():
-    email = request.json.get('email')
+    email = sanitize_input(request.json.get('email'))
     return jsonify({"exists": email_exists(email)})
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -91,10 +98,10 @@ def signup():
     if request.method == 'POST':
         try:
             data = request.get_json()
-            name = data.get('name')
-            email = data.get('email')
-            password = data.get('password')
-            confirm_password = data.get('confirmPassword')
+            name = sanitize_input(data.get('name'))
+            email = sanitize_input(data.get('email'))
+            password = sanitize_input(data.get('password'))
+            confirm_password = sanitize_input(data.get('confirmPassword'))
 
             if not all([name, email, password, confirm_password]):
                 return jsonify({"success": False, "message": "Invalid input"}), 400
@@ -150,9 +157,9 @@ def profile():
 
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
-    name = request.form['name']
-    email = request.form['email']
-    password = request.form['password']
+    name = sanitize_input(request.form['name'])
+    email = sanitize_input(request.form['email'])
+    password = sanitize_input(request.form['password'])
     profile_pic = DEFAULT_PFP
 
     user_credentials = load_credentials()
@@ -173,6 +180,9 @@ def update_profile():
         elif 'profile_pic' in request.files:
             pic = request.files['profile_pic']
             if pic and pic.filename and allowed_file(pic.filename):
+                if len(pic.read()) > MAX_FILE_SIZE:
+                    return jsonify({"success": False, "message": "File size exceeds the 10MB limit"}), 400
+                pic.seek(0)  # Reset file pointer after reading size
                 pic_filename = secure_filename(pic.filename)
                 profile_pic = f"{name}_{pic_filename}"
                 pic.save(os.path.join('static/img/PFPs', profile_pic))
@@ -227,9 +237,8 @@ def allowed_file(filename):
 @app.route('/clear-cookies', methods=['POST'])
 def clear_cookies():
     resp = make_response('Cookies cleared')
-    resp.set_cookie('email', '', expires=0, path='/')
-    resp.set_cookie('name', '', expires=0, path='/')
-    resp.set_cookie('session', '', expires=0, path='/')
+    resp.delete_cookie('email')
+    resp.delete_cookie('name')
     return resp
 
 @app.route('/chat')
