@@ -58,7 +58,7 @@
   <main class="main">
     <!-- Hero Section -->
     <section id="hero" class="hero section light-background" aria-labelledby="hero-title">
-      <img src="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg" loading="lazy">
+      <img src="{{ url_for('serve_assets', filename='img/hero-profile-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg" loading="lazy">
       <div class="container" data-aos="zoom-out">
         <div class="row justify-content-center">
           <div class="col-lg-9 text-center">
@@ -72,7 +72,7 @@
         <div class="container">
           <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-              <div class="card shadow-sm rounded" style="background: transparent; border: none;">
+              <div class="card rounded" style="background: transparent; border: none; box-shadow: none;">
                 <div class="card-body">
                   <form action="/update_profile" method="POST" enctype="multipart/form-data">
                     <div class="profile-picture-container text-center mb-4">
