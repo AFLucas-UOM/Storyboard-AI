@@ -220,6 +220,9 @@
 
 })();
 
+/**
+ * Light/Dark mode switch
+ */
 document.addEventListener("DOMContentLoaded", function () {
   const currentHour = new Date().getHours();
   const isNightTime = currentHour >= 18 || currentHour < 5;
@@ -239,6 +242,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+/**
+  * Sign out button function
+  */
 document.addEventListener("DOMContentLoaded", function () {
   const signoutBtn = document.getElementById("signout-btn");
 
