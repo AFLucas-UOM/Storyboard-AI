@@ -35,6 +35,8 @@
   <link href="{{ url_for('serve_assets', filename='vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('serve_assets', filename='vendor/aos/aos.css') }}" rel="stylesheet">
   <link href="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <!-- Main CSS File -->
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
@@ -49,7 +51,7 @@
         <li><a href="/home"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
         <li><a href="" class="active" aria-current="page"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
         <li><a href="/chat"><i class="bi bi-chat-left-dots"></i><span>Chat</span></a></li>
-        <li><a href="#"><i class="bi bi-clock-history"></i><span>History</span></a></li>
+        <li><a href="/history"><i class="bi bi-clock-history"></i><span>History</span></a></li>
         <li><a href="#" id="signout-btn"><i class="bi bi-box-arrow-right"></i><span>Signout</span></a></li>
       </ul>
     </nav>
@@ -76,7 +78,7 @@
                 <div class="card-body">
                   <form action="/update_profile" method="POST" enctype="multipart/form-data">
                     <div class="profile-picture-container text-center mb-4">
-                      <div class="profile-picture" style="margin-top: -1.5cm; margin-bottom: -1.5cm;">
+                      <div class="profile-picture" style="margin-top: -1.5cm; margin-bottom: -1.9cm;">
                         <img id="profile-img" 
                           src="{{ url_for('static', filename='img/PFPs/' + (user.get('profile_pic') if user.get('profile_pic') else 'default.png')) }}" 
                           alt="Profile Picture" 
@@ -89,7 +91,11 @@
                         <!-- Hidden file input to trigger when image is clicked -->
                         <input type="file" name="profile_pic" id="profile-pic" accept="image/*" class="d-none" onchange="previewProfilePic(event)">
                       </div>
-                    </div>                    
+                    </div>  
+                      <!-- Remove Preview Button -->
+                      <div id="remove-preview-container" style="display: none;">
+                        <button type="button" class="btn btn-warning btn-sm" onclick="removePreview()">Remove Preview</button>
+                      </div>                  
                       <!-- Button to remove profile pic -->
                       {% if user.get('profile_pic') != 'default.png' %}
                       <div class="mt-2 d-flex justify-content-center">
@@ -165,26 +171,52 @@
 
   <!-- Profile Image Preview and Removal JS --> 
   <script>
-    // Image preview before upload
+    // Preview the uploaded profile picture
     function previewProfilePic(event) {
-      const file = event.target.files[0];
+      const file = event.target.files[0]; // Check if a file is uploaded
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
+          // Update the image source with the preview
           document.getElementById('profile-img').src = e.target.result;
+          // Show the "Remove Preview" button
+          document.getElementById('remove-preview-container').style.display = 'block';
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(file); // Read the image file as a data URL
       } else {
         alert("Please upload a valid image file.");
       }
     }
-    // Remove profile picture
+
+    // Remove the preview and reset file input
+    function removePreview() {
+      // Reset to the default or user's existing profile picture
+      document.getElementById('profile-img').src = "{{ url_for('static', filename='img/PFPs/' + (user.get('profile_pic') if user.get('profile_pic') else 'default.png')) }}";
+      // Reset file input
+      document.getElementById('profile-pic').value = ""; // Clear the file input
+      // Hide the "Remove Preview" button
+      document.getElementById('remove-preview-container').style.display = 'none';
+    }
+
+    // Hide the "Remove Preview" button if there is no preview on page load
+    window.onload = function () {
+      const profileImg = document.getElementById('profile-img');
+      const defaultSrc = "{{ url_for('static', filename='img/PFPs/' + (user.get('profile_pic') if user.get('profile_pic') else 'default.png')) }}";
+
+      // If the image src matches the default, ensure the button is hidden
+      if (profileImg.src === defaultSrc) {
+        document.getElementById('remove-preview-container').style.display = 'none';
+      }
+    };
+    
     function removeProfilePic() {
       document.getElementById('remove-profile-pic').value = "true";
       document.getElementById('profile-img').src = "{{ url_for('static', filename='img/PFPs/default.png') }}";
+
+      // Hide the button
+      document.querySelector('.btn-danger').style.display = "none";
     }
-  </script>
-  <script>
+
     // Password validation check
     function validatePassword() {
       const password = document.getElementById('password').value;

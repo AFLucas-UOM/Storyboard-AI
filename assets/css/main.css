@@ -979,3 +979,11 @@ button[type="submit"]:hover {
   transform: translateY(-5px); /* Lift the box slightly when hovered */
   opacity: 0.9; /* Slightly fade on hover */
 }
+
+#remove-preview-container {
+  display: none; /* Initially hidden */
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
