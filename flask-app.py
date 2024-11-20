@@ -1,9 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, request, session, send_from_directory, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-import os, json
-from datetime import timedelta
 from werkzeug.utils import secure_filename
-import bleach  # For sanitizing inputs
+from datetime import timedelta
+import os, json, bleach # sanaitize input
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
