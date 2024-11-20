@@ -91,11 +91,11 @@
                         <!-- Hidden file input to trigger when image is clicked -->
                         <input type="file" name="profile_pic" id="profile-pic" accept="image/*" class="d-none" onchange="previewProfilePic(event)">
                       </div>
-                    </div>  
+                    </div>    
                       <!-- Remove Preview Button -->
-                      <div id="remove-preview-container" style="display: none;">
-                        <button type="button" class="btn btn-warning btn-sm" onclick="removePreview()">Remove Preview</button>
-                      </div>                  
+                      <div id="remove-preview-container" style="display: none; padding-top: 14px; height: 46px;">
+                        <button type="button" class="btn btn-warning btn-sm" onclick="removePreview()">Remove Preview Picture</button>
+                      </div>            
                       <!-- Button to remove profile pic -->
                       {% if user.get('profile_pic') != 'default.png' %}
                       <div class="mt-2 d-flex justify-content-center">
