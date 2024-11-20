@@ -242,7 +242,26 @@ def clear_cookies():
 
 @app.route('/chat')
 def chat():
-    return render_template('chat.html')
+    user_email = session.get('user')
+    if user_email:
+        user_credentials = load_credentials()
+        user = next((u for u in user_credentials if u['email'] == user_email), None)
+        if user:
+            # Extract relevant user information (e.g., name and profile_pic)
+            profile_pic = user.get('profile_pic')
+            if profile_pic:
+                # Set the path to the user's custom profile picture
+                profile_pic_path = f'img/PFPs/{profile_pic}'
+            else:
+                # Use the default profile picture if none is set
+                profile_pic_path = 'img/PFPs/default.png'
+                
+            user_info = {
+                'name': user.get('name', 'Guest'),
+                'profile_pic': profile_pic_path
+            }
+            return render_template('chat.html', user_info=user_info)
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)

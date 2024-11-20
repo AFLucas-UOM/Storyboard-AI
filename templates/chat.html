@@ -56,7 +56,519 @@
   </header>
 
   <main class="main">
+    <section class="chatbot">
+      <div class="card-body">
+        <!-- Chat history container -->
+        <div class="chatbox">
+          <div class="messages" id="message-container" aria-live="polite" aria-atomic="true">
+            <!-- Messages will dynamically load here -->
+          </div>
+        </div>
     
+        <!-- User input container -->
+        <div class="input-container">
+          <div class="input-group">
+            <!-- Input field for user message -->
+            <input 
+              type="text" 
+              id="chat-input" 
+              class="form-control" 
+              placeholder="Message Storyboard-AI" 
+              aria-label="Enter your message for Storyboard-AI"
+              style="padding-right: 3rem;" 
+            />
+            
+            <!-- Microphone button for speech recognition -->
+            <button 
+              class="btn btn-outline-secondary input-group-text" 
+              type="button" 
+              id="mic-button" 
+              aria-label="Enable voice input"
+            >
+              <i class="bi bi-mic" aria-hidden="true"></i>
+            </button>
+          </div>
+    
+          <!-- Send message button -->
+          <button 
+            id="send-button" 
+            class="btn btn-primary" 
+            style="font-size: large;" 
+            aria-label="Send message"
+          >
+            ↑
+          </button>
+        </div>
+    
+        <!-- Disclaimer message -->
+        <p class="message-text text-muted small mt-2">
+          Storyboard-AI generates content which might not exactly match your vision.
+        </p>
+      </div>
+    </section>
+
+  <style>
+      /* Main Content */
+      .main-content {
+          max-height: 79vh; /* Ensures content doesn't exceed this height */
+          overflow: hidden; /* Prevents overflow beyond this container */
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+
+      /* Chatbox Container */
+      .chatbox {
+          display: flex;
+          flex-direction: column;
+          padding: 20px 200px;
+          border-radius: 10px;
+          background-color: white;
+          height: calc(60vh - 205px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
+          position: relative;
+          overflow: hidden; /* Prevents the chatbox itself from growing */
+      }
+
+      /* Messages Container - Fixed height with scrolling */
+      .messages {
+          flex-grow: 1;
+          overflow-y: auto; /* Enables scrolling if messages overflow */
+          padding: 10px;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 65%; /* Slightly increased width */
+          margin: 0 auto; /* Centers the messages container */
+          height: 100%; /* Make sure it fills the available space */
+      }
+
+      /* Individual Message Styling */
+      .message {
+          padding: 12px;
+          border-radius: 10px;
+          margin: 5px 0;
+          display: flex;
+          align-items: center;
+          max-width: 75%;
+          word-wrap: break-word;
+          animation: fadeIn 0.3s ease;
+      }
+
+      /* Message Content */
+      .message-content_user {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+
+      .message-content_bot {
+          display: flex; /* Use flexbox to align items horizontally */
+          align-items: center; /* Vertically center the icon and text */
+          justify-content: flex-start; /* Align items to the start (left side) */
+      }
+
+      .message-text p {
+          margin: 0;
+          text-align: justify; /* Justify the last line (if text wraps) */
+      }
+
+      .message-text_user_input p{
+        text-align: right;
+        margin: 0;
+      }
+
+      /* Message Icon Styling */
+      .message-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          overflow: hidden;
+      }
+
+      .message-icon_bot{
+        margin-right: 10px;
+      }
+
+      /* Bot Message Styling */
+      .bot-message {
+          color: #24282C;
+          align-self: flex-start;
+          border-top-left-radius: 0;
+          animation: fadeIn 0.5s ease;
+      }
+
+      .bot-icon {
+          width: 40px; /* Set the icon width */
+          height: 40px; /* Set the icon height */
+          border-radius: 50%; /* Make the icon circular */
+          object-fit: cover; /* Ensure the image fits within the circle */
+      }
+
+
+      /* User Message Styling */
+      .user-message {
+          background-color: #F4F4F4;
+          color: #24282C;
+          align-self: flex-end;
+          border-top-right-radius: 0;
+          border-radius: 10px;
+          padding: 10px;
+          max-width: 75%;
+          animation: fadeIn 0.5s ease;
+          text-align: right;
+      }
+
+      .user-icon {
+          width: 100%;
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: cover;
+      }
+
+      /* Input Container Styles (below chatbox) */
+      .input-container {
+          display: flex;
+          align-items: center;
+          background-color: white;
+          padding: 15px 50px;
+          display: flex;
+          gap: 10px;
+          border-radius: 8px;
+          margin-left: auto;
+          margin-right: auto;
+          width: 50%; /* Center the input container */
+      }
+
+      /* Input Field */
+      #chat-input {
+          flex-grow: 1;
+          padding: 10px 15px;
+          font-size: 16px;
+          border: 1px solid #036628;
+          border-radius: 30px;
+          outline: none; /* Remove the default outline */
+          transition: border-color 0.3s ease;
+      }
+
+      /* Remove the blue glow on focus from the input */
+      #chat-input:focus {
+          outline: none; /* Remove outline */
+          box-shadow: none; /* Remove any box-shadow, including blue glow */
+          border-color: #036628; /* Optional: maintain border color */
+      }
+
+      /* Ensure the input group container is positioned relative */
+      .input-group {
+          position: relative; /* This ensures the mic button is positioned relative to the input group */
+      }
+
+      /* Mic button to stay visible even when the input is focused */
+      .input-group:focus-within #mic-button {
+          visibility: visible; /* Ensure mic button stays visible when input is focused */
+      }
+
+      /* Send Button */
+      #send-button {
+          background-color: var(--accent-color);
+          color: white;
+          padding: 10px 15px;
+          border-radius: 30px;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.3s ease, opacity 0.3s ease;
+          font-size: large;
+      }
+
+      #send-button:hover {
+      color: var(--contrast-color);
+      background: color-mix(in srgb, var(--accent-color), transparent 15%);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
+      }
+
+
+      #send-button:disabled {
+          background-color: #ccc; /* Grey out the button */
+          color: #777; /* Change text color when disabled */
+          cursor: not-allowed; /* Prevent cursor change */
+      }
+
+      /* Message Text Style */
+      .message-text {
+          font-size: 15px;
+          color: #24282C;
+          padding-right: 2px;
+          text-align: center;
+      }
+
+      .input-group {
+      position: relative;
+    }
+    
+    #mic-button {
+      color: #585B5E;
+      padding: 6px;
+      border-radius: 0%;  /* This makes the button circular */
+      border: none;
+      cursor: pointer;
+      font-size: large;
+      position: absolute;
+      right: 10px;  /* Adjust to position the mic button */
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-block;
+      visibility: visible; /* Ensure the button remains visible */
+      padding-left: 3px;;
+      z-index: 10; /* Ensure the mic button stays on top */
+    }
+
+    #mic-button:hover {
+      background-color: transparent;  /* No background color */
+      color: var(--accent-color);     /* Change text/icon color */
+    }
+
+      /* Fade-In Animation */
+      @keyframes fadeIn {
+          from {
+              opacity: 0;
+          }
+          to {
+              opacity: 1;
+          }
+      }
+
+      @media (max-width: 768px) {
+          .input-container {
+            width: 90%;
+          }
+          .chatbox {
+            padding: 10px;
+          }
+          .messages {
+            width: 100%;
+          }
+        }
+  </style>
+<script>
+  // Ensure browser compatibility for SpeechRecognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+      document.getElementById('chat-input').placeholder = "Speech recognition is not supported in this browser.";
+  }
+
+  // Initialize SpeechRecognition
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  // DOM elements
+  const micButton = document.getElementById("mic-button");
+  const sendButton = document.getElementById("send-button");
+  const chatInput = document.getElementById("chat-input");
+  const messageContainer = document.getElementById("message-container");
+
+  // Colors
+  const ACTIVE_MIC_COLOR = '#0563bb'; // Blue
+  const DEFAULT_MIC_COLOR = '#272829'; // Grey
+  const ERROR_MIC_COLOR = 'red';
+
+  // Function to get the current favicon URL (either light or dark)
+  function getCurrentFavicon() {
+      const faviconElement = document.getElementById('favicon');
+      const lightIcon = faviconElement.getAttribute('data-light-icon');
+      const darkIcon = faviconElement.getAttribute('data-dark-icon');
+
+      // Check which icon is currently used and return it
+      const currentFavicon = faviconElement.getAttribute('href') === lightIcon ? lightIcon : darkIcon;
+      return currentFavicon;
+  }
+
+  // Update the bot icon to match the current favicon
+  function updateBotIcon() {
+      const botIcon = document.querySelector('.bot-icon');
+      const currentFavicon = getCurrentFavicon();
+      botIcon.src = currentFavicon; // Update the bot icon's source to the current favicon
+  }
+
+  // Run the function to update the bot icon when the page loads
+  window.addEventListener('DOMContentLoaded', () => {
+      updateBotIcon();  // Set the bot icon based on initial favicon
+  });
+
+  // Add listener to detect favicon changes if needed
+  document.addEventListener('DOMContentLoaded', function() {
+      const favicon = document.getElementById('favicon');
+      if (favicon) {
+          updateBotIcon(); // Set initial icon based on the favicon when the page is loaded
+      }
+  });
+
+
+  // Run the function to update the bot icon when the page loads
+  window.addEventListener('DOMContentLoaded', updateBotIcon);
+
+  // Optionally, set up a listener for theme changes (light/dark mode)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateBotIcon);
+
+  // Speech recognition events
+  recognition.onstart = () => {
+      micButton.innerHTML = `<i class="bi bi-mic-fill"></i>`;
+      micButton.style.color = ACTIVE_MIC_COLOR;
+      chatInput.placeholder = "Listening...";
+  };
+
+  recognition.onend = () => {
+      micButton.innerHTML = `<i class="bi bi-mic"></i>`;
+      micButton.style.color = DEFAULT_MIC_COLOR;
+      chatInput.placeholder = "Message Storyboard-AI";
+  };
+
+  recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+      }
+      chatInput.value = transcript;
+  };
+
+  recognition.onerror = (event) => {
+      if (event.error === 'not-allowed') {
+          chatInput.placeholder = "Permission to use the microphone was denied.";
+          micButton.innerHTML = `<i class="bi bi-mic-slash-fill"></i>`;
+          micButton.style.color = ERROR_MIC_COLOR;
+      } else {
+          chatInput.placeholder = "Error occurred during speech recognition.";
+          // Update bot icon on error
+          updateBotIcon();
+      }
+  };
+
+  // Check microphone permission
+  function requestMicrophonePermission() {
+      navigator.permissions.query({ name: 'microphone' }).then((result) => {
+          if (result.state === 'denied') {
+              chatInput.placeholder = "Microphone access is required.";
+              micButton.innerHTML = `<i class="bi bi-mic-mute"></i>`;
+              micButton.style.color = ERROR_MIC_COLOR;
+              micButton.disabled = true;
+              micButton.style.opacity = 0.6;
+          } else {
+              micButton.disabled = false;
+              micButton.style.opacity = 1;
+          }
+      }).catch((error) => {
+          console.error("Permission error:", error);
+          chatInput.placeholder = "Unable to check microphone permission.";
+          // Update bot icon on permission error
+          updateBotIcon();
+      });
+  }
+
+  // Mic button functionality
+  micButton.addEventListener('click', () => {
+      if (micButton.innerHTML.includes('mic-slash-fill')) {
+          navigator.permissions.query({ name: 'microphone' }).then((result) => {
+              if (result.state !== 'denied') recognition.start();
+          });
+      } else if (micButton.innerHTML.includes('mic-fill')) {
+          recognition.stop();
+      } else {
+          recognition.start();
+      }
+  });
+
+  // Send message functionality
+  sendButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      sendMessage();
+  });
+
+  chatInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+          event.preventDefault();
+          sendMessage();
+      }
+  });
+
+  function sendMessage() {
+      const userInput = chatInput.value.trim();
+
+      if (userInput) {
+          sendButton.disabled = true;
+          sendButton.innerHTML = "&#10005;";
+
+          // User message
+          const userMessage = document.createElement("div");
+          userMessage.classList.add("message", "user-message");
+          userMessage.innerHTML = `
+              <div class="message-content_user">
+                  <div class="message-text_user_input"><p>${userInput}</p></div>
+                  <div class="message-icon" style="min-width: 10%">
+                      <!-- Dynamically load user profile picture -->
+                      <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
+                  </div>
+              </div>`;
+          messageContainer.appendChild(userMessage);
+          chatInput.value = "";
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+
+          // Fetch chatbot response
+          fetch("http://127.0.0.1:5000/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: userInput }),
+          })
+              .then(response => response.json())
+              .then(data => {
+                  const botMessage = document.createElement("div");
+                  botMessage.classList.add("message", "bot-message");
+                  botMessage.innerHTML = `
+                      <div class="message-content_bot">
+                          <div class="message-icon_bot">
+                              <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                          </div>
+                          <div class="message-text"><p>${data.response}</p></div>
+                      </div>`;
+                  messageContainer.appendChild(botMessage);
+                  messageContainer.scrollTop = messageContainer.scrollHeight;
+              })
+              .catch(error => {
+                  console.error("Error fetching chatbot response:", error);
+
+                  const errorMessages = [
+                      "Oops! Looks like something went wrong. Please try again later.",
+                      "Yikes! The gremlins are at it again. Please try again later.",
+                      "Whoa! The Force must've glitched. Try again later, young Padawan!"
+                  ];
+
+                  // Randomly select one of the error messages
+                  const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+
+                  const errorMessage = document.createElement("div");
+                  errorMessage.classList.add("message", "bot-message");
+                  errorMessage.innerHTML = `
+                      <div class="message-content_bot">
+                          <div class="message-icon_bot">
+                              <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                          </div>
+                          <div class="message-text"><p>${randomErrorMessage}</p></div>
+                      </div>`;
+
+                  messageContainer.appendChild(errorMessage);
+                  messageContainer.scrollTop = messageContainer.scrollHeight;
+              })
+              .finally(() => {
+                  sendButton.disabled = false;
+                  sendButton.innerHTML = "↑";
+              });
+      }
+  }
+  // Check permissions on load
+  requestMicrophonePermission();
+</script>
   </main>
   
   <!-- Footer Section -->
