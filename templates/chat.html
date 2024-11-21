@@ -522,6 +522,19 @@
                 botMessageText = "Is there anything else you'd like to add to the story?";
                 break;
             case 4:
+                botMessageText = "Generating story. Please wait...";
+                // Display the bot message to the user
+                const generatingMessage = document.createElement("div");
+                generatingMessage.classList.add("message", "bot-message");
+                generatingMessage.innerHTML = `
+                    <div class="message-content_bot">
+                        <div class="message-icon_bot">
+                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                        </div>
+                        <div class="message-text"><p>${botMessageText}</p></div>
+                    </div>`;
+                messageContainer.appendChild(generatingMessage);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
                 // All inputs are gathered, create the final prompt
                   const finalPrompt = `
                   You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story divided into three parts: an introduction, a body, and a conclusion.
@@ -635,53 +648,6 @@
 
     // Start the chatbot conversation
     askForInput();
-
-    // Function to handle sending the final prompt
-    function sendFinalPrompt(finalPrompt) {
-        fetch("http://127.0.0.1:5000/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: finalPrompt }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                const botMessage = document.createElement("div");
-                botMessage.classList.add("message", "bot-message");
-                botMessage.innerHTML = `
-                    <div class="message-content_bot">
-                        <div class="message-icon_bot">
-                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                        </div>
-                        <div class="message-text"><p>${data.response}</p></div>
-                    </div>`;
-                messageContainer.appendChild(botMessage);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            })
-            .catch(error => {
-                console.error("Error fetching chatbot response:", error);
-
-                const errorMessages = [
-                    "Oops! Looks like something went wrong. Please try again later.",
-                    "Yikes! The gremlins are at it again. Please try again later.",
-                    "Whoa! The Force must've glitched. Try again later, young Padawan!"
-                ];
-
-                // Randomly select one of the error messages
-                const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-
-                const errorMessage = document.createElement("div");
-                errorMessage.classList.add("message", "bot-message");
-                errorMessage.innerHTML = `
-                    <div class="message-content_bot">
-                        <div class="message-icon_bot">
-                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                        </div>
-                        <div class="message-text"><p>${randomErrorMessage}</p></div>
-                    </div>`;
-                messageContainer.appendChild(errorMessage);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-            });
-    }
 
     // Check permissions on load
     requestMicrophonePermission();
