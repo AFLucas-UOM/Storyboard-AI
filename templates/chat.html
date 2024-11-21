@@ -497,7 +497,130 @@
         }
     });
 
-    // Send message functionality
+    // Initialize variables for user inputs
+    let characterName = "";
+    let storyTheme = "";
+    let storyEnding = "";
+    let additionalNotes = "";
+    let currentStep = 0; // To track the conversation flow
+
+    // Function to handle chatbot interaction
+    function askForInput() {
+        let botMessageText = "";
+
+        switch (currentStep) {
+            case 0:
+                botMessageText = "What is the name of the character in your story?";
+                break;
+            case 1:
+                botMessageText = "What is the theme of the story?";
+                break;
+            case 2:
+                botMessageText = "How would you like the story to end?";
+                break;
+            case 3:
+                botMessageText = "Is there anything else you'd like to add to the story?";
+                break;
+            case 4:
+                // All inputs are gathered, create the final prompt
+                  const finalPrompt = `
+                  You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story divided into three parts: an introduction, a body, and a conclusion.
+
+                  The story is about a character named "${characterName}" and should follow a "${storyTheme}" theme. The story must have a "${storyEnding}" ending.
+
+                  Please make the story captivating by including well-described settings, interesting events, and realistic dialogue (if appropriate). Additionally, consider this important note provided by the user: "${additionalNotes || 'No additional notes were given.'}"
+
+                  Ensure that the story flows naturally and engages the reader from start to finish. Be creative and thoughtful in your writing. Let's begin!
+                  `;
+
+                  console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
+
+                  // Send the prompt to TinyLlama
+                  fetch("http://127.0.0.1:5000/chat", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ prompt: finalPrompt }),
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                      const botMessage = document.createElement("div");
+                      botMessage.classList.add("message", "bot-message");
+                      botMessage.innerHTML = `
+                          <div class="message-content_bot">
+                              <div class="message-icon_bot">
+                                  <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                              </div>
+                              <div class="message-text"><p>${data.response}</p></div>
+                          </div>`;
+                      messageContainer.appendChild(botMessage);
+                      messageContainer.scrollTop = messageContainer.scrollHeight;
+                  })
+                  .catch(error => {
+                      console.error("Error fetching chatbot response:", error);
+                      // Handle error as before
+                  })
+                  .finally(() => {
+                      sendButton.disabled = false;
+                      sendButton.innerHTML = "↑";
+                  });
+                return;
+        }
+
+        // Display bot message
+        const botMessage = document.createElement("div");
+        botMessage.classList.add("message", "bot-message");
+        botMessage.innerHTML = `
+            <div class="message-content_bot">
+                <div class="message-icon_bot">
+                    <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                </div>
+                <div class="message-text"><p>${botMessageText}</p></div>
+            </div>`;
+        messageContainer.appendChild(botMessage);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    // Function to handle user responses and progress conversation
+    function sendMessage() {
+        const userInput = chatInput.value.trim();
+
+        if (userInput) {
+            // Display user message
+            const userMessage = document.createElement("div");
+            userMessage.classList.add("message", "user-message");
+            userMessage.innerHTML = `
+                <div class="message-content_user">
+                    <div class="message-text_user_input"><p>${userInput}</p></div>
+                    <div class="message-icon" style="min-width: 10%">
+                        <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
+                    </div>
+                </div>`;
+            messageContainer.appendChild(userMessage);
+            chatInput.value = "";
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            // Save input based on current step
+            if (currentStep === 0) {
+                characterName = userInput; // Saving character name
+                console.log("Character Name:", characterName); // Add this to log the value
+            } else if (currentStep === 1) {
+                storyTheme = userInput; // Saving story theme
+                console.log("Story Theme:", storyTheme); // Add this to log the value
+            } else if (currentStep === 2) {
+                storyEnding = userInput; // Saving story ending
+                console.log("Story Ending:", storyEnding); // Add this to log the value
+            } else if (currentStep === 3) {
+                additionalNotes = userInput; // Saving additional notes
+                console.log("Additional Notes:", additionalNotes); // Add this to log the value
+            }
+
+            // Move to next step
+            currentStep++;
+            setTimeout(askForInput, 1000); // Add slight delay for natural interaction
+        }
+    }
+
+    // Attach event listeners for user interactions
     sendButton.addEventListener("click", (event) => {
         event.preventDefault();
         sendMessage();
@@ -510,79 +633,56 @@
         }
     });
 
-    function sendMessage() {
-        const userInput = chatInput.value.trim();
+    // Start the chatbot conversation
+    askForInput();
 
-        if (userInput) {
-            sendButton.disabled = true;
-            sendButton.innerHTML = "&#10005;";
-
-            // User message
-            const userMessage = document.createElement("div");
-            userMessage.classList.add("message", "user-message");
-            userMessage.innerHTML = `
-                <div class="message-content_user">
-                    <div class="message-text_user_input"><p>${userInput}</p></div>
-                    <div class="message-icon" style="min-width: 10%">
-                        <!-- Dynamically load user profile picture -->
-                        <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
-                    </div>
-                </div>`;
-            messageContainer.appendChild(userMessage);
-            chatInput.value = "";
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-            // Fetch chatbot response
-            fetch("http://127.0.0.1:5000/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: userInput }),
+    // Function to handle sending the final prompt
+    function sendFinalPrompt(finalPrompt) {
+        fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: finalPrompt }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = document.createElement("div");
+                botMessage.classList.add("message", "bot-message");
+                botMessage.innerHTML = `
+                    <div class="message-content_bot">
+                        <div class="message-icon_bot">
+                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                        </div>
+                        <div class="message-text"><p>${data.response}</p></div>
+                    </div>`;
+                messageContainer.appendChild(botMessage);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
             })
-                .then(response => response.json())
-                .then(data => {
-                    const botMessage = document.createElement("div");
-                    botMessage.classList.add("message", "bot-message");
-                    botMessage.innerHTML = `
-                        <div class="message-content_bot">
-                            <div class="message-icon_bot">
-                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                            </div>
-                            <div class="message-text"><p>${data.response}</p></div>
-                        </div>`;
-                    messageContainer.appendChild(botMessage);
-                    messageContainer.scrollTop = messageContainer.scrollHeight;
-                })
-                .catch(error => {
-                    console.error("Error fetching chatbot response:", error);
+            .catch(error => {
+                console.error("Error fetching chatbot response:", error);
 
-                    const errorMessages = [
-                        "Oops! Looks like something went wrong. Please try again later.",
-                        "Yikes! The gremlins are at it again. Please try again later.",
-                        "Whoa! The Force must've glitched. Try again later, young Padawan!"
-                    ];
+                const errorMessages = [
+                    "Oops! Looks like something went wrong. Please try again later.",
+                    "Yikes! The gremlins are at it again. Please try again later.",
+                    "Whoa! The Force must've glitched. Try again later, young Padawan!"
+                ];
 
-                    // Randomly select one of the error messages
-                    const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                // Randomly select one of the error messages
+                const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
 
-                    const errorMessage = document.createElement("div");
-                    errorMessage.classList.add("message", "bot-message");
-                    errorMessage.innerHTML = `
-                        <div class="message-content_bot">
-                            <div class="message-icon_bot">
-                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                            </div>
-                            <div class="message-text"><p>${randomErrorMessage}</p></div>
-                        </div>`;
-
-                    messageContainer.appendChild(errorMessage);
-                    messageContainer.scrollTop = messageContainer.scrollHeight;
-                })
-                .finally(() => {
-                    sendButton.disabled = false;
-                    sendButton.innerHTML = "↑";
-                });
-        }
+                const errorMessage = document.createElement("div");
+                errorMessage.classList.add("message", "bot-message");
+                errorMessage.innerHTML = `
+                    <div class="message-content_bot">
+                        <div class="message-icon_bot">
+                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                        </div>
+                        <div class="message-text"><p>${randomErrorMessage}</p></div>
+                    </div>`;
+                messageContainer.appendChild(errorMessage);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            });
     }
+
     // Check permissions on load
     requestMicrophonePermission();
   </script>
