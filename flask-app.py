@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import timedelta
 import os, json, bleach # sanitized input
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
@@ -244,7 +245,26 @@ def clear_cookies():
     resp.delete_cookie('name')
     return resp
 
-@app.route('/chat')
+# Function to query Ollama
+def query_ollama(prompt):
+    try:
+        print(f"Sending prompt to Ollama: {prompt}")  # Debugging log
+        result = subprocess.run(
+            ['ollama', 'run', 'tinyllama:1.1b-chat'],  # Run the Ollama model
+            input=prompt,  # Pass the user prompt via stdin
+            capture_output=True, text=True, shell=True
+        )
+        response = result.stdout.strip()  # Get the model's output
+        if result.stderr:
+            print(f"Error output from Ollama: {result.stderr}")  # Debugging log for errors
+        print(f"Ollama response: {response}")  # Debugging log for response
+        return response
+    except Exception as e:
+        print(f"Error querying Ollama: {str(e)}")  # Debugging log for exceptions
+        return f"Error querying Ollama: {str(e)}"
+    
+
+@app.route('/chat', methods=['GET', 'POST'])
 def chat():
     user_email = session.get('user')
     if user_email:
@@ -253,19 +273,27 @@ def chat():
         if user:
             # Extract relevant user information (e.g., name and profile_pic)
             profile_pic = user.get('profile_pic')
-            if profile_pic:
-                # Set the path to the user's custom profile picture
-                profile_pic_path = f'img/PFPs/{profile_pic}'
-            else:
-                # Use the default profile picture if none is set
-                profile_pic_path = 'img/PFPs/default.png'
-                
+            profile_pic_path = f'img/PFPs/{profile_pic}' if profile_pic else 'img/PFPs/default.png'
             user_info = {
                 'name': user.get('name', 'Guest'),
                 'profile_pic': profile_pic_path
             }
+
+            # Handle POST requests (chatbot functionality)
+            if request.method == 'POST':
+                user_input = request.json.get('prompt', "").strip()
+                if not user_input:
+                    return jsonify({"response": "Error: No prompt provided."}), 400
+                
+                # Query Ollama with the user prompt
+                response = query_ollama(user_input)
+                return jsonify({"response": response})
+
+            # Render the chat page for GET requests
             return render_template('chat.html', user_info=user_info)
+    
     return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
