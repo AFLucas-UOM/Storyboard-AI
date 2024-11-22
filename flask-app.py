@@ -224,11 +224,9 @@ def update_profile():
 @app.route('/signout')
 def signout():
     session.pop('user', None)
-
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('email', '', expires=0)
     resp.set_cookie('name', '', expires=0)
-
     return resp
 
 @app.errorhandler(404)

@@ -106,267 +106,6 @@
         </p>
       </div>
     </section>
-
-  <style>
-      /* Main Content */
-      .main-content {
-        width: 100%;
-        min-height: 100vh;
-        position: relative;
-        padding: 80px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .card-body {
-          display: flex;
-          flex-direction: column;
-          justify-content: center; /* Center content vertically */
-          align-items: center; /* Center content horizontally */
-          width: 100%; /* Ensure full width */
-          margin: 0; /* Remove any default margin */
-          padding: 0; /* Remove any padding */
-      }
-
-      /* Chatbox Container */
-      .chatbox {
-          display: flex;
-          align-items: center;
-          flex-direction: column;
-          padding: 20px 200px;
-          background-color: white;
-          height: calc(70vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
-          position: relative;
-          overflow: hidden; /* Prevents the chatbox itself from growing */
-          width: 110%;
-          justify-content: center;
-      }
-
-      /* Messages Container - Fixed height with scrolling */
-      .messages {
-          flex-grow: 1;
-          overflow-y: auto; /* Enables scrolling if messages overflow */
-          padding: 10px;
-          border-radius: 8px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          width: 65%; /* Slightly increased width */
-          margin: 0 auto; /* Centers the messages container */
-          height: 100%; /* Make sure it fills the available space */
-      }
-
-      /* Individual Message Styling */
-      .message {
-          padding: 12px;
-          border-radius: 10px;
-          margin: 5px 0;
-          display: flex;
-          align-items: center;
-          max-width: 75%;
-          word-wrap: break-word;
-          animation: fadeIn 0.3s ease;
-      }
-
-      /* Message Content */
-      .message-content_user {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-      }
-
-      .message-content_bot {
-          display: flex; /* Use flexbox to align items horizontally */
-          align-items: center; /* Vertically center the icon and text */
-          justify-content: flex-start; /* Align items to the start (left side) */
-      }
-
-      .message-text p {
-          margin: 0;
-          text-align: justify; /* Justify the last line (if text wraps) */
-      }
-
-      .message-text_user_input p{
-        text-align: right;
-        margin: 0;
-      }
-
-      /* Message Icon Styling */
-      .message-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          overflow: hidden;
-      }
-
-      .message-icon_bot{
-        margin-right: 10px;
-      }
-
-      /* Bot Message Styling */
-      .bot-message {
-          color: #24282C;
-          align-self: flex-start;
-          border-top-left-radius: 0;
-          animation: fadeIn 0.5s ease;
-      }
-
-      .bot-icon {
-          width: 40px; /* Set the icon width */
-          height: 40px; /* Set the icon height */
-          border-radius: 50%; /* Make the icon circular */
-          object-fit: cover; /* Ensure the image fits within the circle */
-      }
-
-
-      /* User Message Styling */
-      .user-message {
-          background-color: #F4F4F4;
-          color: var(--default-text-color);
-          align-self: flex-end;
-          border-top-right-radius: 0;
-          border-radius: 10px;
-          padding: 10px;
-          max-width: 75%;
-          animation: fadeIn 0.5s ease;
-          text-align: right;
-      }
-
-      .user-icon {
-          width: 100%;
-          height: 100%;
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: cover;
-      }
-
-      /* Input Container Styles (below chatbox) */
-      .input-container {
-          display: flex;
-          align-items: center;
-          background-color: white;
-          padding: 15px 50px;
-          display: flex;
-          gap: 10px;
-          border-radius: 8px;
-          margin-left: auto;
-          margin-right: auto;
-          width: 50%; /* Center the input container */
-      }
-
-      /* Input Field */
-      #chat-input {
-          display: flex;
-          align-items: center;
-          position: relative;
-          width: 100%;
-          flex-grow: 1;
-          padding: 10px 15px;
-          font-size: 16px;
-          border: 1px solid var(--accent-color);
-          border-radius: 30px;
-          outline: none; /* Remove the default outline */
-          transition: border-color 0.3s ease;
-      }
-
-      /* Remove the blue glow on focus from the input */
-      #chat-input:focus {
-          outline: none; /* Remove outline */
-          box-shadow: none; /* Remove any box-shadow, including blue glow */
-      }
-
-      /* Ensure the input group container is positioned relative */
-      .input-group {
-          position: relative; /* This ensures the mic button is positioned relative to the input group */
-      }
-
-      /* Mic button to stay visible even when the input is focused */
-      .input-group:focus-within #mic-button {
-          visibility: visible; /* Ensure mic button stays visible when input is focused */
-      }
-
-      /* Send Button */
-      #send-button {
-          background-color: var(--accent-color);
-          color: white;
-          padding: 10px 15px;
-          border-radius: 30px;
-          border: none;
-          cursor: pointer;
-          transition: background-color 0.3s ease, opacity 0.3s ease;
-          font-size: large;
-      }
-
-      #send-button:hover {
-      color: var(--contrast-color);
-      background: color-mix(in srgb, var(--accent-color), transparent 15%);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
-      }
-
-
-      #send-button:disabled {
-          background-color: #ccc; /* Grey out the button */
-          color: #777; /* Change text color when disabled */
-          cursor: not-allowed; /* Prevent cursor change */
-      }
-
-      /* Message Text Style */
-      .message-text {
-          font-size: 15px;
-          color: #24282C;
-          padding-right: 2px;
-          text-align: center;
-      }
-
-      .input-group {
-      position: relative;
-    }
-    
-    #mic-button {
-      color: #585B5E;
-      padding: 6px;
-      border-radius: 0%;  /* This makes the button circular */
-      border: none;
-      cursor: pointer;
-      font-size: large;
-      position: absolute;
-      right: 10px;  /* Adjust to position the mic button */
-      top: 50%;
-      transform: translateY(-50%);
-      display: inline-block;
-      visibility: visible; /* Ensure the button remains visible */
-      padding-left: 3px;;
-      z-index: 10; /* Ensure the mic button stays on top */
-    }
-
-    #mic-button:hover {
-      background-color: transparent;  /* No background color */
-      color: var(--accent-color);     /* Change text/icon color */
-    }
-
-      /* Fade-In Animation */
-      @keyframes fadeIn {
-          from {
-              opacity: 0;
-          }
-          to {
-              opacity: 1;
-          }
-      }
-
-      @media (max-width: 768px) {
-          .input-container {
-            width: 90%;
-          }
-          .chatbox {
-            padding: 10px;
-          }
-          .messages {
-            width: 100%;
-          }
-        }
-  </style>
   <script>
     // Ensure browser compatibility for SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -504,250 +243,315 @@
     let additionalNotes = "";
     let currentStep = 0; // To track the conversation flow
 
+    // Fetch the current user's name from localStorage and extract the first name
+    const currentUser = (localStorage.getItem("currentuser") || "").split(" ")[0];
     // Function to handle chatbot interaction
     function askForInput() {
         let botMessageText = "";
 
+        // Set bot message based on the current step in the conversation
         switch (currentStep) {
             case 0:
-                botMessageText = "What is the name of the character in your story?";
+                const variations0 = [
+                    `Hey ${currentUser}, welcome to Storyboard-AI! Let’s kick things off and create an incredible story together.`,
+                    `Hi ${currentUser}! I’m Storyboard-AI, and I'm excited to help you bring your story ideas to life!`,
+                    `Hello ${currentUser}! Ready to start creating an awesome story with Storyboard-AI?`,
+                    `Welcome aboard ${currentUser}! I am here to help you create an amazing story.`,
+                    `Hey there ${currentUser}, I’m Storyboard-AI, and I can’t wait to help you create something amazing!`
+                ];
+                botMessageText = variations0[Math.floor(Math.random() * variations0.length)];
+                setTimeout(() => {
+                    currentStep++;
+                    askForInput();
+                }, Math.random() * 1000 + 1000); // Random time between 1000ms (1 second) and 2000ms (2 seconds)
                 break;
             case 1:
-                botMessageText = "What is the theme of the story?";
+                const variations1 = [
+                    `I’ll be asking you a few questions to better understand your vision for the story. Let’s dive in!`,
+                    `I’ve got a few questions that will help me get a clearer picture of what you have in mind. Let’s get started!`,
+                    `I’ll be asking you some questions to make sure I fully understand your ideas for the story.`,
+                    `I’ll be first asking a few questions to help shape your story just the way you imagine it.`,
+                    `Okay so... let’s get going with some questions to make sure your story turns out just as you envision it.`
+                ];
+                botMessageText = variations1[Math.floor(Math.random() * variations1.length)];
+                setTimeout(() => {
+                    currentStep++;
+                    askForInput();
+                }, Math.random() * 1000 + 1000); // Random time between 1000ms (1 second) and 2000ms (2 seconds)
                 break;
             case 2:
-                botMessageText = "How would you like the story to end?";
+                const variations2 = [
+                    `Firstly ${currentUser}.... what’s the name of the main character in your story?`,
+                    `Ok ${currentUser}, so what will your main character be called?`,
+                    `So ${currentUser}.... what’s the name of the protagonist in your story?`,
+                    `Alright ${currentUser}.... can you please tell me the name of your main character?`,
+                    `First thing’s first ${currentUser}... what’s the name of your main character?`
+                ];
+                botMessageText = variations2[Math.floor(Math.random() * variations2.length)];
                 break;
             case 3:
-                botMessageText = "Is there anything else you'd like to add to the story?";
+                const variations3 = [
+                    `Cool! Now, could you tell me what kind of theme you’d like for your story. Adventure? Romance? Mystery? Or maybe something more unique?`,
+                    `Next, what’s the theme of your story? Adventure, romance, mystery... or maybe something completely different?`,
+                    `What theme are you thinking for your story? Could be adventure, romance, mystery... or maybe something unique!`,
+                    `Great! Now, what kind of theme would you like? Something like adventure, romance, or mystery?`,
+                    `Awesome! So, what’s the vibe of your story? Adventure, romance, mystery... or perhaps something entirely original?`
+                ];
+                botMessageText = variations3[Math.floor(Math.random() * variations3.length)];
                 break;
             case 4:
-                botMessageText = "Generating story. Please wait...";
-                // Display the bot message to the user
-                const generatingMessage = document.createElement("div");
-                generatingMessage.classList.add("message", "bot-message");
-                generatingMessage.innerHTML = `
-                    <div class="message-content_bot">
-                        <div class="message-icon_bot">
-                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                        </div>
-                        <div class="message-text"><p>${botMessageText}</p></div>
-                    </div>`;
-                messageContainer.appendChild(generatingMessage);
-                messageContainer.scrollTop = messageContainer.scrollHeight;
-                // All inputs are gathered, create the final prompt
-                  const finalPrompt = `
-                  You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story about a character named "${characterName}" that follows a "${storyTheme}" theme and concludes with a "${storyEnding}" ending.
+                const variations4 = [
+                    `And how would you like the story to end? A happy ending, a shocking twist, or something bittersweet?`,
+                    `So now let me know how you’d like the story to wrap up. A happy ending, a twist, or maybe something bittersweet?`,
+                    `Another question for you.... what kind of ending do you envision for your story? A happy ending, a surprising twist, or a bittersweet finale?`,
+                    `Dam ok... and how do you want the story to end? A happy ending, a shocking twist, or perhaps something bittersweet?`,
+                    `Got it! And what’s your ideal ending for the story? A happy resolution, a twist, or maybe something bittersweet?`
+                ];
+                botMessageText = variations4[Math.floor(Math.random() * variations4.length)];
+                break;
+            case 5:
+                const variations5 = [
+                    `Is there anything else you’d like to add? A special scene, a character trait, or a plot twist?`,
+                    `Anything else you’d like to include in your story?`,
+                    `Is there any extra detail you’d like to add?`,
+                    `Last question I promise 😅. Got any special additions to the story? A unique scene, a special trait, or maybe a plot twist?`,
+                    `Before we wrap up, is there anything else you’d like to include? A cool scene, character trait, or a twist?`
+                ];
+                botMessageText = variations5[Math.floor(Math.random() * variations5.length)];
+                break;
+            case 6:
+                const variations6 = [
+                    `OMG SO COOL! I’ve got everything I need. Time to work some magic and create your story! ✨`,
+                    `Perfect! I have all the info I need. Now, let me work my magic! Just sit back and let me craft something special for you! ✨`,
+                    `Awesome! I’ll start putting it all together to create your story! ✨`,
+                    `Great! Sit tight, while I create something amazing for you! ✨`,
+                    `Awesome, everything’s in place! I’m about to create your story. Hang on tight while I make something truly magical for you✨`
+                ];
+                botMessageText = variations6[Math.floor(Math.random() * variations6.length)];
+                    // Display the bot message to the user
+                    const generatingMessage = document.createElement("div");
+                    generatingMessage.classList.add("message", "bot-message");
+                    generatingMessage.innerHTML = `
+                        <div class="message-content_bot">
+                            <div class="message-icon_bot">
+                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                            </div>
+                            <div class="message-text"><p>${botMessageText}</p></div>
+                        </div>`;
+                    messageContainer.appendChild(generatingMessage);
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                    // All inputs are gathered, create the final prompt
+                    const finalPrompt = `
+                    You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story about a character named "${characterName}" that follows a "${storyTheme}" theme and concludes with a "${storyEnding}" ending.
 
-                  The story should be immersive, with well-described settings, intriguing events, and realistic dialogue (if appropriate). Avoid breaking the narrative into formal sections like introduction, body, or conclusion. Instead, focus on ensuring the story flows naturally, captivating the reader from start to finish.
+                    The story should be immersive, with well-described settings, intriguing events, and realistic dialogue (if appropriate). Avoid breaking the narrative into formal sections like introduction, body, or conclusion. Instead, focus on ensuring the story flows naturally, captivating the reader from start to finish.
 
-                  Additionally, consider this important note provided by the user: "${additionalNotes || 'No additional notes were given.'}"
+                    Additionally, consider this important note provided by the user: "${additionalNotes || 'No additional notes were given.'}"
 
-                  Be creative and thoughtful in your storytelling. Let's begin!
+                    Be creative and thoughtful in your storytelling. Let's begin!
 
-                  `;
+                    `;
 
-                  console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
+                    console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
 
-                  // Send the prompt to TinyLlama
-                  fetch("http://127.0.0.1:5000/chat", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ prompt: finalPrompt }),
-                  })
-                  .then(response => response.json())
-                  .then(data => {
-                      // Split the response by line breaks (or paragraphs)
-                      const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
+                    // Send the prompt to TinyLlama
+                    fetch("http://127.0.0.1:5000/chat", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ prompt: finalPrompt }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Split the response by line breaks (or paragraphs)
+                        const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
-                      // Function to simulate typing animation for '...'
-                      function showTypingAnimation() {
-                          const typingMessage = document.createElement("div");
-                          typingMessage.classList.add("message", "bot-message");
-                          typingMessage.innerHTML = `
-                              <div class="message-content_bot">
-                                  <div class="message-icon_bot">
-                                      <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                  </div>
-                                  <div class="message-text"><p>...</p></div>
-                              </div>`;
-                          messageContainer.appendChild(typingMessage);
-                          messageContainer.scrollTop = messageContainer.scrollHeight;
+                        // Function to simulate typing animation for '...'
+                        function showTypingAnimation() {
+                            const typingMessage = document.createElement("div");
+                            typingMessage.classList.add("message", "bot-message");
+                            typingMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text"><p></p></div>
+                                </div>`;
+                            messageContainer.appendChild(typingMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                          // Return the typingMessage to be updated later
-                          return typingMessage;
-                      }
+                            // Return the typingMessage to be updated later
+                            return typingMessage;
+                        }
 
-                      // Function to simulate the typing of '...'
-                      function animateDots(typingMessage) {
-                          return new Promise(resolve => {
-                              let dots = '';
-                              let dotCount = 0;
+                        // Function to simulate the typing of '...'
+                        function animateDots(typingMessage) {
+                            return new Promise(resolve => {
+                                let dots = '';
+                                let dotCount = 0;
 
-                              // Use a setInterval to simulate typing of dots
-                              const typingInterval = setInterval(() => {
-                                  dots += '.';
-                                  typingMessage.querySelector(".message-text p").innerText = dots;
+                                // Use a setInterval to simulate typing of dots
+                                const typingInterval = setInterval(() => {
+                                    dots += '.';
+                                    typingMessage.querySelector(".message-text p").innerText = dots;
 
-                                  // If the dot count reaches 3, we stop adding dots and reset back to one dot
-                                  dotCount++;
-                                  if (dotCount === 3) {
-                                      dots = '.'; // Reset to 1 dot after 3 dots
-                                      dotCount = 1;  // Keep counting forward, no backward movement
-                                  }
-                              }, 500); // Change 500ms to adjust the speed of the typing animation
+                                    // If the dot count reaches 3, we stop adding dots and reset back to one dot
+                                    dotCount++;
+                                    if (dotCount === 3) {
+                                        dots = '.'; // Reset to 1 dot after 3 dots
+                                        dotCount = 1;  // Keep counting forward, no backward movement
+                                    }
+                                }, 500); // Change 500ms to adjust the speed of the typing animation
 
-                              // Keep typing until the message is ready to be updated
-                              setTimeout(() => {
-                                  clearInterval(typingInterval); // Stop typing after the last message
-                                  resolve();
-                              }, 3000); // You can adjust this timeout if you want the typing effect to last longer
-                          });
-                      }
+                                // Keep typing until the message is ready to be updated
+                                setTimeout(() => {
+                                    clearInterval(typingInterval); // Stop typing after the last message
+                                    resolve();
+                                }, 3000); // You can adjust this timeout if you want the typing effect to last longer
+                            });
+                        }
 
-                      // Function to simulate typing animation for paragraphs (human-like typing with cursor)
-                      function typeParagraphWithCursor(typingMessage, paragraph) {
-                          return new Promise(resolve => {
-                              let index = 0;
-                              const typingInterval = setInterval(() => {
-                                  // Add the character to the text and append the cursor
-                                  typingMessage.querySelector(".message-text p").innerText = paragraph.slice(0, index + 1) + '|';
-                                  index++;
+                        // Function to simulate typing animation for paragraphs (human-like typing with cursor)
+                        function typeParagraphWithCursor(typingMessage, paragraph) {
+                            return new Promise(resolve => {
+                                let index = 0;
+                                const typingInterval = setInterval(() => {
+                                    // Add the character to the text and append the cursor
+                                    typingMessage.querySelector(".message-text p").innerText = paragraph.slice(0, index + 1) + '|';
+                                    index++;
 
-                                  if (index === paragraph.length) {
-                                      clearInterval(typingInterval);
-                                      // Once the paragraph is done, initiate the blinking effect on the cursor
-                                      blinkCursor(typingMessage, paragraph).then(resolve);
-                                  }
-                              }, 50); // Typing speed, you can adjust this value
-                          });
-                      }
+                                    if (index === paragraph.length) {
+                                        clearInterval(typingInterval);
+                                        // Once the paragraph is done, initiate the blinking effect on the cursor
+                                        blinkCursor(typingMessage, paragraph).then(resolve);
+                                    }
+                                }, 50); // Typing speed, you can adjust this value
+                            });
+                        }
 
-                      // Function to blink the cursor twice before disappearing
-                      function blinkCursor(typingMessage, paragraph) {
-                          return new Promise(resolve => {
-                              const cursor = typingMessage.querySelector(".message-text p");
-                              let blinkCount = 0;
-                              
-                              // Make the cursor blink twice
-                              const blinkInterval = setInterval(() => {
-                                  if (blinkCount < 2) {
-                                      // Toggle the cursor visibility (blink effect)
-                                      cursor.innerText = cursor.innerText.endsWith('|') ? paragraph : paragraph + '|';
-                                      blinkCount++;
-                                  } else {
-                                      clearInterval(blinkInterval);
-                                      // Remove the cursor after blinking
-                                      cursor.innerText = paragraph;
-                                      resolve();
-                                  }
-                              }, 500); // Blink every 500ms
-                          });
-                      }
+                        // Function to blink the cursor twice before disappearing
+                        function blinkCursor(typingMessage, paragraph) {
+                            return new Promise(resolve => {
+                                const cursor = typingMessage.querySelector(".message-text p");
+                                let blinkCount = 0;
+                                
+                                // Make the cursor blink twice
+                                const blinkInterval = setInterval(() => {
+                                    if (blinkCount < 2) {
+                                        // Toggle the cursor visibility (blink effect)
+                                        cursor.innerText = cursor.innerText.endsWith('|') ? paragraph : paragraph + '|';
+                                        blinkCount++;
+                                    } else {
+                                        clearInterval(blinkInterval);
+                                        // Remove the cursor after blinking
+                                        cursor.innerText = paragraph;
+                                        resolve();
+                                    }
+                                }, 500); // Blink every 500ms
+                            });
+                        }
 
-                      // Function to append the message after a delay and update the typing animation
-                      function appendMessageWithDelay(typingMessage, paragraph, delay) {
-                          return new Promise(resolve => {
-                              setTimeout(() => {
-                                  // Update the typing message with the actual paragraph after the delay
-                                  typeParagraphWithCursor(typingMessage, paragraph).then(resolve);
-                              }, delay);
-                          });
-                      }
+                        // Function to append the message after a delay and update the typing animation
+                        function appendMessageWithDelay(typingMessage, paragraph, delay) {
+                            return new Promise(resolve => {
+                                setTimeout(() => {
+                                    // Update the typing message with the actual paragraph after the delay
+                                    typeParagraphWithCursor(typingMessage, paragraph).then(resolve);
+                                }, delay);
+                            });
+                        }
 
-                      // Iterate over each paragraph and add random delays with typing animation
-                      (async function() {
-                          for (let i = 0; i < botMessages.length; i++) {
-                              const typingMessage = showTypingAnimation(); // Show typing animation for each paragraph
-                              await animateDots(typingMessage); // Animate dots typing effect
-                              const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
-                              await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
-                          }
-                      })();
-                  })
-                  .catch(error => {
-                      console.error("Error fetching chatbot response:", error);
-                      // Handle error as before
-                  })
-                  .finally(() => {
-                      sendButton.disabled = false;
-                      sendButton.innerHTML = "↑";
-                  });
+                        // Iterate over each paragraph and add random delays with typing animation
+                        (async function() {
+                            for (let i = 0; i < botMessages.length; i++) {
+                                const typingMessage = showTypingAnimation(); // Show typing animation for each paragraph
+                                await animateDots(typingMessage); // Animate dots typing effect
+                                const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+                                await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
+                            }
+                        })();
+                    })
+                    .catch(error => {
+                        console.error("Error fetching chatbot response:", error);
+                        // Handle error as before
+                    })
+                    .finally(() => {
+                        sendButton.disabled = false;
+                        sendButton.innerHTML = "↑";
+                    });
 
 
-                return;
-        }
-
-        // Display bot message
-        const botMessage = document.createElement("div");
-        botMessage.classList.add("message", "bot-message");
-        botMessage.innerHTML = `
-            <div class="message-content_bot">
-                <div class="message-icon_bot">
-                    <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                </div>
-                <div class="message-text"><p>${botMessageText}</p></div>
-            </div>`;
-        messageContainer.appendChild(botMessage);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
-
-    // Function to handle user responses and progress conversation
-    function sendMessage() {
-        const userInput = chatInput.value.trim();
-
-        if (userInput) {
-            // Display user message
-            const userMessage = document.createElement("div");
-            userMessage.classList.add("message", "user-message");
-            userMessage.innerHTML = `
-                <div class="message-content_user">
-                    <div class="message-text_user_input"><p>${userInput}</p></div>
-                    <div class="message-icon" style="min-width: 10%">
-                        <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
-                    </div>
-                </div>`;
-            messageContainer.appendChild(userMessage);
-            chatInput.value = "";
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-            // Save input based on current step
-            if (currentStep === 0) {
-                characterName = userInput; // Saving character name
-                console.log("Character Name:", characterName); // Add this to log the value
-            } else if (currentStep === 1) {
-                storyTheme = userInput; // Saving story theme
-                console.log("Story Theme:", storyTheme); // Add this to log the value
-            } else if (currentStep === 2) {
-                storyEnding = userInput; // Saving story ending
-                console.log("Story Ending:", storyEnding); // Add this to log the value
-            } else if (currentStep === 3) {
-                additionalNotes = userInput; // Saving additional notes
-                console.log("Additional Notes:", additionalNotes); // Add this to log the value
+                    return;
             }
 
-            // Move to next step
-            currentStep++;
-            setTimeout(askForInput, 1000); // Add slight delay for natural interaction
+            // Display bot message
+            const botMessage = document.createElement("div");
+            botMessage.classList.add("message", "bot-message");
+            botMessage.innerHTML = `
+                <div class="message-content_bot">
+                    <div class="message-icon_bot">
+                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                    </div>
+                    <div class="message-text"><p>${botMessageText}</p></div>
+                </div>`;
+            messageContainer.appendChild(botMessage);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
         }
-    }
 
-    // Attach event listeners for user interactions
-    sendButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        sendMessage();
-    });
+        // Function to handle user responses and progress conversation
+        function sendMessage() {
+            const userInput = chatInput.value.trim();
 
-    chatInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
+            if (userInput) {
+                // Display user message
+                const userMessage = document.createElement("div");
+                userMessage.classList.add("message", "user-message");
+                userMessage.innerHTML = `
+                    <div class="message-content_user">
+                        <div class="message-text_user_input"><p>${userInput}</p></div>
+                        <div class="message-icon" style="min-width: 10%">
+                            <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
+                        </div>
+                    </div>`;
+                messageContainer.appendChild(userMessage);
+                chatInput.value = "";
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                // Save input based on current step
+                if (currentStep === 2) {
+                    characterName = userInput; // Saving character name
+                    console.log("Character Name:", characterName); // Add this to log the value
+                } else if (currentStep === 3) {
+                    storyTheme = userInput; // Saving story theme
+                    console.log("Story Theme:", storyTheme); // Add this to log the value
+                } else if (currentStep === 4) {
+                    storyEnding = userInput; // Saving story ending
+                    console.log("Story Ending:", storyEnding); // Add this to log the value
+                } else if (currentStep === 5) {
+                    additionalNotes = userInput; // Saving additional notes
+                    console.log("Additional Notes:", additionalNotes); // Add this to log the value
+                }
+
+                // Move to next step
+                currentStep++;
+                setTimeout(askForInput, 1000); // Add slight delay for natural interaction
+            }
+        }
+
+        // Attach event listeners for user interactions
+        sendButton.addEventListener("click", (event) => {
             event.preventDefault();
             sendMessage();
-        }
-    });
+        });
 
-    // Start the chatbot conversation
-    askForInput();
+        chatInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
 
+        // Start the chatbot conversation
+        askForInput();
     // Check permissions on load
     requestMicrophonePermission();
   </script>
@@ -801,5 +605,265 @@
 
   <!-- Main JS File -->
   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+  <style>
+    /* Main Content */
+    .main-content {
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      padding: 80px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+        width: 100%; /* Ensure full width */
+        margin: 0; /* Remove any default margin */
+        padding: 0; /* Remove any padding */
+    }
+
+    /* Chatbox Container */
+    .chatbox {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px 200px;
+        background-color: white;
+        height: calc(70vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
+        position: relative;
+        overflow: hidden; /* Prevents the chatbox itself from growing */
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Messages Container - Fixed height with scrolling */
+    .messages {
+        flex-grow: 1;
+        overflow-y: auto; /* Enables scrolling if messages overflow */
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 65%; /* Slightly increased width */
+        margin: 0 auto; /* Centers the messages container */
+        height: 100%; /* Make sure it fills the available space */
+    }
+
+    /* Individual Message Styling */
+    .message {
+        padding: 12px;
+        border-radius: 10px;
+        margin: 5px 0;
+        display: flex;
+        align-items: center;
+        max-width: 75%;
+        word-wrap: break-word;
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Message Content */
+    .message-content_user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .message-content_bot {
+        display: flex; /* Use flexbox to align items horizontally */
+        align-items: center; /* Vertically center the icon and text */
+        justify-content: flex-start; /* Align items to the start (left side) */
+    }
+
+    .message-text p {
+        margin: 0;
+        text-align: justify; /* Justify the last line (if text wraps) */
+    }
+
+    .message-text_user_input p{
+      text-align: right;
+      margin: 0;
+    }
+
+    /* Message Icon Styling */
+    .message-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .message-icon_bot{
+      margin-right: 10px;
+    }
+
+    /* Bot Message Styling */
+    .bot-message {
+        color: #24282C;
+        align-self: flex-start;
+        border-top-left-radius: 0;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .bot-icon {
+        width: 40px; /* Set the icon width */
+        height: 40px; /* Set the icon height */
+        border-radius: 50%; /* Make the icon circular */
+        object-fit: cover; /* Ensure the image fits within the circle */
+    }
+
+
+    /* User Message Styling */
+    .user-message {
+        background-color: #F4F4F4;
+        color: var(--default-text-color);
+        align-self: flex-end;
+        border-top-right-radius: 0;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 75%;
+        animation: fadeIn 0.5s ease;
+        text-align: right;
+    }
+
+    .user-icon {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+
+    /* Input Container Styles (below chatbox) */
+    .input-container {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        padding: 15px 50px;
+        display: flex;
+        gap: 10px;
+        border-radius: 8px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%; /* Center the input container */
+    }
+
+    /* Input Field */
+    #chat-input {
+        display: flex;
+        align-items: center;
+        position: relative;
+        width: 100%;
+        flex-grow: 1;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 1px solid var(--accent-color);
+        border-radius: 30px;
+        outline: none; /* Remove the default outline */
+        transition: border-color 0.3s ease;
+    }
+
+    /* Remove the blue glow on focus from the input */
+    #chat-input:focus {
+        outline: none; /* Remove outline */
+        box-shadow: none; /* Remove any box-shadow, including blue glow */
+    }
+
+    /* Ensure the input group container is positioned relative */
+    .input-group {
+        position: relative; /* This ensures the mic button is positioned relative to the input group */
+    }
+
+    /* Mic button to stay visible even when the input is focused */
+    .input-group:focus-within #mic-button {
+        visibility: visible; /* Ensure mic button stays visible when input is focused */
+    }
+
+    /* Send Button */
+    #send-button {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        font-size: large;
+    }
+
+    #send-button:hover {
+    color: var(--contrast-color);
+    background: color-mix(in srgb, var(--accent-color), transparent 15%);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
+    }
+
+
+    #send-button:disabled {
+        background-color: #ccc; /* Grey out the button */
+        color: #777; /* Change text color when disabled */
+        cursor: not-allowed; /* Prevent cursor change */
+    }
+
+    /* Message Text Style */
+    .message-text {
+        font-size: 15px;
+        color: #24282C;
+        padding-right: 2px;
+        text-align: center;
+    }
+
+    .input-group {
+    position: relative;
+  }
+  
+  #mic-button {
+    color: #585B5E;
+    padding: 6px;
+    border-radius: 0%;  /* This makes the button circular */
+    border: none;
+    cursor: pointer;
+    font-size: large;
+    position: absolute;
+    right: 10px;  /* Adjust to position the mic button */
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-block;
+    visibility: visible; /* Ensure the button remains visible */
+    padding-left: 3px;;
+    z-index: 10; /* Ensure the mic button stays on top */
+  }
+
+  #mic-button:hover {
+    background-color: transparent;  /* No background color */
+    color: var(--accent-color);     /* Change text/icon color */
+  }
+
+    /* Fade-In Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .input-container {
+          width: 90%;
+        }
+        .chatbox {
+          padding: 10px;
+        }
+        .messages {
+          width: 100%;
+        }
+      }
+</style>
 </body>
 </html>
