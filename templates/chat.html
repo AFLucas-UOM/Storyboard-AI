@@ -342,14 +342,15 @@
                     messageContainer.scrollTop = messageContainer.scrollHeight;
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
-                    You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story about a character named "${characterName}" that follows a "${storyTheme}" theme and concludes with a "${storyEnding}" ending.
+                    You are a superb storyteller, gifted at weaving vivid, engaging, and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
 
-                    The story should be immersive, with well-described settings, intriguing events, and realistic dialogue (if appropriate). Avoid breaking the narrative into formal sections like introduction, body, or conclusion. Instead, focus on ensuring the story flows naturally, captivating the reader from start to finish.
+                    Important: Consider the following additional note(s) provided by the user: "${additionalNotes || 'No additional notes were given.'}"
+                    
+                    Please ensure that the story flows seamlessly, captivating the reader from the opening moment to the final line. Avoid rigidly dividing the story into sections; instead, focus on crafting a cohesive and engaging journey.
 
-                    Additionally, consider this important note provided by the user: "${additionalNotes || 'No additional notes were given.'}"
+                    Additionally, ensure that the content remains appropriate for all audiences. Avoid incorporating any violent, offensive, or inappropriate themes, and instead focus on delivering a wholesome, engaging story. If the narrative begins to lean toward inappropriate or harmful content, redirect it to maintain a positive, respectful tone.
 
-                    Be creative and thoughtful in your storytelling. Let's begin!
-
+                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Create something memorable and suitable for a wide audience!
                     `;
 
                     console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
