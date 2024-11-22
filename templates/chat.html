@@ -249,6 +249,103 @@
     function askForInput() {
         let botMessageText = "";
 
+        // Function to simulate typing animation for '...'
+        function showTypingAnimation() {
+            const typingMessage = document.createElement("div");
+            typingMessage.classList.add("message", "bot-message");
+            typingMessage.innerHTML = `
+                <div class="message-content_bot">
+                    <div class="message-icon_bot">
+                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                    </div>
+                    <div class="message-text"><p></p></div>
+                </div>`;
+            messageContainer.appendChild(typingMessage);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            // Return the typingMessage to be updated later
+            return typingMessage;
+        }
+
+        // Function to simulate the typing of '...'
+        function animateDots(typingMessage) {
+            return new Promise(resolve => {
+                let dots = '';
+                let dotCount = 0;
+
+                // Use a setInterval to simulate typing of dots
+                const typingInterval = setInterval(() => {
+                    dots += '.'; // Add a dot
+
+                    // Update the message with the new dots
+                    typingMessage.querySelector(".message-text p").innerText = dots;
+
+                    // If the dot count reaches 3, reset to 0 dots
+                    dotCount++;
+                    if (dotCount === 3) {
+                        dots = '';  // Reset to 0 dots
+                        dotCount = 0;  // Reset the counter
+                    }
+                }, 500); // Adjust speed here (500ms)
+
+                                // Stop typing after a certain time
+                setTimeout(() => {
+                    clearInterval(typingInterval); // Stop typing
+                    resolve(); // Resolve the promise to continue
+                }, 3000); // Adjust the duration to control how long the typing effect lasts
+            });
+        }
+
+        // Function to simulate typing animation for paragraphs (human-like typing with cursor)
+        function typeParagraphWithCursor(typingMessage, paragraph) {
+            return new Promise(resolve => {
+                let index = 0;
+                const typingInterval = setInterval(() => {
+                    // Add the character to the text and append the cursor
+                    typingMessage.querySelector(".message-text p").innerText = paragraph.slice(0, index + 1) + '|';
+                    index++;
+
+                    if (index === paragraph.length) {
+                        clearInterval(typingInterval);
+                        // Once the paragraph is done, initiate the blinking effect on the cursor
+                        blinkCursor(typingMessage, paragraph).then(resolve);
+                    }
+                }, 50); // Typing speed, you can adjust this value
+            });
+        }
+
+        // Function to blink the cursor twice before disappearing
+        function blinkCursor(typingMessage, paragraph) {
+            return new Promise(resolve => {
+                const cursor = typingMessage.querySelector(".message-text p");
+                let blinkCount = 0;
+                                
+                // Make the cursor blink twice
+                const blinkInterval = setInterval(() => {
+                    if (blinkCount < 2) {
+                        // Toggle the cursor visibility (blink effect)
+                        cursor.innerText = cursor.innerText.endsWith('|') ? paragraph : paragraph + '|';
+                        blinkCount++;
+                    } else {
+                        clearInterval(blinkInterval);
+                        // Remove the cursor after blinking
+                        cursor.innerText = paragraph;
+                        resolve();
+                    }
+                }, 500); // Blink every 500ms
+            });
+        }
+
+        // Function to append the message after a delay and update the typing animation
+        function appendMessageWithDelay(typingMessage, paragraph, delay) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // Update the typing message with the actual paragraph after the delay
+                    typeParagraphWithCursor(typingMessage, paragraph).then(resolve);
+                }, delay);
+            });
+        }
+
         // Set bot message based on the current step in the conversation
         switch (currentStep) {
             case 0:
@@ -329,17 +426,42 @@
                 ];
                 botMessageText = variations6[Math.floor(Math.random() * variations6.length)];
                     // Display the bot message to the user
-                    const generatingMessage = document.createElement("div");
-                    generatingMessage.classList.add("message", "bot-message");
-                    generatingMessage.innerHTML = `
-                        <div class="message-content_bot">
-                            <div class="message-icon_bot">
-                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                            </div>
-                            <div class="message-text"><p>${botMessageText}</p></div>
-                        </div>`;
-                    messageContainer.appendChild(generatingMessage);
-                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                    (async function() {
+                        for (let i = 0; i < botMessages.length; i++) {
+                            // Step 1: Create a typing animation element for each message
+                            const typingMessage = showTypingAnimation(); // This will be a temporary message showing typing dots
+                            
+                            // Step 2: Wait for the typing dots animation to finish before continuing
+                            await animateDots(typingMessage);
+
+                            // Step 3: Append the typing animation message
+                            messageContainer.appendChild(typingMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Step 4: Random delay before appending the actual bot message
+                            const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
+                            await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay);
+
+                            // Step 5: Create the real bot message and replace the typing animation
+                            const generatingMessage = document.createElement("div");
+                            generatingMessage.classList.add("message", "bot-message");
+                            generatingMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text"><p>${botMessages[i]}</p></div>
+                                </div>`;
+                            
+                            // Step 6: Replace the typing message with the real message after the random delay
+                            typingMessage.replaceWith(generatingMessage);
+                            
+                            // Step 7: Scroll to the bottom of the message container
+                            messageContainer.appendChild(generatingMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                        }
+                    })();
+
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
                     You are a skilled storyteller known for creating vivid, engaging, and well-structured stories. Your task is to write a story about a character named "${characterName}" that follows a "${storyTheme}" theme and concludes with a "${storyEnding}" ending.
@@ -365,110 +487,21 @@
                         // Split the response by line breaks (or paragraphs)
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
-                        // Function to simulate typing animation for '...'
-                        function showTypingAnimation() {
-                            const typingMessage = document.createElement("div");
-                            typingMessage.classList.add("message", "bot-message");
-                            typingMessage.innerHTML = `
-                                <div class="message-content_bot">
-                                    <div class="message-icon_bot">
-                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                    </div>
-                                    <div class="message-text"><p></p></div>
-                                </div>`;
-                            messageContainer.appendChild(typingMessage);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                            // Return the typingMessage to be updated later
-                            return typingMessage;
-                        }
-
-                        // Function to simulate the typing of '...'
-                        function animateDots(typingMessage) {
-                            return new Promise(resolve => {
-                                let dots = '';
-                                let dotCount = 0;
-
-                                // Use a setInterval to simulate typing of dots
-                                const typingInterval = setInterval(() => {
-                                    dots += '.';
-                                    typingMessage.querySelector(".message-text p").innerText = dots;
-
-                                    // If the dot count reaches 3, we stop adding dots and reset back to one dot
-                                    dotCount++;
-                                    if (dotCount === 3) {
-                                        dots = '.'; // Reset to 1 dot after 3 dots
-                                        dotCount = 1;  // Keep counting forward, no backward movement
-                                    }
-                                }, 500); // Change 500ms to adjust the speed of the typing animation
-
-                                // Keep typing until the message is ready to be updated
-                                setTimeout(() => {
-                                    clearInterval(typingInterval); // Stop typing after the last message
-                                    resolve();
-                                }, 3000); // You can adjust this timeout if you want the typing effect to last longer
-                            });
-                        }
-
-                        // Function to simulate typing animation for paragraphs (human-like typing with cursor)
-                        function typeParagraphWithCursor(typingMessage, paragraph) {
-                            return new Promise(resolve => {
-                                let index = 0;
-                                const typingInterval = setInterval(() => {
-                                    // Add the character to the text and append the cursor
-                                    typingMessage.querySelector(".message-text p").innerText = paragraph.slice(0, index + 1) + '|';
-                                    index++;
-
-                                    if (index === paragraph.length) {
-                                        clearInterval(typingInterval);
-                                        // Once the paragraph is done, initiate the blinking effect on the cursor
-                                        blinkCursor(typingMessage, paragraph).then(resolve);
-                                    }
-                                }, 50); // Typing speed, you can adjust this value
-                            });
-                        }
-
-                        // Function to blink the cursor twice before disappearing
-                        function blinkCursor(typingMessage, paragraph) {
-                            return new Promise(resolve => {
-                                const cursor = typingMessage.querySelector(".message-text p");
-                                let blinkCount = 0;
-                                
-                                // Make the cursor blink twice
-                                const blinkInterval = setInterval(() => {
-                                    if (blinkCount < 2) {
-                                        // Toggle the cursor visibility (blink effect)
-                                        cursor.innerText = cursor.innerText.endsWith('|') ? paragraph : paragraph + '|';
-                                        blinkCount++;
-                                    } else {
-                                        clearInterval(blinkInterval);
-                                        // Remove the cursor after blinking
-                                        cursor.innerText = paragraph;
-                                        resolve();
-                                    }
-                                }, 500); // Blink every 500ms
-                            });
-                        }
-
-                        // Function to append the message after a delay and update the typing animation
-                        function appendMessageWithDelay(typingMessage, paragraph, delay) {
-                            return new Promise(resolve => {
-                                setTimeout(() => {
-                                    // Update the typing message with the actual paragraph after the delay
-                                    typeParagraphWithCursor(typingMessage, paragraph).then(resolve);
-                                }, delay);
-                            });
-                        }
 
                         // Iterate over each paragraph and add random delays with typing animation
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
-                                const typingMessage = showTypingAnimation(); // Show typing animation for each paragraph
-                                await animateDots(typingMessage); // Animate dots typing effect
+                                const typingMessage = showTypingAnimation(); // Create a new element for each message
+                                
+                                // Wait for the typing dots animation to finish before continuing
+                                await animateDots(typingMessage);
+
+                                // Random delay before appending the actual message
                                 const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
                                 await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
                             }
                         })();
+
                     })
                     .catch(error => {
                         console.error("Error fetching chatbot response:", error);
