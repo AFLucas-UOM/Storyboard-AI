@@ -40,20 +40,52 @@
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
 
   <script>
-    // Place the speakText function in the <head> or at the end of the body
-    function speakText(text) {
-        console.log('Attempting to speak:', text); // Log the text being passed to the function
+    // Store the current SpeechSynthesisUtterance and its state
+    let currentUtterance = null;
+    let isSpeaking = false;
 
-        const speech = new SpeechSynthesisUtterance(text);
+    function speakText(text, iconElement) {
+        // Stop TTS if already playing
+        if (isSpeaking) {
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+                isSpeaking = false;
+                currentUtterance = null;
 
-        // Set speech properties
-        speech.lang = 'en-US';
-        speech.volume = 1;
-        speech.rate = 1;
-        speech.pitch = 1;
+                // Reset icon to speaker
+                iconElement.classList.remove("stop");
+                iconElement.innerHTML = "&#128266;"; // Speaker icon
+            }
+            return;
+        }
 
-        window.speechSynthesis.speak(speech);
+        // Start TTS
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        isSpeaking = true;
+
+        // Change icon to stop during playback
+        iconElement.classList.add("stop");
+        iconElement.innerHTML = "■"; // Stop icon
+
+        // When the utterance finishes, reset the icon and state
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            currentUtterance = null;
+            iconElement.classList.remove("stop");
+            iconElement.innerHTML = "&#128266;"; // Speaker icon
+        };
+
+        // Handle errors gracefully
+        currentUtterance.onerror = () => {
+            isSpeaking = false;
+            currentUtterance = null;
+            iconElement.classList.remove("stop");
+            iconElement.innerHTML = "&#128266;"; // Speaker icon
+        };
+
+        speechSynthesis.speak(currentUtterance);
     }
+
   </script>
 </head>
 
@@ -412,22 +444,24 @@
 
                                 // Use a setInterval to simulate typing of dots
                                 const typingInterval = setInterval(() => {
-                                    dots += '.';
+                                    dots += '.'; // Add a dot
+
+                                    // Update the message with the new dots
                                     typingMessage.querySelector(".message-text p").innerText = dots;
 
-                                    // If the dot count reaches 3, we stop adding dots and reset back to one dot
+                                    // If the dot count reaches 3, reset to 0 dots
                                     dotCount++;
                                     if (dotCount === 3) {
-                                        dots = '.'; // Reset to 1 dot after 3 dots
-                                        dotCount = 1;  // Keep counting forward, no backward movement
+                                        dots = '';  // Reset to 0 dots
+                                        dotCount = 0;  // Reset the counter
                                     }
-                                }, 500); // Change 500ms to adjust the speed of the typing animation
+                                }, 500); // Adjust speed here (500ms)
 
-                                // Keep typing until the message is ready to be updated
+                                // Stop typing after a certain time
                                 setTimeout(() => {
-                                    clearInterval(typingInterval); // Stop typing after the last message
-                                    resolve();
-                                }, 3000); // You can adjust this timeout if you want the typing effect to last longer
+                                    clearInterval(typingInterval); // Stop typing
+                                    resolve(); // Resolve the promise to continue
+                                }, 3000); // Adjust the duration to control how long the typing effect lasts
                             });
                         }
 
@@ -480,16 +514,22 @@
                                 }, delay);
                             });
                         }
+                        
 
                         // Iterate over each paragraph and add random delays with typing animation
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
-                                const typingMessage = showTypingAnimation(); // Show typing animation for each paragraph
-                                await animateDots(typingMessage); // Animate dots typing effect
+                                const typingMessage = showTypingAnimation(); // Create a new element for each message
+                                
+                                // Wait for the typing dots animation to finish before continuing
+                                await animateDots(typingMessage);
+
+                                // Random delay before appending the actual message
                                 const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
                                 await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
                             }
                         })();
+
                     })
                     .catch(error => {
                         console.error("Error fetching chatbot response:", error);
@@ -505,7 +545,6 @@
             }
 
             // Display bot message
-            // Display bot message
             const botMessage = document.createElement("div");
             botMessage.classList.add("message", "bot-message");
             botMessage.innerHTML = `
@@ -515,12 +554,11 @@
                     </div>
                     <div class="message-text">
                         <p>${botMessageText}</p>
-                        <span class="speaker-icon" onclick="speakText('${botMessageText}')">&#128266;</span> <!-- Speaker icon -->
+                        <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
                     </div>
                 </div>`;
             messageContainer.appendChild(botMessage);
             messageContainer.scrollTop = messageContainer.scrollHeight;
-
         }
 
         // Function to handle user responses and progress conversation
@@ -715,13 +753,21 @@
     .speaker-icon {
         display: none;
         position: absolute;
-        right: 10px; /* Position it slightly from the right edge */
-        bottom: 10px; /* Position it slightly from the bottom edge */
+        right: 10px;
+        bottom: 10px;
         cursor: pointer;
+        font-size: 18px;
+        user-select: none;
     }
 
     .message-text:hover .speaker-icon {
         display: inline-block;
+    }
+
+    /* Styling for the "stop" icon */
+    .speaker-icon.stop {
+        content: "■"; /* Unicode for a square */
+        font-size: 16px; /* Slightly adjust size for stop */
     }
 
 
