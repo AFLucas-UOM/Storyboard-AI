@@ -385,7 +385,10 @@
                             <div class="message-icon_bot">
                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                             </div>
-                            <div class="message-text"><p>${botMessageText}</p></div>
+                            <div class="message-text">
+                                <p>${botMessageText}</p>
+                                <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
+                            </div>
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
                     messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -416,7 +419,7 @@
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
                         // Function to simulate typing animation for '...'
-                        function showTypingAnimation() {
+                        function showTypingAnimation(paragraph) {
                             const typingMessage = document.createElement("div");
                             typingMessage.classList.add("message", "bot-message");
                             typingMessage.innerHTML = `
@@ -425,8 +428,7 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p>${botMessageText}</p>
-                                        <span class="speaker-icon" onclick="speakText('${botMessageText}')">&#128266;</span> <!-- Speaker icon -->
+                                        <p>${paragraph}</p>
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(typingMessage);
@@ -477,11 +479,112 @@
                                     if (index === paragraph.length) {
                                         clearInterval(typingInterval);
                                         // Once the paragraph is done, initiate the blinking effect on the cursor
-                                        blinkCursor(typingMessage, paragraph).then(resolve);
+                                        blinkCursor(typingMessage, paragraph).then(() => {
+                                            // Add the speaker icon once typing is done
+                                            addSpeakerIcon(typingMessage, paragraph);
+                                            addRedoButton(typingMessage, paragraph); // Add the redo button
+                                            makeTextClickable(typingMessage, paragraph); // Enable text click functionality
+                                            resolve(); // Resolve the promise to continue
+                                        });
                                     }
                                 }, 50); // Typing speed, you can adjust this value
                             });
                         }
+
+                        function addSpeakerIcon(typingMessage, paragraph) {
+                            const speakerIconContainer = typingMessage.querySelector(".message-text");
+                            const speakerIcon = document.createElement("span");
+                            speakerIcon.classList.add("speaker-icon");
+                            speakerIcon.innerHTML = `&#128266;`; // Speaker icon
+                            speakerIcon.onclick = () => speakText(paragraph, speakerIcon); // On click, call text-to-speech function
+
+                            // Append the speaker icon after the text has been typed
+                            speakerIconContainer.appendChild(speakerIcon);
+                        }
+
+                        function addRedoButton(typingMessage, paragraph) {
+                            const redoButton = document.createElement("button");
+                            redoButton.innerHTML = "🔁 Redo"; // You can change this to a more stylish button
+                            redoButton.classList.add("redo-button"); // Add a class for styling purposes
+
+                            const messageContent = typingMessage.querySelector(".message-content_bot");
+                            const messageText = messageContent.querySelector(".message-text");
+
+                            // Add the redo button next to the speaker icon
+                            messageText.appendChild(redoButton);
+
+                            redoButton.onclick = () => {
+                                // Temporarily hide the paragraph while it's being rewritten
+                                messageText.querySelector("p").innerText = "Rewriting...";
+
+                                // Send the prompt to TinyLlama to re-write the paragraph
+                                const rewrittenParagraph = rewriteParagraph(paragraph);
+
+                                // Once the paragraph is rewritten, replace the original text
+                                rewrittenParagraph.then(newParagraph => {
+                                    // Update the message with the rewritten paragraph
+                                    messageText.querySelector("p").innerText = newParagraph;
+                                });
+                            };
+                        }
+
+
+                        function rewriteParagraph(paragraph) {
+                            return new Promise(resolve => {
+                                // Define a stronger prompt to rewrite the paragraph
+                                const finalPrompt = `I want you to re-write this paragraph, keep your response to ONLY 1 paragraph, with similar length to the paragraph I shall provide you with, keeping all the context intact:\n\n"${paragraph}"`;
+
+                                // Send the prompt to TinyLlama
+                                fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: finalPrompt }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    const rewrittenParagraph = data.response; // Assume the response contains the rewritten paragraph
+                                    resolve(rewrittenParagraph); // Resolve the promise with the new paragraph
+                                })
+                                .catch(error => {
+                                    console.error("Error rewriting paragraph:", error);
+                                    resolve(paragraph); // If there’s an error, return the original paragraph
+                                });
+                            });
+                        }
+
+
+
+
+                        
+                        function makeTextClickable(typingMessage, paragraph) {
+                            const paragraphElement = typingMessage.querySelector(".message-text p");
+
+                            // Add a click event listener to the paragraph
+                            paragraphElement.style.cursor = 'pointer'; // Change cursor to pointer to indicate it's clickable
+
+                            paragraphElement.onclick = () => {
+                                copyToClipboard(paragraph); // Call the copyToClipboard function on click
+                            };
+                        }
+
+                        function copyToClipboard(text) {
+                            // Create a temporary textarea element to hold the text to be copied
+                            const tempTextArea = document.createElement("textarea");
+                            tempTextArea.value = text;
+                            document.body.appendChild(tempTextArea);
+
+                            // Select the text in the textarea and copy it to the clipboard
+                            tempTextArea.select();
+                            document.execCommand('copy');
+
+                            // Remove the textarea after copying
+                            document.body.removeChild(tempTextArea);
+
+                            // Optional: Provide feedback to the user (e.g., alert or visual cue)
+                            alert("Text copied to clipboard!"); // You can change this to a more user-friendly notification
+                        }
+
+
 
                         // Function to blink the cursor twice before disappearing
                         function blinkCursor(typingMessage, paragraph) {
@@ -519,8 +622,8 @@
                         // Iterate over each paragraph and add random delays with typing animation
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
-                                const typingMessage = showTypingAnimation(); // Create a new element for each message
-                                
+                                const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
+
                                 // Wait for the typing dots animation to finish before continuing
                                 await animateDots(typingMessage);
 
@@ -529,6 +632,7 @@
                                 await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
                             }
                         })();
+
 
                     })
                     .catch(error => {
@@ -593,6 +697,8 @@
                 } else if (currentStep === 5) {
                     additionalNotes = userInput; // Saving additional notes
                     console.log("Additional Notes:", additionalNotes); // Add this to log the value
+                } else if (currentStep === 6) {
+                    console.log("We are going!");
                 }
 
                 // Move to next step
