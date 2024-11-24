@@ -39,6 +39,9 @@
   <!-- Main CSS File -->
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>  
+
   <script>
     // Store the current SpeechSynthesisUtterance and its state
     let currentUtterance = null;
@@ -152,6 +155,9 @@
         <!-- Disclaimer message -->
         <p class="message-text text-muted small mt-2">
           Storyboard-AI generates content which might not exactly match your vision.
+        </p>
+        <p class = "message-text text-muted small mt-2">
+          Storyboard-AI can make mistakes! While it aims to create engaging and imaginative stories, the generated content may occasionally include unexpected twists or inaccuracies.
         </p>
       </div>
     </section>
@@ -394,16 +400,15 @@
                     messageContainer.scrollTop = messageContainer.scrollHeight;
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
-                    You are a superb storyteller, gifted at weaving vivid, engaging, and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
+                    You are a storyteller, gifted at writing engaging and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
 
                     Important: Consider the following additional note(s) provided by the user: "${additionalNotes || 'No additional notes were given.'}"
-                    
-                    Please ensure that the story flows seamlessly, captivating the reader from the opening moment to the final line. Avoid rigidly dividing the story into sections; instead, focus on crafting a cohesive and engaging journey.
+
+                    Write the entire story in paragraph format, with no title, no list of characters, and absolutely no sections or breaks. It should be one continuous narrative, flowing seamlessly from start to finish. Do not include any headings, subheadings, or any sort of structural divisions. Keep the story cohesive and focused, engaging the reader from the first sentence to the last without breaking the immersion.
 
                     Additionally, ensure that the content remains appropriate for all audiences. Avoid incorporating any violent, offensive, or inappropriate themes, and instead focus on delivering a wholesome, engaging story. If the narrative begins to lean toward inappropriate or harmful content, redirect it to maintain a positive, respectful tone.
 
-                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Create something memorable and suitable for a wide audience!
-                    `;
+                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Remember the rules from before and create something memorable and suitable for a wide audience!`;
 
                     console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
 
@@ -528,7 +533,6 @@
                             };
                         }
 
-
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
@@ -618,8 +622,34 @@
                             });
                         }
                         
+                        function generateTitleForStory(story) {
+                            return new Promise((resolve, reject) => {
+                                // Prepare the prompt for generating the title
+                                const titlePrompt = `You need to generate a title for this story, the title should be less than 7 words maximum and only return the title nothing else, the story is: ${story}`;
 
-                        // Iterate over each paragraph and add random delays with typing animation
+                                // Send the request to Ollama
+                                fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: titlePrompt }),
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error("Failed to fetch the title from Ollama");
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        const title = data.response || "Untitled Story"; // Use "Untitled Story" if no title is returned
+                                        resolve(title); // Resolve the promise with the title
+                                    })
+                                    .catch(error => {
+                                        console.error("Error generating story title:", error);
+                                        reject("Untitled Story"); // Reject with a fallback title
+                                    });
+                            });
+                        }
+
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
@@ -631,7 +661,111 @@
                                 const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
                                 await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
                             }
+
+                            // Combine all paragraphs into a single story text
+                            const story = botMessages.join(" ");
+
+                            console.log(story); // Log the story for debugging
+
+                            // Generate the story title using the new function
+                            try {
+                                const title = await generateTitleForStory(story);
+
+                                // Display the title to the user
+                                const titleMessage = document.createElement("div");
+                                titleMessage.classList.add("message", "bot-message");
+                                titleMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p><strong>Story Title:</strong> ${title}</p>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(titleMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                                // Ask the user if they want to save the story as a PDF with two options (buttons)
+                                const saveMessage = document.createElement("div");
+                                saveMessage.classList.add("message", "bot-message");
+                                saveMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p>Would you like to save this story as a PDF?</p>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(saveMessage);
+
+                                // Add buttons for the user to choose
+                                const buttonContainer = document.createElement("div");
+                                buttonContainer.classList.add("button-container");
+                                
+                                const yesButton = document.createElement("button");
+                                yesButton.textContent = "Yes, Save as PDF";
+                                yesButton.classList.add("button", "yes-button");
+                                yesButton.onclick = function() {
+                                    generateAndDownloadPDF(title, story); // Call the function to generate and download the PDF
+                                    buttonContainer.style.display = "none"; // Hide the buttons after click
+                                };
+
+                                const noButton = document.createElement("button");
+                                noButton.textContent = "No, Cancel";
+                                noButton.classList.add("button", "no-button");
+                                noButton.onclick = function() {
+                                    buttonContainer.style.display = "none"; // Hide the buttons after canceling
+                                };
+
+                                buttonContainer.appendChild(yesButton);
+                                buttonContainer.appendChild(noButton);
+                                messageContainer.appendChild(buttonContainer);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            } catch (fallbackTitle) {
+                                // Display the fallback title in case of error
+                                const titleMessage = document.createElement("div");
+                                titleMessage.classList.add("message", "bot-message");
+                                titleMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p><strong>Story Title:</strong> ${fallbackTitle}</p>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(titleMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+                            }
                         })();
+
+                        // Function to generate and download the PDF
+                        function generateAndDownloadPDF(title, story) {
+                            const docDefinition = {
+                                content: [
+                                    { text: title, style: 'header' },
+                                    { text: story, style: 'story' }
+                                ],
+                                styles: {
+                                    header: {
+                                        fontSize: 18,
+                                        bold: true,
+                                        margin: [0, 0, 0, 10]
+                                    },
+                                    story: {
+                                        fontSize: 12,
+                                        margin: [0, 10, 0, 10]
+                                    }
+                                }
+                            };
+
+                            // Generate PDF and trigger download
+                            pdfMake.createPdf(docDefinition).download('Story.pdf');
+                        }
+
 
 
                     })
@@ -1015,6 +1149,34 @@
     .input-group {
         position: relative;
     }
+
+    .button-container {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .button {
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .button:hover {
+        background-color: #45a049;
+    }
+
+    .yes-button {
+        background-color: #4CAF50;
+    }
+    
+    .no-button {
+        background-color: #f44336;
+    }
+
     
   #mic-button {
     color: #585B5E;
