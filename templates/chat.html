@@ -439,7 +439,7 @@
                                             resolve(); // Resolve the promise to continue
                                         });
                                     }
-                                }, 50); // Typing speed, you can adjust this value
+                                }, 25); // Typing speed, you can adjust this value
                             });
                         }
 
@@ -495,15 +495,21 @@
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
-                                const finalPrompt = `I would like you to re-write the following paragraph with the following guidelines: 
-                                - Maintain the same overall meaning, tone, and context.
-                                - Keep the length of your response comparable to the original, ensuring it remains concise but thorough.
-                                - Use different wording and sentence structures to improve clarity, flow, and engagement, while retaining the key information.
-                                - Do not include any additional commentary, explanations, or changes to the original context; focus only on rewriting the paragraph.
-                                - Ensure the rewritten paragraph feels natural and cohesive without losing any important details.
+                                const finalPrompt = `You are a rewriting assistant. Your task is to rewrite the following paragraph according to these guidelines:
 
-                                Here is the paragraph to re-write:
+                                - Keep the original meaning, tone, and context.
+                                - Ensure the length is similar, concise but thorough.
+                                - Use varied wording and sentence structures to enhance readability while maintaining key details.
+                                - Do not include any introductory phrases, commentary, or explanations. Only provide the rewritten paragraph.
 
+                                Example:
+                                Original paragraph:
+                                "Sean stood at the edge of the cliff, staring at the horizon. The wind whipped through his hair as he thought about the long journey ahead. He was ready for whatever came next."
+
+                                Rewritten paragraph:
+                                "Standing on the cliff's edge, Sean gazed out at the horizon. The wind tugged at his hair as he contemplated the journey ahead, feeling prepared for whatever challenges awaited him."
+
+                                Here is the paragraph to rewrite:
                                 "${paragraph}"`;
 
                                 // Send the prompt to TinyLlama
@@ -587,7 +593,14 @@
                         
                         function generateTitleForStory(story) {
                             // Prepare the prompt for generating the title
-                            const titlePrompt = `Your task is to generate a concise, engaging title for the following story. The title should be no longer than 7 words, reflecting the essence of the story. Focus on capturing its mood, theme, and core message. Respond with only the title, and ensure it is clear, relevant, and intriguing. The story is: ${story}`;
+                            const titlePrompt = `You are a title-crafting expert, skilled at creating concise and captivating titles that encapsulate the mood, theme, and core message of a story. Your task is to generate a title for the provided story based on the following guidelines:
+
+                            - The title should be no longer than 7 words.
+                            - It must reflect the essence of the story, including its mood, theme, and key message.
+                            - Ensure the title is clear, relevant, and intriguing without being overly vague or abstract.
+                            - Respond with only the title, avoiding any additional commentary or explanation.
+                            Here is the story:
+                            "${story}"`;
 
                             return new Promise((resolve, reject) => {
                                 // Send the request to Ollama
@@ -696,6 +709,35 @@
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(titleMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Prepare the prompt for generating the 100-word summary
+                            const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Focus on the key details that drive the story forward, and omit any unnecessary information. Your summary should be both efficient and informative, capturing the essence of the story in a straightforward manner.
+                            Story: "${story}"`;
+
+                            // Send the request to Ollama to generate the summary
+                            const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ prompt: summaryPrompt }),
+                            });
+
+                            const summaryResult = await summaryResponse.json();
+                            const summary = summaryResult.response || "No summary generated."; // Fallback if no summary is generated
+
+                            // Display the summary to the user
+                            const summaryMessage = document.createElement("div");
+                            summaryMessage.classList.add("message", "bot-message");
+                            summaryMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p><strong>Story Summary:</strong> ${summary}</p>
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(summaryMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
                             // Ask if the user wants to save the story as a PDF
@@ -829,7 +871,41 @@
                     storyEnding = userInput; // Saving story ending
                 } else if (currentStep === 5) {
                     additionalNotes = userInput; // Saving additional notes
-                } 
+                    lockInput(); // Lock the input and buttons after saving additional notes
+                }
+
+                // Function to lock input and buttons
+                function lockInput() {
+                    const inputField = document.getElementById("chat-input");
+                    const sendButton = document.getElementById("send-button");
+                    const micButton = document.getElementById("mic-button");
+                    const inputContainer = document.querySelector(".input-container");
+
+                    // Disable input field and buttons
+                    inputField.disabled = true;
+                    sendButton.disabled = true;
+                    micButton.disabled = true;
+
+                    // Apply styling to permanently grey out the send button
+                    sendButton.style.backgroundColor = "#d3d3d3"; // Light grey
+                    sendButton.style.borderColor = "#d3d3d3";
+                    sendButton.style.cursor = "not-allowed"; // Show 'not allowed' cursor on hover
+
+                    // Ensure the red text message is above the input container
+                    const existingLockedMessage = document.getElementById("locked-message");
+                    if (!existingLockedMessage) {
+                        const lockedMessage = document.createElement("p");
+                        lockedMessage.id = "locked-message"; // Add an ID to avoid duplicate messages
+                        lockedMessage.textContent = "You cannot send more messages at this stage.";
+                        lockedMessage.style.color = "red";
+                        lockedMessage.style.marginBottom = "10px"; // Add spacing between the message and the bar
+                        lockedMessage.style.textAlign = "center"; // Align text for better appearance
+                        lockedMessage.style.fontWeight = "500"; // Semi-bold text
+                        lockedMessage.style.fontSize = "1.5rem"; // Larger font size
+                        inputContainer.parentNode.insertBefore(lockedMessage, inputContainer); // Insert above the input bar
+                    }
+                }
+
                 // Move to next step
                 currentStep++;
                 setTimeout(askForInput, 1000); // Add slight delay for natural interaction
