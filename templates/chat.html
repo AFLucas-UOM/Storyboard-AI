@@ -43,53 +43,56 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>  
 
   <script>
-    // Store the current SpeechSynthesisUtterance and its state
-    let currentUtterance = null;
-    let isSpeaking = false;
+    // Manage text-to-speech (TTS) functionality and button state
+    let currentUtterance = null; // Stores the active utterance
+    let isSpeaking = false;     // Tracks whether TTS is currently playing
 
     function speakText(text, iconElement) {
-        // Stop TTS if already playing
+        // If TTS is currently active, stop playback and reset the button state
         if (isSpeaking) {
-            if (currentUtterance) {
-                speechSynthesis.cancel();
-                isSpeaking = false;
-                currentUtterance = null;
-
-                // Reset icon to speaker
-                iconElement.classList.remove("stop");
-                iconElement.innerHTML = "&#128266;"; // Speaker icon
-            }
+            stopSpeaking(iconElement);
             return;
         }
 
-        // Start TTS
+        // Initialize a new SpeechSynthesisUtterance
         currentUtterance = new SpeechSynthesisUtterance(text);
         isSpeaking = true;
 
-        // Change icon to stop during playback
-        iconElement.classList.add("stop");
-        iconElement.innerHTML = "■"; // Stop icon
+        // Update button to indicate playback (stop icon)
+        updateIcon(iconElement, true);
 
-        // When the utterance finishes, reset the icon and state
-        currentUtterance.onend = () => {
-            isSpeaking = false;
-            currentUtterance = null;
-            iconElement.classList.remove("stop");
-            iconElement.innerHTML = "&#128266;"; // Speaker icon
-        };
+        // Event listener: Reset state when playback finishes
+        currentUtterance.onend = () => resetState(iconElement);
 
-        // Handle errors gracefully
-        currentUtterance.onerror = () => {
-            isSpeaking = false;
-            currentUtterance = null;
-            iconElement.classList.remove("stop");
-            iconElement.innerHTML = "&#128266;"; // Speaker icon
-        };
+        // Event listener: Handle errors gracefully
+        currentUtterance.onerror = () => resetState(iconElement);
 
+        // Start the TTS
         speechSynthesis.speak(currentUtterance);
     }
 
-  </script>
+    // Stop TTS playback and reset the button state
+    function stopSpeaking(iconElement) {
+        speechSynthesis.cancel();
+        resetState(iconElement);
+    }
+
+    // Update the button icon to reflect TTS state using Bootstrap icons
+    function updateIcon(iconElement, isPlaying) {
+        if (isPlaying) {
+            iconElement.className = "bi bi-stop-circle"; // Stop icon
+        } else {
+            iconElement.className = "bi bi-volume-up"; // Speaker icon
+        }
+    }
+
+    // Reset playback state and button appearance
+    function resetState(iconElement) {
+        isSpeaking = false;
+        currentUtterance = null;
+        updateIcon(iconElement, false);
+    }
+</script>
 </head>
 
 <body class="index-page" style="margin-top: 0px; height: 100%;">
@@ -155,9 +158,6 @@
         <!-- Disclaimer message -->
         <p class="message-text text-muted small mt-2">
           Storyboard-AI generates content which might not exactly match your vision.
-        </p>
-        <p class = "message-text text-muted small mt-2">
-          Storyboard-AI can make mistakes! While it aims to create engaging and imaginative stories, the generated content may occasionally include unexpected twists or inaccuracies.
         </p>
       </div>
     </section>
@@ -393,7 +393,7 @@
                             </div>
                             <div class="message-text">
                                 <p>${botMessageText}</p>
-                                <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
+                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)"></i> <!-- Speaker icon -->
                             </div>
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
@@ -498,9 +498,8 @@
 
                         function addSpeakerIcon(typingMessage, paragraph) {
                             const speakerIconContainer = typingMessage.querySelector(".message-text");
-                            const speakerIcon = document.createElement("span");
-                            speakerIcon.classList.add("speaker-icon");
-                            speakerIcon.innerHTML = `&#128266;`; // Speaker icon
+                            const speakerIcon = document.createElement("i"); // Use <i> for Bootstrap icons
+                            speakerIcon.classList.add("speaker-icon", "bi", "bi-volume-up"); // Add Bootstrap speaker icon classes
                             speakerIcon.onclick = () => speakText(paragraph, speakerIcon); // On click, call text-to-speech function
 
                             // Append the speaker icon after the text has been typed
@@ -538,7 +537,6 @@
                             };
                         }
 
-
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
@@ -561,10 +559,6 @@
                                 });
                             });
                         }
-
-
-
-
                         
                         function makeTextClickable(typingMessage, paragraph) {
                             const paragraphElement = typingMessage.querySelector(".message-text p");
@@ -593,7 +587,6 @@
                             // Optional: Provide feedback to the user (e.g., alert or visual cue)
                             alert("Text copied to clipboard!"); // You can change this to a more user-friendly notification
                         }
-
 
 
                         // Function to blink the cursor twice before disappearing
@@ -786,9 +779,6 @@
 
                         })();
 
-
-
-
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {
                             const docDefinition = {
@@ -839,7 +829,7 @@
                     </div>
                     <div class="message-text">
                         <p>${botMessageText}</p>
-                        <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
+                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)"></i> <!-- Speaker icon -->
                     </div>
                 </div>`;
             messageContainer.appendChild(botMessage);
@@ -906,10 +896,33 @@
     // Check permissions on load
     requestMicrophonePermission();
   </script>
+
+  <!-- Additional Info Section -->
+    <div id="info-area" style="display: none; margin-bottom: 0; width: 100%;">
+        <div class="info-group">
+            <h3>About the Storyboard-AI Chatbot</h3>
+            <p>
+                The <span class="highlight">Storyboard-AI Chatbot</span> utilizes advanced AI technology to help you create personalized stories based on your responses. 
+                The chatbot engages you by asking questions and then dynamically generates a complete story, complete with images and video. 
+                Additionally, it uses your browser’s <span class="highlight">SpeechSynthesisUtterance</span> feature to provide text-to-speech functionality, allowing the story to be narrated aloud for a richer, more interactive experience.
+            </p>
+            <p>
+                <span class="highlight"><b>Disclaimer:</b></span> The stories created by the chatbot are purely fictional and for entertainment purposes, meant to assist with story generation; however, the system may occasionally produce errors or inaccuracies, resulting in unexpected twists or content deviations.
+            </p>
+            <p>
+                Powered by <a href="https://ollama.com" target="_blank" class="bold-link"><b>&copy; Ollama</b></a> using the <a href="https://ollama.com/library/tinyllama:1.1b-chat" target="_blank" class="bold-link"><b>&copy; TinyLlama:1.1b-chat</b></a> model.
+            </p>        
+        </div>             
+    </div>    
   </main>
   
   <!-- Footer Section -->
-  <footer id="footer" class="footer position-relative light-background" role="contentinfo">
+  <footer style="position: relative; display: flex; justify-content: center; align-items: center; width: 105%;" id="footer" role="contentinfo">
+    <p style="margin-bottom: 0px;">
+        <a id="info-button" href="javascript:void(0)" onclick="toggleInfo()" style="font-weight: 500;">Click here to find out more about this page</a>
+    </p>
+  </footer>
+  <footer style="width: 105%;" id="footer" class="footer position-relative light-background" role="contentinfo">   <!-- Width Extra JUST FOR THIS PAGE -->
     <div class="credits">
       Designed by <a href="mailto:andrea.f.lucas.22@um.edu.mt" target="_blank">Andrea Filiberto Lucas</a> & <a href="mailto:sean.muscat.22@um.edu.mt" target="_blank">Sean David Muscat</a>
     </div>
@@ -956,6 +969,8 @@
 
   <!-- Main JS File -->
   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='js/chat.js') }}" defer></script>
+
   <style>
     /* Main Content */
     .main-content {
@@ -973,7 +988,7 @@
         flex-direction: column;
         justify-content: center; /* Center content vertically */
         align-items: center; /* Center content horizontally */
-        width: 100%; /* Ensure full width */
+        width: auto; /* Ensure full width */
         margin: 0; /* Remove any default margin */
         padding: 0; /* Remove any padding */
     }
@@ -985,7 +1000,7 @@
         flex-direction: column;
         padding: 20px 200px;
         background-color: white;
-        height: calc(70vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
+        height: calc(72vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
         position: relative;
         overflow: hidden; /* Prevents the chatbox itself from growing */
         width: 100%;
