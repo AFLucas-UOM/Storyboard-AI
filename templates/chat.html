@@ -39,9 +39,13 @@
   <!-- Main CSS File -->
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>  
+  <script src="{{ url_for('serve_assets', filename='js/chat.js') }}" defer></script>
 
+  <!-- Include pdfmake library for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/pdfmake.min.js"></script>
+  <!-- Include vfs_fonts.js, required for handling embedded fonts in pdfmake -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>
+  
   <script>
     // Manage text-to-speech (TTS) functionality and button state
     let currentUtterance = null; // Stores the active utterance
@@ -157,10 +161,11 @@
     
         <!-- Disclaimer message -->
         <p class="message-text text-muted small mt-2">
-          Storyboard-AI generates content which might not exactly match your vision.
+            Storyboard-AI may generate content that doesn't fully align with your vision.
         </p>
       </div>
     </section>
+    
   <script>
     // Ensure browser compatibility for SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -941,6 +946,17 @@
         padding: 0;
     }
 
+    /* Main Content */
+    .main-content {
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      padding: 80px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     @media (min-width: 1200px) and (max-width: 1600px) {
       .header~main {
         margin-left: 90px;
@@ -970,319 +986,5 @@
   <!-- Main JS File -->
   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
   <script src="{{ url_for('serve_assets', filename='js/chat.js') }}" defer></script>
-
-  <style>
-    /* Main Content */
-    .main-content {
-      width: 100%;
-      min-height: 100vh;
-      position: relative;
-      padding: 80px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* Center content vertically */
-        align-items: center; /* Center content horizontally */
-        width: auto; /* Ensure full width */
-        margin: 0; /* Remove any default margin */
-        padding: 0; /* Remove any padding */
-    }
-
-    /* Chatbox Container */
-    .chatbox {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        padding: 20px 200px;
-        background-color: white;
-        height: calc(72vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
-        position: relative;
-        overflow: hidden; /* Prevents the chatbox itself from growing */
-        width: 100%;
-        justify-content: center;
-    }
-
-    /* Messages Container - Fixed height with scrolling */
-    .messages {
-        flex-grow: 1;
-        overflow-y: auto; /* Enables scrolling if messages overflow */
-        padding: 10px;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 65%; /* Slightly increased width */
-        margin: 0 auto; /* Centers the messages container */
-        height: 100%; /* Make sure it fills the available space */
-    }
-
-    /* Individual Message Styling */
-    .message {
-        padding: 12px;
-        border-radius: 10px;
-        margin: 5px 0;
-        display: flex;
-        align-items: center;
-        max-width: 75%;
-        word-wrap: break-word;
-        animation: fadeIn 0.3s ease;
-    }
-
-    /* Message Content */
-    .message-content_user {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .message-content_bot {
-        display: flex; /* Use flexbox to align items horizontally */
-        align-items: center; /* Vertically center the icon and text */
-        justify-content: flex-start; /* Align items to the start (left side) */
-    }
-
-    .message-text p {
-        margin: 0;
-        text-align: justify; /* Justify the last line (if text wraps) */
-    }
-
-    /* Speaker icon styling */
-    .speaker-icon {
-        display: none;
-        position: absolute;
-        right: 10px;
-        bottom: 10px;
-        cursor: pointer;
-        font-size: 18px;
-        user-select: none;
-    }
-
-    .message-text:hover .speaker-icon {
-        display: inline-block;
-    }
-
-    /* Styling for the "stop" icon */
-    .speaker-icon.stop {
-        content: "■"; /* Unicode for a square */
-        font-size: 16px; /* Slightly adjust size for stop */
-    }
-
-
-    .message-text_user_input p{
-      text-align: right;
-      margin: 0;
-    }
-
-    /* Message Icon Styling */
-    .message-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        overflow: hidden;
-    }
-
-    .message-icon_bot{
-      margin-right: 10px;
-    }
-
-    /* Bot Message Styling */
-    .bot-message {
-        color: #24282C;
-        align-self: flex-start;
-        border-top-left-radius: 0;
-        animation: fadeIn 0.5s ease;
-    }
-
-    .bot-icon {
-        width: 40px; /* Set the icon width */
-        height: 40px; /* Set the icon height */
-        border-radius: 50%; /* Make the icon circular */
-        object-fit: cover; /* Ensure the image fits within the circle */
-    }
-
-
-    /* User Message Styling */
-    .user-message {
-        background-color: #F4F4F4;
-        color: var(--default-text-color);
-        align-self: flex-end;
-        border-top-right-radius: 0;
-        border-radius: 10px;
-        padding: 10px;
-        max-width: 75%;
-        animation: fadeIn 0.5s ease;
-        text-align: right;
-    }
-
-    .user-icon {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover;
-    }
-
-    /* Input Container Styles (below chatbox) */
-    .input-container {
-        display: flex;
-        align-items: center;
-        background-color: white;
-        padding: 15px 50px;
-        display: flex;
-        gap: 10px;
-        border-radius: 8px;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%; /* Center the input container */
-    }
-
-    /* Input Field */
-    #chat-input {
-        display: flex;
-        align-items: center;
-        position: relative;
-        width: 100%;
-        flex-grow: 1;
-        padding: 10px 15px;
-        font-size: 16px;
-        border: 1px solid var(--accent-color);
-        border-radius: 30px;
-        outline: none; /* Remove the default outline */
-        transition: border-color 0.3s ease;
-    }
-
-    /* Remove the blue glow on focus from the input */
-    #chat-input:focus {
-        outline: none; /* Remove outline */
-        box-shadow: none; /* Remove any box-shadow, including blue glow */
-    }
-
-    /* Ensure the input group container is positioned relative */
-    .input-group {
-        position: relative; /* This ensures the mic button is positioned relative to the input group */
-    }
-
-    /* Mic button to stay visible even when the input is focused */
-    .input-group:focus-within #mic-button {
-        visibility: visible; /* Ensure mic button stays visible when input is focused */
-    }
-
-    /* Send Button */
-    #send-button {
-        background-color: var(--accent-color);
-        color: white;
-        padding: 10px 15px;
-        border-radius: 30px;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.3s ease, opacity 0.3s ease;
-        font-size: large;
-    }
-
-    #send-button:hover {
-    color: var(--contrast-color);
-    background: color-mix(in srgb, var(--accent-color), transparent 15%);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
-    }
-
-
-    #send-button:disabled {
-        background-color: #ccc; /* Grey out the button */
-        color: #777; /* Change text color when disabled */
-        cursor: not-allowed; /* Prevent cursor change */
-    }
-
-    /* Message Text Style */
-    .message-text {
-        font-size: 15px;
-        color: #24282C;
-        padding-right: 2px;
-        text-align: justify; /* Ensure text is always justified */
-        word-wrap: break-word; /* Prevent text from overflowing */
-        position: relative; /* Position for the speaker icon */
-    }
-
-
-    .input-group {
-        position: relative;
-    }
-
-    .button-container {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .button {
-        padding: 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-
-    .button:hover {
-        background-color: #45a049;
-    }
-
-    .yes-button {
-        background-color: #4CAF50;
-    }
-    
-    .no-button {
-        background-color: #f44336;
-    }
-
-    
-  #mic-button {
-    color: #585B5E;
-    padding: 6px;
-    border-radius: 0%;  /* This makes the button circular */
-    border: none;
-    cursor: pointer;
-    font-size: large;
-    position: absolute;
-    right: 10px;  /* Adjust to position the mic button */
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-block;
-    visibility: visible; /* Ensure the button remains visible */
-    padding-left: 3px;;
-    z-index: 10; /* Ensure the mic button stays on top */
-  }
-
-  #mic-button:hover {
-    background-color: transparent;  /* No background color */
-    color: var(--accent-color);     /* Change text/icon color */
-  }
-
-    /* Fade-In Animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .input-container {
-          width: 90%;
-        }
-        .chatbox {
-          padding: 10px;
-        }
-        .messages {
-          width: 100%;
-        }
-      }
-</style>
 </body>
 </html>
