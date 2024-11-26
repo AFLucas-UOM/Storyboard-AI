@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import timedelta
 import os, json, bleach # sanitized input
-import subprocess
+import subprocess, sys
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
@@ -246,17 +246,39 @@ def clear_cookies():
 # Function to query Ollama
 def query_ollama(prompt):
     try:
-        print(f"Sending prompt to Ollama: {prompt}")  # Debugging log
+        # Determine the platform
+        is_windows = sys.platform.startswith('win')
+        
+        # Set the ollama executable path based on the platform
+        ollama_path = 'ollama'  # Default for macOS/Linux
+        if is_windows:
+            ollama_path = 'ollama.exe'  # Adjust for Windows
+
+        # Construct the command
+        command = [ollama_path, 'run', 'tinyllama:1.1b-chat']
+        
+        print(f"Running command: {' '.join(command)}")  # Debugging log
+        print(f"Sending prompt: {prompt}")  # Debugging log
+
+        # Run the subprocess
         result = subprocess.run(
-            ['ollama', 'run', 'tinyllama:1.1b-chat'],  # Run the Ollama model
+            command,
             input=prompt,  # Pass the user prompt via stdin
-            capture_output=True, text=True, shell=True
+            capture_output=True, text=True
         )
-        response = result.stdout.strip()  # Get the model's output
-        if result.stderr:
-            print(f"Error output from Ollama: {result.stderr}")  # Debugging log for errors
+
+        # Process the output
+        if result.returncode != 0:
+            error_message = result.stderr.strip()
+            print(f"Error output from Ollama: {error_message}")  # Debugging log for errors
+            return f"Error: {error_message}"
+        
+        response = result.stdout.strip()
         print(f"Ollama response: {response}")  # Debugging log for response
         return response
+
+    except FileNotFoundError:
+        return "Error: Ollama executable not found. Ensure it's installed and available in PATH."
     except Exception as e:
         print(f"Error querying Ollama: {str(e)}")  # Debugging log for exceptions
         return f"Error querying Ollama: {str(e)}"
