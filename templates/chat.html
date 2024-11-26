@@ -371,24 +371,30 @@
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
                         // Function to simulate typing animation for '...'
-                        function showTypingAnimation(paragraph) {
+                        function showTypingAnimation(text) {
+                            // Create a new div for the typing animation
                             const typingMessage = document.createElement("div");
                             typingMessage.classList.add("message", "bot-message");
+                            
+                            // Add the typing animation (three dots)
                             typingMessage.innerHTML = `
                                 <div class="message-content_bot">
                                     <div class="message-icon_bot">
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p>${paragraph}</p>
+                                        <p class="typing">...</p>
                                     </div>
                                 </div>`;
+                            
+                            // Append to the message container
                             messageContainer.appendChild(typingMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                            // Return the typingMessage to be updated later
+                            
+                            // Return the typing message for later manipulation (to replace the dots with the actual text)
                             return typingMessage;
                         }
+
 
                         // Function to simulate the typing of '...'
                         function animateDots(typingMessage) {
@@ -785,6 +791,7 @@
                             });
 
                         })();
+
 
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {
