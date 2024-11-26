@@ -38,6 +38,58 @@
 
   <!-- Main CSS File -->
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>  
+
+  <script>
+    // Store the current SpeechSynthesisUtterance and its state
+    let currentUtterance = null;
+    let isSpeaking = false;
+
+    function speakText(text, iconElement) {
+        // Stop TTS if already playing
+        if (isSpeaking) {
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+                isSpeaking = false;
+                currentUtterance = null;
+
+                // Reset icon to speaker
+                iconElement.classList.remove("stop");
+                iconElement.innerHTML = "&#128266;"; // Speaker icon
+            }
+            return;
+        }
+
+        // Start TTS
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        isSpeaking = true;
+
+        // Change icon to stop during playback
+        iconElement.classList.add("stop");
+        iconElement.innerHTML = "■"; // Stop icon
+
+        // When the utterance finishes, reset the icon and state
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            currentUtterance = null;
+            iconElement.classList.remove("stop");
+            iconElement.innerHTML = "&#128266;"; // Speaker icon
+        };
+
+        // Handle errors gracefully
+        currentUtterance.onerror = () => {
+            isSpeaking = false;
+            currentUtterance = null;
+            iconElement.classList.remove("stop");
+            iconElement.innerHTML = "&#128266;"; // Speaker icon
+        };
+
+        speechSynthesis.speak(currentUtterance);
+    }
+
+  </script>
 </head>
 
 <body class="index-page" style="margin-top: 0px; height: 100%;">
@@ -103,6 +155,9 @@
         <!-- Disclaimer message -->
         <p class="message-text text-muted small mt-2">
           Storyboard-AI generates content which might not exactly match your vision.
+        </p>
+        <p class = "message-text text-muted small mt-2">
+          Storyboard-AI can make mistakes! While it aims to create engaging and imaginative stories, the generated content may occasionally include unexpected twists or inaccuracies.
         </p>
       </div>
     </section>
@@ -336,22 +391,24 @@
                             <div class="message-icon_bot">
                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                             </div>
-                            <div class="message-text"><p>${botMessageText}</p></div>
+                            <div class="message-text">
+                                <p>${botMessageText}</p>
+                                <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
+                            </div>
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
                     messageContainer.scrollTop = messageContainer.scrollHeight;
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
-                    You are a superb storyteller, gifted at weaving vivid, engaging, and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
+                    You are a storyteller, gifted at writing engaging and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
 
                     Important: Consider the following additional note(s) provided by the user: "${additionalNotes || 'No additional notes were given.'}"
-                    
-                    Please ensure that the story flows seamlessly, captivating the reader from the opening moment to the final line. Avoid rigidly dividing the story into sections; instead, focus on crafting a cohesive and engaging journey.
+
+                    Write the entire story in paragraph format, with no title, no list of characters, and absolutely no sections or breaks. It should be one continuous narrative, flowing seamlessly from start to finish. Do not include any headings, subheadings, or any sort of structural divisions. Keep the story cohesive and focused, engaging the reader from the first sentence to the last without breaking the immersion.
 
                     Additionally, ensure that the content remains appropriate for all audiences. Avoid incorporating any violent, offensive, or inappropriate themes, and instead focus on delivering a wholesome, engaging story. If the narrative begins to lean toward inappropriate or harmful content, redirect it to maintain a positive, respectful tone.
 
-                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Create something memorable and suitable for a wide audience!
-                    `;
+                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Remember the rules from before and create something memorable and suitable for a wide audience!`;
 
                     console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
 
@@ -367,7 +424,7 @@
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
                         // Function to simulate typing animation for '...'
-                        function showTypingAnimation() {
+                        function showTypingAnimation(paragraph) {
                             const typingMessage = document.createElement("div");
                             typingMessage.classList.add("message", "bot-message");
                             typingMessage.innerHTML = `
@@ -375,7 +432,9 @@
                                     <div class="message-icon_bot">
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
-                                    <div class="message-text"><p></p></div>
+                                    <div class="message-text">
+                                        <p>${paragraph}</p>
+                                    </div>
                                 </div>`;
                             messageContainer.appendChild(typingMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -392,22 +451,24 @@
 
                                 // Use a setInterval to simulate typing of dots
                                 const typingInterval = setInterval(() => {
-                                    dots += '.';
+                                    dots += '.'; // Add a dot
+
+                                    // Update the message with the new dots
                                     typingMessage.querySelector(".message-text p").innerText = dots;
 
-                                    // If the dot count reaches 3, we stop adding dots and reset back to one dot
+                                    // If the dot count reaches 3, reset to 0 dots
                                     dotCount++;
                                     if (dotCount === 3) {
-                                        dots = '.'; // Reset to 1 dot after 3 dots
-                                        dotCount = 1;  // Keep counting forward, no backward movement
+                                        dots = '';  // Reset to 0 dots
+                                        dotCount = 0;  // Reset the counter
                                     }
-                                }, 500); // Change 500ms to adjust the speed of the typing animation
+                                }, 500); // Adjust speed here (500ms)
 
-                                // Keep typing until the message is ready to be updated
+                                // Stop typing after a certain time
                                 setTimeout(() => {
-                                    clearInterval(typingInterval); // Stop typing after the last message
-                                    resolve();
-                                }, 3000); // You can adjust this timeout if you want the typing effect to last longer
+                                    clearInterval(typingInterval); // Stop typing
+                                    resolve(); // Resolve the promise to continue
+                                }, 3000); // Adjust the duration to control how long the typing effect lasts
                             });
                         }
 
@@ -423,11 +484,117 @@
                                     if (index === paragraph.length) {
                                         clearInterval(typingInterval);
                                         // Once the paragraph is done, initiate the blinking effect on the cursor
-                                        blinkCursor(typingMessage, paragraph).then(resolve);
+                                        blinkCursor(typingMessage, paragraph).then(() => {
+                                            // Add the speaker icon once typing is done
+                                            addSpeakerIcon(typingMessage, paragraph);
+                                            addRedoButton(typingMessage, paragraph); // Add the redo button
+                                            makeTextClickable(typingMessage, paragraph); // Enable text click functionality
+                                            resolve(); // Resolve the promise to continue
+                                        });
                                     }
                                 }, 50); // Typing speed, you can adjust this value
                             });
                         }
+
+                        function addSpeakerIcon(typingMessage, paragraph) {
+                            const speakerIconContainer = typingMessage.querySelector(".message-text");
+                            const speakerIcon = document.createElement("span");
+                            speakerIcon.classList.add("speaker-icon");
+                            speakerIcon.innerHTML = `&#128266;`; // Speaker icon
+                            speakerIcon.onclick = () => speakText(paragraph, speakerIcon); // On click, call text-to-speech function
+
+                            // Append the speaker icon after the text has been typed
+                            speakerIconContainer.appendChild(speakerIcon);
+                        }
+
+                        function addRedoButton(typingMessage, paragraph) {
+                            const redoButton = document.createElement("button");
+                            redoButton.innerHTML = "🔁 Redo"; // Stylish button
+                            redoButton.classList.add("redo-button"); // Add a class for styling purposes
+
+                            const messageContent = typingMessage.querySelector(".message-content_bot");
+                            const messageText = messageContent.querySelector(".message-text");
+
+                            // Add the redo button next to the speaker icon
+                            messageText.appendChild(redoButton);
+
+                            redoButton.onclick = () => {
+                                // Temporarily hide the paragraph while it's being rewritten
+                                messageText.querySelector("p").innerText = "Rewriting...";
+
+                                // Send the prompt to TinyLlama to re-write the paragraph
+                                rewriteParagraph(paragraph).then(newParagraph => {
+                                    // Update the message with the rewritten paragraph
+                                    messageText.querySelector("p").innerText = newParagraph;
+
+                                    // Update the botMessages array with the rewritten paragraph
+                                    const paragraphIndex = botMessages.indexOf(paragraph);
+                                    if (paragraphIndex !== -1) {
+                                        botMessages[paragraphIndex] = newParagraph; // Update the original array
+                                    }
+                                }).catch(error => {
+                                    console.error("Error rewriting paragraph:", error);
+                                });
+                            };
+                        }
+
+
+                        function rewriteParagraph(paragraph) {
+                            return new Promise(resolve => {
+                                // Define a stronger prompt to rewrite the paragraph
+                                const finalPrompt = `I want you to re-write this paragraph, keep your response to ONLY 1 paragraph, with similar length to the paragraph I shall provide you with, only respond with the paragraph nothing more, keeping all the context intact:\n\n"${paragraph}"`;
+
+                                // Send the prompt to TinyLlama
+                                fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: finalPrompt }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    const rewrittenParagraph = data.response; // Assume the response contains the rewritten paragraph
+                                    resolve(rewrittenParagraph); // Resolve the promise with the new paragraph
+                                })
+                                .catch(error => {
+                                    console.error("Error rewriting paragraph:", error);
+                                    resolve(paragraph); // If there’s an error, return the original paragraph
+                                });
+                            });
+                        }
+
+
+
+
+                        
+                        function makeTextClickable(typingMessage, paragraph) {
+                            const paragraphElement = typingMessage.querySelector(".message-text p");
+
+                            // Add a click event listener to the paragraph
+                            paragraphElement.style.cursor = 'pointer'; // Change cursor to pointer to indicate it's clickable
+
+                            paragraphElement.onclick = () => {
+                                copyToClipboard(paragraph); // Call the copyToClipboard function on click
+                            };
+                        }
+
+                        function copyToClipboard(text) {
+                            // Create a temporary textarea element to hold the text to be copied
+                            const tempTextArea = document.createElement("textarea");
+                            tempTextArea.value = text;
+                            document.body.appendChild(tempTextArea);
+
+                            // Select the text in the textarea and copy it to the clipboard
+                            tempTextArea.select();
+                            document.execCommand('copy');
+
+                            // Remove the textarea after copying
+                            document.body.removeChild(tempTextArea);
+
+                            // Optional: Provide feedback to the user (e.g., alert or visual cue)
+                            alert("Text copied to clipboard!"); // You can change this to a more user-friendly notification
+                        }
+
+
 
                         // Function to blink the cursor twice before disappearing
                         function blinkCursor(typingMessage, paragraph) {
@@ -460,16 +627,194 @@
                                 }, delay);
                             });
                         }
+                        
+                        function generateTitleForStory(story) {
+                            return new Promise((resolve, reject) => {
+                                // Prepare the prompt for generating the title
+                                const titlePrompt = `You need to generate a title for this story, the title should be less than 7 words ONLY and only return the title nothing else just the 7 word title, the story is: ${story}`;
 
-                        // Iterate over each paragraph and add random delays with typing animation
+                                // Send the request to Ollama
+                                fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: titlePrompt }),
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error("Failed to fetch the title from Ollama");
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        const title = data.response || "Untitled Story"; // Use "Untitled Story" if no title is returned
+                                        resolve(title); // Resolve the promise with the title
+                                    })
+                                    .catch(error => {
+                                        console.error("Error generating story title:", error);
+                                        reject("Untitled Story"); // Reject with a fallback title
+                                    });
+                            });
+                        }
+                        
+                        function saveConversationToJSON(title, userName, story) {
+                            // First, we need to load the current conversations from conversations.json
+                            fetch('json/conversations.json', {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Add the new conversation to the conversations array
+                                const newConversation = {
+                                    title: title,
+                                    userName: userName,
+                                    story: story,
+                                    timestamp: new Date().toISOString() // Add a timestamp
+                                };
+
+                                // Append the new conversation to the data array
+                                data.conversations.push(newConversation);
+
+                                // Now save the updated JSON back to the server or save locally (depending on setup)
+                                return fetch('json/conversations.json', {
+                                    method: 'POST', // You could use PUT or another method depending on your backend
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(data) // Send the updated JSON
+                                });
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    console.log('Conversation saved successfully!');
+                                } else {
+                                    console.error('Failed to save conversation');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error saving conversation:', error);
+                            });
+                        }
+
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
-                                const typingMessage = showTypingAnimation(); // Show typing animation for each paragraph
-                                await animateDots(typingMessage); // Animate dots typing effect
+                                const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
+
+                                // Wait for the typing dots animation to finish before continuing
+                                await animateDots(typingMessage);
+
+                                // Random delay before appending the actual message
                                 const randomDelay = Math.floor(Math.random() * 4000) + 1000; // Random delay between 1 and 5 seconds
                                 await appendMessageWithDelay(typingMessage, botMessages[i], randomDelay); // Replace ... with the actual paragraph
                             }
+
+                            // Combine all paragraphs into a single story text
+                            const story = botMessages.join(" ");
+                            console.log(story);
+
+                            // Prepare the prompt for generating the title
+                            const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
+
+                            // Send the request to Ollama to generate the title
+                            const response = await fetch("http://127.0.0.1:5000/chat", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ prompt: titlePrompt }),
+                            });
+
+                            const result = await response.json();
+                            const title = result.response || "Untitled Story"; // Fallback in case no reply is received
+
+                            // Display the title to the user
+                            const titleMessage = document.createElement("div");
+                            titleMessage.classList.add("message", "bot-message");
+                            titleMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p><strong>Story Title:</strong> ${title}</p>
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(titleMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Ask if the user wants to save the story as a PDF
+                            const savePDFButton = document.createElement("button");
+                            savePDFButton.innerText = "Save as PDF";
+                            savePDFButton.classList.add("save-pdf-button");
+
+                            messageContainer.appendChild(savePDFButton);
+
+                            savePDFButton.onclick = () => {
+                                // Call the function to generate and download the PDF with the title and story
+                                generateAndDownloadPDF(title, story);
+                            };
+
+                            // Save the conversation to conversations.json
+                            const currentUser = localStorage.getItem("currentuser") || "Anonymous"; // Retrieve username or default to "Anonymous"
+                            const conversationData = {
+                                title: title,
+                                userName: currentUser,
+                                story: story
+                            };
+
+                            // Send the data to the server to save it in the JSON file
+                            fetch("/save-conversation", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(conversationData)
+                            })
+                            .then(response => {
+                                return response.text(); // Get response as text first
+                            })
+                            .then(data => {
+                                console.log(data); // Log the raw response to check for errors
+                                try {
+                                    const jsonData = JSON.parse(data); // Try parsing it manually
+                                    console.log("Response data:", jsonData);
+                                } catch (e) {
+                                    console.error("Error parsing JSON:", e);
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error saving conversation:", error);
+                            });
+
                         })();
+
+
+
+
+                        // Function to generate and download the PDF
+                        function generateAndDownloadPDF(title, story) {
+                            const docDefinition = {
+                                content: [
+                                    { text: title, style: 'header' },
+                                    { text: story, style: 'story' }
+                                ],
+                                styles: {
+                                    header: {
+                                        fontSize: 18,
+                                        bold: true,
+                                        margin: [0, 0, 0, 10]
+                                    },
+                                    story: {
+                                        fontSize: 12,
+                                        margin: [0, 10, 0, 10]
+                                    }
+                                }
+                            };
+
+                            // Generate PDF and trigger download
+                            pdfMake.createPdf(docDefinition).download('Story.pdf');
+                        }
+
+
+
                     })
                     .catch(error => {
                         console.error("Error fetching chatbot response:", error);
@@ -492,7 +837,10 @@
                     <div class="message-icon_bot">
                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                     </div>
-                    <div class="message-text"><p>${botMessageText}</p></div>
+                    <div class="message-text">
+                        <p>${botMessageText}</p>
+                        <span class="speaker-icon" onclick="speakText('${botMessageText}', this)">&#128266;</span> <!-- Speaker icon -->
+                    </div>
                 </div>`;
             messageContainer.appendChild(botMessage);
             messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -530,6 +878,8 @@
                 } else if (currentStep === 5) {
                     additionalNotes = userInput; // Saving additional notes
                     console.log("Additional Notes:", additionalNotes); // Add this to log the value
+                } else if (currentStep === 6) {
+                    console.log("We are going!");
                 }
 
                 // Move to next step
@@ -686,6 +1036,28 @@
         text-align: justify; /* Justify the last line (if text wraps) */
     }
 
+    /* Speaker icon styling */
+    .speaker-icon {
+        display: none;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        user-select: none;
+    }
+
+    .message-text:hover .speaker-icon {
+        display: inline-block;
+    }
+
+    /* Styling for the "stop" icon */
+    .speaker-icon.stop {
+        content: "■"; /* Unicode for a square */
+        font-size: 16px; /* Slightly adjust size for stop */
+    }
+
+
     .message-text_user_input p{
       text-align: right;
       margin: 0;
@@ -815,13 +1187,44 @@
         font-size: 15px;
         color: #24282C;
         padding-right: 2px;
-        text-align: center;
+        text-align: justify; /* Ensure text is always justified */
+        word-wrap: break-word; /* Prevent text from overflowing */
+        position: relative; /* Position for the speaker icon */
     }
 
+
     .input-group {
-    position: relative;
-  }
-  
+        position: relative;
+    }
+
+    .button-container {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .button {
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .button:hover {
+        background-color: #45a049;
+    }
+
+    .yes-button {
+        background-color: #4CAF50;
+    }
+    
+    .no-button {
+        background-color: #f44336;
+    }
+
+    
   #mic-button {
     color: #585B5E;
     padding: 6px;
