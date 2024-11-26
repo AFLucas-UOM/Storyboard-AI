@@ -508,30 +508,6 @@ section,
     font-size: 20px;
   }
 }
-/*--------------------------------------------------------------
-# Login & Sign-up Button
---------------------------------------------------------------*/
-.auth-buttons {
-  position: absolute;
-  top: 40px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.auth-buttons a {
-  margin: 0 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 50px;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.auth-buttons a:hover {
-  background-color: #0056b3;
-}
 
 /*--------------------------------------------------------------
 # Signup Section
@@ -1344,4 +1320,48 @@ color: var(--accent-color);     /* Change text/icon color */
   .messages {
     width: 100%;
   }
+}
+
+/* Style the action row to align items horizontally */
+.action-row {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 5px; /* Add space between the speaker icon and redo button */
+}
+
+/* Style the speaker icon */
+.speaker-icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: #555; /* Adjust color to match your design */
+}
+
+/* Styling for the redo button */
+.redo-button {
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+/* Hover effect for redo button */
+.redo-button:hover {
+  color: #007bff;
+  background-color: #d6e2ef42;
+}
+
+/* Styling for Bootstrap icon */
+.redo-button i {
+  margin-right: 5px;
+}
+
+.hidden-text {
+    visibility: hidden; /* Make the text invisible initially */
 }

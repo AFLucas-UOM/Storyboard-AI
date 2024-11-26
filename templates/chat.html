@@ -45,58 +45,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/pdfmake.min.js"></script>
   <!-- Include vfs_fonts.js, required for handling embedded fonts in pdfmake -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>
-  
-  <script>
-    // Manage text-to-speech (TTS) functionality and button state
-    let currentUtterance = null; // Stores the active utterance
-    let isSpeaking = false;     // Tracks whether TTS is currently playing
-
-    function speakText(text, iconElement) {
-        // If TTS is currently active, stop playback and reset the button state
-        if (isSpeaking) {
-            stopSpeaking(iconElement);
-            return;
-        }
-
-        // Initialize a new SpeechSynthesisUtterance
-        currentUtterance = new SpeechSynthesisUtterance(text);
-        isSpeaking = true;
-
-        // Update button to indicate playback (stop icon)
-        updateIcon(iconElement, true);
-
-        // Event listener: Reset state when playback finishes
-        currentUtterance.onend = () => resetState(iconElement);
-
-        // Event listener: Handle errors gracefully
-        currentUtterance.onerror = () => resetState(iconElement);
-
-        // Start the TTS
-        speechSynthesis.speak(currentUtterance);
-    }
-
-    // Stop TTS playback and reset the button state
-    function stopSpeaking(iconElement) {
-        speechSynthesis.cancel();
-        resetState(iconElement);
-    }
-
-    // Update the button icon to reflect TTS state using Bootstrap icons
-    function updateIcon(iconElement, isPlaying) {
-        if (isPlaying) {
-            iconElement.className = "bi bi-stop-circle"; // Stop icon
-        } else {
-            iconElement.className = "bi bi-volume-up"; // Speaker icon
-        }
-    }
-
-    // Reset playback state and button appearance
-    function resetState(iconElement) {
-        isSpeaking = false;
-        currentUtterance = null;
-        updateIcon(iconElement, false);
-    }
-</script>
 </head>
 
 <body class="index-page" style="margin-top: 0px; height: 100%;">
@@ -165,7 +113,7 @@
         </p>
       </div>
     </section>
-    
+
   <script>
     // Ensure browser compatibility for SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -221,7 +169,6 @@
             updateBotIcon(); // Set initial icon based on the favicon when the page is loaded
         }
     });
-
 
     // Run the function to update the bot icon when the page loads
     window.addEventListener('DOMContentLoaded', updateBotIcon);
@@ -302,13 +249,12 @@
     let storyEnding = "";
     let additionalNotes = "";
     let currentStep = 0; // To track the conversation flow
-
     // Fetch the current user's name from localStorage and extract the first name
     const currentUser = (localStorage.getItem("currentuser") || "").split(" ")[0];
+    
     // Function to handle chatbot interaction
     function askForInput() {
         let botMessageText = "";
-
         // Set bot message based on the current step in the conversation
         switch (currentStep) {
             case 0:
@@ -397,26 +343,22 @@
                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                             </div>
                             <div class="message-text">
-                                <p>${botMessageText}</p>
-                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)"></i> <!-- Speaker icon -->
+                                <p style="margin-bottom: 14px;">${botMessageText}</p>
+                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                             </div>
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
                     messageContainer.scrollTop = messageContainer.scrollHeight;
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
-                    You are a storyteller, gifted at writing engaging and well-structured narratives. Your task is to craft a story featuring a character named "${characterName}", set within the context of a "${storyTheme}" theme. The narrative should evolve naturally, drawing the reader into an immersive world with detailed settings, intriguing events, and realistic dialogue when appropriate. The story should progress toward a "${storyEnding}" ending, concluding in a way that feels satisfying and true to the narrative's tone and direction.
+                        You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
+                        Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
 
-                    Important: Consider the following additional note(s) provided by the user: "${additionalNotes || 'No additional notes were given.'}"
-
-                    Write the entire story in paragraph format, with no title, no list of characters, and absolutely no sections or breaks. It should be one continuous narrative, flowing seamlessly from start to finish. Do not include any headings, subheadings, or any sort of structural divisions. Keep the story cohesive and focused, engaging the reader from the first sentence to the last without breaking the immersion.
-
-                    Additionally, ensure that the content remains appropriate for all audiences. Avoid incorporating any violent, offensive, or inappropriate themes, and instead focus on delivering a wholesome, engaging story. If the narrative begins to lean toward inappropriate or harmful content, redirect it to maintain a positive, respectful tone.
-
-                    Be creative, thoughtful, and imaginative in your storytelling approach, while maintaining a responsible and inclusive narrative. Remember the rules from before and create something memorable and suitable for a wide audience!`;
-
+                        Write the story as a uninterrupted narrative in simple paragraph(s) format. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
+                        Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
+                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.`;
+                                            
                     console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
-
                     // Send the prompt to TinyLlama
                     fetch("http://127.0.0.1:5000/chat", {
                         method: "POST",
@@ -504,8 +446,16 @@
                         function addSpeakerIcon(typingMessage, paragraph) {
                             const speakerIconContainer = typingMessage.querySelector(".message-text");
                             const speakerIcon = document.createElement("i"); // Use <i> for Bootstrap icons
-                            speakerIcon.classList.add("speaker-icon", "bi", "bi-volume-up"); // Add Bootstrap speaker icon classes
-                            speakerIcon.onclick = () => speakText(paragraph, speakerIcon); // On click, call text-to-speech function
+
+                            // Add Bootstrap speaker icon classes
+                            speakerIcon.classList.add("speaker-icon", "bi", "bi-volume-up");
+
+                            // Style the icon to use var(--accent-color)
+                            speakerIcon.style.color = "var(--accent-color)";
+                            speakerIcon.style.cursor = "pointer"; // Add a pointer cursor for better UX
+
+                            // On click, call the text-to-speech function
+                            speakerIcon.onclick = () => speakText(paragraph, speakerIcon);
 
                             // Append the speaker icon after the text has been typed
                             speakerIconContainer.appendChild(speakerIcon);
@@ -513,13 +463,13 @@
 
                         function addRedoButton(typingMessage, paragraph) {
                             const redoButton = document.createElement("button");
-                            redoButton.innerHTML = "🔁 Redo"; // Stylish button
-                            redoButton.classList.add("redo-button"); // Add a class for styling purposes
+                            redoButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Redo`; // Bootstrap icon for redo
+                            redoButton.classList.add("redo-button", "btn", "btn-outline-primary", "btn-sm"); // Bootstrap classes for styling
 
                             const messageContent = typingMessage.querySelector(".message-content_bot");
                             const messageText = messageContent.querySelector(".message-text");
 
-                            // Add the redo button next to the speaker icon
+                            // Add the redo button next to the message text
                             messageText.appendChild(redoButton);
 
                             redoButton.onclick = () => {
@@ -545,7 +495,16 @@
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
-                                const finalPrompt = `I want you to re-write this paragraph, keep your response to ONLY 1 paragraph, with similar length to the paragraph I shall provide you with, only respond with the paragraph nothing more, keeping all the context intact:\n\n"${paragraph}"`;
+                                const finalPrompt = `I would like you to re-write the following paragraph with the following guidelines: 
+                                - Maintain the same overall meaning, tone, and context.
+                                - Keep the length of your response comparable to the original, ensuring it remains concise but thorough.
+                                - Use different wording and sentence structures to improve clarity, flow, and engagement, while retaining the key information.
+                                - Do not include any additional commentary, explanations, or changes to the original context; focus only on rewriting the paragraph.
+                                - Ensure the rewritten paragraph feels natural and cohesive without losing any important details.
+
+                                Here is the paragraph to re-write:
+
+                                "${paragraph}"`;
 
                                 // Send the prompt to TinyLlama
                                 fetch("http://127.0.0.1:5000/chat", {
@@ -627,10 +586,10 @@
                         }
                         
                         function generateTitleForStory(story) {
-                            return new Promise((resolve, reject) => {
-                                // Prepare the prompt for generating the title
-                                const titlePrompt = `You need to generate a title for this story, the title should be less than 7 words ONLY and only return the title nothing else just the 7 word title, the story is: ${story}`;
+                            // Prepare the prompt for generating the title
+                            const titlePrompt = `Your task is to generate a concise, engaging title for the following story. The title should be no longer than 7 words, reflecting the essence of the story. Focus on capturing its mood, theme, and core message. Respond with only the title, and ensure it is clear, relevant, and intriguing. The story is: ${story}`;
 
+                            return new Promise((resolve, reject) => {
                                 // Send the request to Ollama
                                 fetch("http://127.0.0.1:5000/chat", {
                                     method: "POST",
@@ -644,16 +603,17 @@
                                         return response.json();
                                     })
                                     .then(data => {
-                                        const title = data.response || "Untitled Story"; // Use "Untitled Story" if no title is returned
+                                        const title = data.response?.trim() || "Untitled Story"; // Default to "Untitled Story" if no title is returned
                                         resolve(title); // Resolve the promise with the title
                                     })
                                     .catch(error => {
                                         console.error("Error generating story title:", error);
-                                        reject("Untitled Story"); // Reject with a fallback title
+                                        resolve("Untitled Story"); // Resolve with fallback title in case of error
                                     });
                             });
                         }
-                        
+
+                        // Function to save the conversation to a JSON file
                         function saveConversationToJSON(title, userName, story) {
                             // First, we need to load the current conversations from conversations.json
                             fetch('json/conversations.json', {
@@ -833,8 +793,8 @@
                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                     </div>
                     <div class="message-text">
-                        <p>${botMessageText}</p>
-                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)"></i> <!-- Speaker icon -->
+                        <p style="margin-bottom: 14px;">${botMessageText}</p>
+                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${botMessageText}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color)"></i> <!-- Speaker icon -->
                     </div>
                 </div>`;
             messageContainer.appendChild(botMessage);
@@ -863,20 +823,13 @@
                 // Save input based on current step
                 if (currentStep === 2) {
                     characterName = userInput; // Saving character name
-                    console.log("Character Name:", characterName); // Add this to log the value
                 } else if (currentStep === 3) {
                     storyTheme = userInput; // Saving story theme
-                    console.log("Story Theme:", storyTheme); // Add this to log the value
                 } else if (currentStep === 4) {
                     storyEnding = userInput; // Saving story ending
-                    console.log("Story Ending:", storyEnding); // Add this to log the value
                 } else if (currentStep === 5) {
                     additionalNotes = userInput; // Saving additional notes
-                    console.log("Additional Notes:", additionalNotes); // Add this to log the value
-                } else if (currentStep === 6) {
-                    console.log("We are going!");
-                }
-
+                } 
                 // Move to next step
                 currentStep++;
                 setTimeout(askForInput, 1000); // Add slight delay for natural interaction

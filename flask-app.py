@@ -10,6 +10,7 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure s
 app.permanent_session_lifetime = timedelta(minutes=60)  # Session expiry after 60 minutes of inactivity
 
 USER_JSON_PATH = os.path.join(app.static_folder, 'credentials.json')  # Path to 'static/credentials.json'
+CONVERSATIONS_FILE_PATH = os.path.join('json', 'conversations.json') # Path to the conversations.json file
 DEFAULT_PFP = 'default.png'  # Default Profile Picture
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit for profile pictures
@@ -313,10 +314,6 @@ def chat():
             return render_template('chat.html', user_info=user_info)
     
     return redirect(url_for('login'))
-
-
-# Path to the conversations.json file
-CONVERSATIONS_FILE_PATH = os.path.join('json', 'conversations.json')
 
 @app.route('/save-conversation', methods=['POST'])
 def save_conversation():
