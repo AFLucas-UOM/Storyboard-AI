@@ -656,31 +656,46 @@
                             });
                         }
                         
-                        // // Function to save conversation to server
-                        // function saveConversationToServer(currentuser, title, story) {
-                        //     const conversationData = {
-                        //         currentuser: currentuser,
-                        //         title: title,
-                        //         story: story,
-                        //         timestamp: new Date().toISOString() // Add a timestamp for reference
-                        //     };
+                        function saveConversationToJSON(title, userName, story) {
+                            // First, we need to load the current conversations from conversations.json
+                            fetch('json/conversations.json', {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Add the new conversation to the conversations array
+                                const newConversation = {
+                                    title: title,
+                                    userName: userName,
+                                    story: story,
+                                    timestamp: new Date().toISOString() // Add a timestamp
+                                };
 
-                        //     fetch("/save-conversation", {
-                        //         method: "POST",
-                        //         headers: { "Content-Type": "application/json" },
-                        //         body: JSON.stringify(conversationData)
-                        //     })
-                        //     .then(response => {
-                        //         if (response.ok) {
-                        //             console.log("Conversation saved successfully!");
-                        //         } else {
-                        //             console.error("Failed to save conversation.");
-                        //         }
-                        //     })
-                        //     .catch(error => console.error("Error:", error));
-                        // }
+                                // Append the new conversation to the data array
+                                data.conversations.push(newConversation);
 
-                        // Updated async function
+                                // Now save the updated JSON back to the server or save locally (depending on setup)
+                                return fetch('json/conversations.json', {
+                                    method: 'POST', // You could use PUT or another method depending on your backend
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(data) // Send the updated JSON
+                                });
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    console.log('Conversation saved successfully!');
+                                } else {
+                                    console.error('Failed to save conversation');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error saving conversation:', error);
+                            });
+                        }
+
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
@@ -698,7 +713,7 @@
                             console.log(story);
 
                             // Prepare the prompt for generating the title
-                            const titlePrompt = `You need to generate a title for this story, the title should be less than 10 words maximum and only return the title, nothing else. The story is: ${story}`;
+                            const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
 
                             // Send the request to Ollama to generate the title
                             const response = await fetch("http://127.0.0.1:5000/chat", {
@@ -736,7 +751,42 @@
                                 // Call the function to generate and download the PDF with the title and story
                                 generateAndDownloadPDF(title, story);
                             };
+
+                            // Save the conversation to conversations.json
+                            const currentUser = localStorage.getItem("currentuser") || "Anonymous"; // Retrieve username or default to "Anonymous"
+                            const conversationData = {
+                                title: title,
+                                userName: currentUser,
+                                story: story
+                            };
+
+                            // Send the data to the server to save it in the JSON file
+                            fetch("/save-conversation", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(conversationData)
+                            })
+                            .then(response => {
+                                return response.text(); // Get response as text first
+                            })
+                            .then(data => {
+                                console.log(data); // Log the raw response to check for errors
+                                try {
+                                    const jsonData = JSON.parse(data); // Try parsing it manually
+                                    console.log("Response data:", jsonData);
+                                } catch (e) {
+                                    console.error("Error parsing JSON:", e);
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error saving conversation:", error);
+                            });
+
                         })();
+
+
 
 
                         // Function to generate and download the PDF

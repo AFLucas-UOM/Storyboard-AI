@@ -293,36 +293,34 @@ def chat():
     return redirect(url_for('login'))
 
 
-# CONVERSATIONS_FILE = os.path.join(os.getcwd(), "json", "conversations.json")
+# Path to the conversations.json file
+CONVERSATIONS_FILE_PATH = os.path.join('json', 'conversations.json')
 
+@app.route('/save-conversation', methods=['POST'])
+def save_conversation():
+    try:
+        # Get the JSON data from the request
+        conversation_data = request.get_json()
 
-# @app.route("/save-conversation", methods=["POST"])
-# def save_conversation():
-#     try:
-#         # Retrieve the JSON data sent by the client
-#         conversation_data = request.get_json()
+        # Read the existing conversations from the file
+        if os.path.exists(CONVERSATIONS_FILE_PATH):
+            with open(CONVERSATIONS_FILE_PATH, 'r') as file:
+                conversations = json.load(file)
+        else:
+            conversations = []
 
-#         # Ensure the directory exists
-#         os.makedirs(os.path.dirname(CONVERSATIONS_FILE), exist_ok=True)
+        # Append the new conversation
+        conversations.append(conversation_data)
 
-#         # Read existing conversations or initialise an empty list
-#         if os.path.exists(CONVERSATIONS_FILE):
-#             with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as file:
-#                 conversations = json.load(file)
-#         else:
-#             conversations = []
+        # Save the updated conversations back to the JSON file
+        with open(CONVERSATIONS_FILE_PATH, 'w') as file:
+            json.dump(conversations, file, indent=4)
 
-#         # Append the new conversation
-#         conversations.append(conversation_data)
+        return jsonify({"message": "Conversation saved successfully"}), 200
 
-#         # Save updated conversations back to the file
-#         with open(CONVERSATIONS_FILE, "w", encoding="utf-8") as file:
-#             json.dump(conversations, file, indent=4)
-
-#         return jsonify({"message": "Conversation saved successfully"}), 200
-#     except Exception as e:
-#         print(f"Error saving conversation: {e}")
-#         return jsonify({"message": "Failed to save conversation"}), 500
-
+    except Exception as e:
+        print(f"Error saving conversation: {e}")
+        return jsonify({"message": "Error saving conversation"}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
