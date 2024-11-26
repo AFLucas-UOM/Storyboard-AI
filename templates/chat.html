@@ -509,7 +509,7 @@
 
                         function addRedoButton(typingMessage, paragraph) {
                             const redoButton = document.createElement("button");
-                            redoButton.innerHTML = "🔁 Redo"; // You can change this to a more stylish button
+                            redoButton.innerHTML = "🔁 Redo"; // Stylish button
                             redoButton.classList.add("redo-button"); // Add a class for styling purposes
 
                             const messageContent = typingMessage.querySelector(".message-content_bot");
@@ -523,20 +523,26 @@
                                 messageText.querySelector("p").innerText = "Rewriting...";
 
                                 // Send the prompt to TinyLlama to re-write the paragraph
-                                const rewrittenParagraph = rewriteParagraph(paragraph);
-
-                                // Once the paragraph is rewritten, replace the original text
-                                rewrittenParagraph.then(newParagraph => {
+                                rewriteParagraph(paragraph).then(newParagraph => {
                                     // Update the message with the rewritten paragraph
                                     messageText.querySelector("p").innerText = newParagraph;
+
+                                    // Update the botMessages array with the rewritten paragraph
+                                    const paragraphIndex = botMessages.indexOf(paragraph);
+                                    if (paragraphIndex !== -1) {
+                                        botMessages[paragraphIndex] = newParagraph; // Update the original array
+                                    }
+                                }).catch(error => {
+                                    console.error("Error rewriting paragraph:", error);
                                 });
                             };
                         }
 
+
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
-                                const finalPrompt = `I want you to re-write this paragraph, keep your response to ONLY 1 paragraph, with similar length to the paragraph I shall provide you with, keeping all the context intact:\n\n"${paragraph}"`;
+                                const finalPrompt = `I want you to re-write this paragraph, keep your response to ONLY 1 paragraph, with similar length to the paragraph I shall provide you with, only respond with the paragraph nothing more, keeping all the context intact:\n\n"${paragraph}"`;
 
                                 // Send the prompt to TinyLlama
                                 fetch("http://127.0.0.1:5000/chat", {
@@ -625,7 +631,7 @@
                         function generateTitleForStory(story) {
                             return new Promise((resolve, reject) => {
                                 // Prepare the prompt for generating the title
-                                const titlePrompt = `You need to generate a title for this story, the title should be less than 7 words maximum and only return the title nothing else, the story is: ${story}`;
+                                const titlePrompt = `You need to generate a title for this story, the title should be less than 7 words ONLY and only return the title nothing else just the 7 word title, the story is: ${story}`;
 
                                 // Send the request to Ollama
                                 fetch("http://127.0.0.1:5000/chat", {
@@ -649,7 +655,32 @@
                                     });
                             });
                         }
+                        
+                        // // Function to save conversation to server
+                        // function saveConversationToServer(currentuser, title, story) {
+                        //     const conversationData = {
+                        //         currentuser: currentuser,
+                        //         title: title,
+                        //         story: story,
+                        //         timestamp: new Date().toISOString() // Add a timestamp for reference
+                        //     };
 
+                        //     fetch("/save-conversation", {
+                        //         method: "POST",
+                        //         headers: { "Content-Type": "application/json" },
+                        //         body: JSON.stringify(conversationData)
+                        //     })
+                        //     .then(response => {
+                        //         if (response.ok) {
+                        //             console.log("Conversation saved successfully!");
+                        //         } else {
+                        //             console.error("Failed to save conversation.");
+                        //         }
+                        //     })
+                        //     .catch(error => console.error("Error:", error));
+                        // }
+
+                        // Updated async function
                         (async function() {
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
@@ -664,83 +695,49 @@
 
                             // Combine all paragraphs into a single story text
                             const story = botMessages.join(" ");
+                            console.log(story);
 
-                            console.log(story); // Log the story for debugging
+                            // Prepare the prompt for generating the title
+                            const titlePrompt = `You need to generate a title for this story, the title should be less than 10 words maximum and only return the title, nothing else. The story is: ${story}`;
 
-                            // Generate the story title using the new function
-                            try {
-                                const title = await generateTitleForStory(story);
+                            // Send the request to Ollama to generate the title
+                            const response = await fetch("http://127.0.0.1:5000/chat", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ prompt: titlePrompt }),
+                            });
 
-                                // Display the title to the user
-                                const titleMessage = document.createElement("div");
-                                titleMessage.classList.add("message", "bot-message");
-                                titleMessage.innerHTML = `
-                                    <div class="message-content_bot">
-                                        <div class="message-icon_bot">
-                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                        </div>
-                                        <div class="message-text">
-                                            <p><strong>Story Title:</strong> ${title}</p>
-                                        </div>
-                                    </div>`;
-                                messageContainer.appendChild(titleMessage);
-                                messageContainer.scrollTop = messageContainer.scrollHeight;
+                            const result = await response.json();
+                            const title = result.response || "Untitled Story"; // Fallback in case no reply is received
 
-                                // Ask the user if they want to save the story as a PDF with two options (buttons)
-                                const saveMessage = document.createElement("div");
-                                saveMessage.classList.add("message", "bot-message");
-                                saveMessage.innerHTML = `
-                                    <div class="message-content_bot">
-                                        <div class="message-icon_bot">
-                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                        </div>
-                                        <div class="message-text">
-                                            <p>Would you like to save this story as a PDF?</p>
-                                        </div>
-                                    </div>`;
-                                messageContainer.appendChild(saveMessage);
+                            // Display the title to the user
+                            const titleMessage = document.createElement("div");
+                            titleMessage.classList.add("message", "bot-message");
+                            titleMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p><strong>Story Title:</strong> ${title}</p>
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(titleMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                                // Add buttons for the user to choose
-                                const buttonContainer = document.createElement("div");
-                                buttonContainer.classList.add("button-container");
-                                
-                                const yesButton = document.createElement("button");
-                                yesButton.textContent = "Yes, Save as PDF";
-                                yesButton.classList.add("button", "yes-button");
-                                yesButton.onclick = function() {
-                                    generateAndDownloadPDF(title, story); // Call the function to generate and download the PDF
-                                    buttonContainer.style.display = "none"; // Hide the buttons after click
-                                };
+                            // Ask if the user wants to save the story as a PDF
+                            const savePDFButton = document.createElement("button");
+                            savePDFButton.innerText = "Save as PDF";
+                            savePDFButton.classList.add("save-pdf-button");
 
-                                const noButton = document.createElement("button");
-                                noButton.textContent = "No, Cancel";
-                                noButton.classList.add("button", "no-button");
-                                noButton.onclick = function() {
-                                    buttonContainer.style.display = "none"; // Hide the buttons after canceling
-                                };
+                            messageContainer.appendChild(savePDFButton);
 
-                                buttonContainer.appendChild(yesButton);
-                                buttonContainer.appendChild(noButton);
-                                messageContainer.appendChild(buttonContainer);
-                                messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                            } catch (fallbackTitle) {
-                                // Display the fallback title in case of error
-                                const titleMessage = document.createElement("div");
-                                titleMessage.classList.add("message", "bot-message");
-                                titleMessage.innerHTML = `
-                                    <div class="message-content_bot">
-                                        <div class="message-icon_bot">
-                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                        </div>
-                                        <div class="message-text">
-                                            <p><strong>Story Title:</strong> ${fallbackTitle}</p>
-                                        </div>
-                                    </div>`;
-                                messageContainer.appendChild(titleMessage);
-                                messageContainer.scrollTop = messageContainer.scrollHeight;
-                            }
+                            savePDFButton.onclick = () => {
+                                // Call the function to generate and download the PDF with the title and story
+                                generateAndDownloadPDF(title, story);
+                            };
                         })();
+
 
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {

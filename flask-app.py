@@ -293,5 +293,36 @@ def chat():
     return redirect(url_for('login'))
 
 
+# CONVERSATIONS_FILE = os.path.join(os.getcwd(), "json", "conversations.json")
+
+
+# @app.route("/save-conversation", methods=["POST"])
+# def save_conversation():
+#     try:
+#         # Retrieve the JSON data sent by the client
+#         conversation_data = request.get_json()
+
+#         # Ensure the directory exists
+#         os.makedirs(os.path.dirname(CONVERSATIONS_FILE), exist_ok=True)
+
+#         # Read existing conversations or initialise an empty list
+#         if os.path.exists(CONVERSATIONS_FILE):
+#             with open(CONVERSATIONS_FILE, "r", encoding="utf-8") as file:
+#                 conversations = json.load(file)
+#         else:
+#             conversations = []
+
+#         # Append the new conversation
+#         conversations.append(conversation_data)
+
+#         # Save updated conversations back to the file
+#         with open(CONVERSATIONS_FILE, "w", encoding="utf-8") as file:
+#             json.dump(conversations, file, indent=4)
+
+#         return jsonify({"message": "Conversation saved successfully"}), 200
+#     except Exception as e:
+#         print(f"Error saving conversation: {e}")
+#         return jsonify({"message": "Failed to save conversation"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
