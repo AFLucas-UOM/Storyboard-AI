@@ -1365,3 +1365,28 @@ color: var(--accent-color);     /* Change text/icon color */
 .hidden-text {
     visibility: hidden; /* Make the text invisible initially */
 }
+
+.save-pdf-button {
+  background-color: var(--accent-color); /* Accent color for button */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 8px; /* Rounded corners */
+  padding: 12px 20px; /* Padding for button */
+  font-size: 16px; /* Font size */
+  font-weight: 600; /* Bold text */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s; /* Smooth hover transitions */
+  margin-top: 15px; /* Space above the button */
+}
+
+/* Hover effect */
+.save-pdf-button:hover {
+  background-color: #1179dae9; /* Darker blue on hover */
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+/* Optional: Active effect */
+.save-pdf-button:active {
+  transform: scale(0.98); /* Slight press effect */
+  background-color: #0a5fa7; /* Even darker shade on press */
+}

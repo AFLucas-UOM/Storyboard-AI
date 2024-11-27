@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from datetime import timedelta
 import os, json, bleach # sanitized input
 import subprocess, sys
+import time, psutil
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
@@ -244,7 +245,6 @@ def clear_cookies():
     resp.delete_cookie('name')
     return resp
 
-# Function to query Ollama
 def query_ollama(prompt):
     try:
         # Determine the platform
@@ -255,13 +255,34 @@ def query_ollama(prompt):
         if is_windows:
             ollama_path = 'ollama.exe'  # Adjust for Windows
 
-        # Construct the command
-        command = [ollama_path, 'run', 'tinyllama:1.1b-chat']
+        def is_ollama_running():
+            """Check if Ollama is running."""
+            for process in psutil.process_iter(['name']):
+                if process.info['name'] and 'ollama' in process.info['name'].lower():
+                    return True
+            return False
+
+        def start_ollama():
+            """Start Ollama server."""
+            try:
+                start_command = [ollama_path, 'serve']
+                subprocess.Popen(start_command)
+                print("Ollama server started.")  # Debugging log
+                time.sleep(5)  # Allow the server some time to initialize
+            except Exception as e:
+                print(f"Failed to start Ollama: {str(e)}")
+                raise
+
+        # Ensure Ollama server is running
+        if not is_ollama_running():
+            print("Ollama is not running. Starting the server...")
+            start_ollama()
         
-        print(f"Running command: {' '.join(command)}")  # Debugging log
+        # Construct the command for querying
+        command = [ollama_path, 'run', 'tinyllama:1.1b-chat']
         print(f"Sending prompt: {prompt}")  # Debugging log
 
-        # Run the subprocess
+        # Run the subprocess to query Ollama
         result = subprocess.run(
             command,
             input=prompt,  # Pass the user prompt via stdin

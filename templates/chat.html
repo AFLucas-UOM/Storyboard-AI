@@ -792,32 +792,57 @@
 
                         })();
 
-
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {
+                            if (!title || !story) {
+                                alert("Title and story content are required to generate the PDF.");
+                                return;
+                            }
+
+                            // Generate a static filename
+                            const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
+
                             const docDefinition = {
+                                info: {
+                                    title: title,
+                                    author: "Storyboard-AI", // Customize the author name
+                                    subject: "Generated Story", // Short description
+                                    keywords: "story, AI, PDF" // Tags
+                                },
                                 content: [
                                     { text: title, style: 'header' },
-                                    { text: story, style: 'story' }
+                                    { text: story, style: 'story' },
+                                    { text: "------- The End -------", style: 'footer', alignment: 'center' }
                                 ],
                                 styles: {
                                     header: {
-                                        fontSize: 18,
+                                        fontSize: 20,
                                         bold: true,
-                                        margin: [0, 0, 0, 10]
+                                        margin: [0, 0, 0, 15]
                                     },
                                     story: {
-                                        fontSize: 12,
+                                        fontSize: 14,
+                                        lineHeight: 1.5,
                                         margin: [0, 10, 0, 10]
+                                    },
+                                    footer: {
+                                        fontSize: 12,
+                                        italics: true,
+                                        margin: [0, 20, 0, 0],
+                                        color: 'gray'
                                     }
-                                }
+                                },
+                                pageMargins: [40, 60, 40, 60] // Top, right, bottom, left margins
                             };
 
-                            // Generate PDF and trigger download
-                            pdfMake.createPdf(docDefinition).download('Story.pdf');
+                            try {
+                                // Generate PDF and trigger download
+                                pdfMake.createPdf(docDefinition).download(fileName);
+                            } catch (error) {
+                                console.error("Error generating PDF:", error);
+                                alert("An error occurred while generating the PDF. Please try again.");
+                            }
                         }
-
-
 
                     })
                     .catch(error => {
@@ -913,7 +938,7 @@
 
                 // Move to next step
                 currentStep++;
-                setTimeout(askForInput, 1000); // Add slight delay for natural interaction
+                setTimeout(askForInput, 2000); // Add slight delay for natural interaction
             }
         }
 
