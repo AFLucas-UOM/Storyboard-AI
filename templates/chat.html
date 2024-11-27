@@ -445,7 +445,7 @@
                                             resolve(); // Resolve the promise to continue
                                         });
                                     }
-                                }, 25); // Typing speed, you can adjust this value
+                                }, 50); // Typing speed, you can adjust this value
                             });
                         }
 
@@ -907,8 +907,6 @@
                         lockedMessage.style.color = "red";
                         lockedMessage.style.marginBottom = "10px"; // Add spacing between the message and the bar
                         lockedMessage.style.textAlign = "center"; // Align text for better appearance
-                        lockedMessage.style.fontWeight = "500"; // Semi-bold text
-                        lockedMessage.style.fontSize = "1.5rem"; // Larger font size
                         inputContainer.parentNode.insertBefore(lockedMessage, inputContainer); // Insert above the input bar
                     }
                 }
