@@ -907,11 +907,11 @@
                 }
 
                 // Function to lock input and buttons
+                // Function to lock input and buttons
                 function lockInput() {
                     const inputField = document.getElementById("chat-input");
                     const sendButton = document.getElementById("send-button");
                     const micButton = document.getElementById("mic-button");
-                    const inputContainer = document.querySelector(".input-container");
 
                     // Disable input field and buttons
                     inputField.disabled = true;
@@ -923,18 +923,10 @@
                     sendButton.style.borderColor = "#d3d3d3";
                     sendButton.style.cursor = "not-allowed"; // Show 'not allowed' cursor on hover
 
-                    // Ensure the red text message is above the input container
-                    const existingLockedMessage = document.getElementById("locked-message");
-                    if (!existingLockedMessage) {
-                        const lockedMessage = document.createElement("p");
-                        lockedMessage.id = "locked-message"; // Add an ID to avoid duplicate messages
-                        lockedMessage.textContent = "You cannot send more messages at this stage.";
-                        lockedMessage.style.color = "red";
-                        lockedMessage.style.marginBottom = "10px"; // Add spacing between the message and the bar
-                        lockedMessage.style.textAlign = "center"; // Align text for better appearance
-                        inputContainer.parentNode.insertBefore(lockedMessage, inputContainer); // Insert above the input bar
-                    }
+                    // Replace the placeholder text in the input field with the lock message
+                    inputField.placeholder = "You cannot send more messages at this stage.";
                 }
+
 
                 // Move to next step
                 currentStep++;
