@@ -490,17 +490,23 @@
                                 // Send the prompt to TinyLlama to re-write the paragraph
                                 rewriteParagraph(paragraph).then(newParagraph => {
                                     // Update the message with the rewritten paragraph
-                                    messageText.querySelector("p").innerText = newParagraph;
+                                    const paragraphElement = messageText.querySelector("p");
+                                    paragraphElement.innerText = newParagraph;
 
                                     // Update the botMessages array with the rewritten paragraph
                                     const paragraphIndex = botMessages.indexOf(paragraph);
                                     if (paragraphIndex !== -1) {
                                         botMessages[paragraphIndex] = newParagraph; // Update the original array
                                     }
+
+                                    // Update the speaker icon to use the new paragraph
+                                    const speakerIcon = messageText.querySelector(".speaker-icon");
+                                    speakerIcon.onclick = () => speakText(newParagraph, speakerIcon);
                                 }).catch(error => {
                                     console.error("Error rewriting paragraph:", error);
                                 });
                             };
+
                         }
 
                         function rewriteParagraph(paragraph) {
