@@ -71,7 +71,12 @@
             <!-- Messages will dynamically load here -->
           </div>
         </div>
-    
+
+        <!-- Progress Bar Container -->
+        <div id="progress-bar-container" style="display: none; margin: 10px 0;">
+            <div id="progress-bar"></div>
+        </div>
+
         <!-- User input container -->
         <div class="input-container">
           <div class="input-group">
@@ -673,7 +678,37 @@
                             });
                         }
 
-                        (async function() {
+                        (async function () {
+                            const progressBarContainer = document.getElementById("progress-bar-container");
+                            const progressBar = document.getElementById("progress-bar");
+
+                            // Step 1: Inform the user that the story is generating
+                            const messageContainer = document.getElementById("message-container");
+                            const generatingMessage = document.createElement("div");
+                            generatingMessage.classList.add("message", "bot-message");
+                            messageContainer.appendChild(generatingMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Step 2: Show and update the progress bar
+                            progressBarContainer.style.display = "block"; // Make the progress bar visible
+
+                            let progress = 0;
+                            const progressInterval = setInterval(() => {
+                                progress += 10; // Increment progress
+                                progressBar.style.width = `${progress}%`;
+
+                                if (progress >= 100) {
+                                    clearInterval(progressInterval); // Stop updating when full
+                                }
+                            }, 500); // Update every 500ms
+
+                            // Simulate the model query (you can replace this with the actual request)
+                            await new Promise((resolve) => setTimeout(resolve, 5000)); // Simulated 5-second delay
+
+                            // Hide the progress bar once complete
+                            progressBarContainer.style.display = "none";
+
+                            // Step 3: Proceed with the typing animation
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
 
@@ -689,18 +724,15 @@
                             const story = botMessages.join(" ");
                             console.log(story);
 
-                            // Prepare the prompt for generating the title
+                            // Generate the story title
                             const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
-
-                            // Send the request to Ollama to generate the title
                             const response = await fetch("http://127.0.0.1:5000/chat", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ prompt: titlePrompt }),
                             });
-
                             const result = await response.json();
-                            const title = result.response || "Untitled Story"; // Fallback in case no reply is received
+                            const title = result.response || "Untitled Story";
 
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
@@ -717,19 +749,16 @@
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Prepare the prompt for generating the 100-word summary
+                            // Generate the story summary
                             const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Focus on the key details that drive the story forward, and omit any unnecessary information. Your summary should be both efficient and informative, capturing the essence of the story in a straightforward manner.
                             Story: "${story}"`;
-
-                            // Send the request to Ollama to generate the summary
                             const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ prompt: summaryPrompt }),
                             });
-
                             const summaryResult = await summaryResponse.json();
-                            const summary = summaryResult.response || "No summary generated."; // Fallback if no summary is generated
+                            const summary = summaryResult.response || "No summary generated.";
 
                             // Display the summary to the user
                             const summaryMessage = document.createElement("div");
@@ -750,38 +779,29 @@
                             const savePDFButton = document.createElement("button");
                             savePDFButton.innerText = "Save as PDF";
                             savePDFButton.classList.add("save-pdf-button");
-
                             messageContainer.appendChild(savePDFButton);
 
                             savePDFButton.onclick = () => {
-                                // Call the function to generate and download the PDF with the title and story
                                 generateAndDownloadPDF(title, story);
                             };
 
-                            // Save the conversation to conversations.json
-                            const currentUser = localStorage.getItem("currentuser") || "Anonymous"; // Retrieve username or default to "Anonymous"
+                            // Save the conversation
+                            const currentUser = localStorage.getItem("currentuser") || "Anonymous";
                             const conversationData = {
                                 title: title,
                                 userName: currentUser,
                                 story: story
                             };
 
-                            // Send the data to the server to save it in the JSON file
                             fetch("/save-conversation", {
                                 method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
+                                headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify(conversationData)
                             })
-                            .then(response => {
-                                return response.text(); // Get response as text first
-                            })
+                            .then(response => response.text())
                             .then(data => {
-                                console.log(data); // Log the raw response to check for errors
                                 try {
-                                    const jsonData = JSON.parse(data); // Try parsing it manually
-                                    console.log("Response data:", jsonData);
+                                    console.log("Response data:", JSON.parse(data));
                                 } catch (e) {
                                     console.error("Error parsing JSON:", e);
                                 }
@@ -789,8 +809,8 @@
                             .catch(error => {
                                 console.error("Error saving conversation:", error);
                             });
-
                         })();
+
 
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {

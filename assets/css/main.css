@@ -1089,6 +1089,30 @@ button[type="submit"]:hover {
   text-align: justify; /* Justify the last line (if text wraps) */
 }
 
+/* Progress Bar Container */
+#progress-bar-container {
+  width: 100%; /* Full width of the container */
+  height: 10px; /* Thin bar for a sleek design */
+  background-color: #e0e0e0; /* Light grey background for the container */
+  border-radius: 5px; /* Rounded corners for a polished look */
+  overflow: hidden; /* Ensures progress bar stays within bounds */
+  position: relative; /* Positions the progress bar within the container */
+}
+
+/* Progress Bar */
+#progress-bar {
+  width: 0%; /* Initial width set to 0 (increases dynamically) */
+  height: 100%; /* Matches the container height */
+  background-color: #007bff; /* Blue colour for the active progress bar */
+  transition: width 0.3s ease; /* Smooth width transition */
+  border-radius: 5px; /* Matches container for consistent rounding */
+}
+
+/* Optional: Add a subtle shadow for depth */
+#progress-bar-container {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Speaker icon styling */
 .speaker-icon {
   display: none;
