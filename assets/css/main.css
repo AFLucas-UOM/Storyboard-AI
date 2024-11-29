@@ -1234,6 +1234,16 @@ margin-right: 10px;
   visibility: visible; /* Ensure mic button stays visible when input is focused */
 }
 
+/* Apply red border when input is locked */
+#chat-input.locked {
+  border-color: red; /* Set border to red when input is locked */
+}
+
+/* Placeholder text color changes to red when disabled */
+#chat-input:disabled::placeholder {
+  color: red; /* Change placeholder text color to red */
+}
+
 /* Send Button */
 #send-button {
   background-color: var(--accent-color);
@@ -1401,6 +1411,10 @@ color: var(--accent-color);     /* Change text/icon color */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease, transform 0.2s; /* Smooth hover transitions */
   margin-top: 15px; /* Space above the button */
+  display: block; /* Ensure it's not stretched across the entire screen */
+  width: 200px; /* Control the button width */
+  margin-left: auto;
+  margin-right: auto; /* Center the button horizontally */
 }
 
 /* Hover effect */
@@ -1414,3 +1428,4 @@ color: var(--accent-color);     /* Change text/icon color */
   transform: scale(0.98); /* Slight press effect */
   background-color: #0a5fa7; /* Even darker shade on press */
 }
+

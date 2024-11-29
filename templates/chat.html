@@ -359,7 +359,7 @@
                         You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
                         Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
 
-                        Write the story as a uninterrupted narrative in simple paragraph(s) format. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
+                        Write the story as a uninterrupted narrative in simple paragraph(s) format, with a maximum word count of 400 words. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
                         Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
                         Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.`;
                                             
@@ -485,12 +485,12 @@
 
                             redoButton.onclick = () => {
                                 // Temporarily hide the paragraph while it's being rewritten
-                                messageText.querySelector("p").innerText = "Rewriting...";
+                                const paragraphElement = messageText.querySelector("p");
+                                paragraphElement.innerText = "Rewriting...";
 
                                 // Send the prompt to TinyLlama to re-write the paragraph
                                 rewriteParagraph(paragraph).then(newParagraph => {
-                                    // Update the message with the rewritten paragraph
-                                    const paragraphElement = messageText.querySelector("p");
+                                    // Update the paragraph with the rewritten text
                                     paragraphElement.innerText = newParagraph;
 
                                     // Update the botMessages array with the rewritten paragraph
@@ -502,6 +502,9 @@
                                     // Update the speaker icon to use the new paragraph
                                     const speakerIcon = messageText.querySelector(".speaker-icon");
                                     speakerIcon.onclick = () => speakText(newParagraph, speakerIcon);
+
+                                    // Update the copy-to-clipboard functionality to use the new paragraph
+                                    makeTextClickable(typingMessage, newParagraph);
                                 }).catch(error => {
                                     console.error("Error rewriting paragraph:", error);
                                 });
@@ -512,19 +515,12 @@
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
-                                const finalPrompt = `You are a rewriting assistant. Your task is to rewrite the following paragraph according to these guidelines:
+                                const finalPrompt = `You are a writing expert whose task is to rewrite the provided paragraph based on these strict guidelines:
 
-                                - Keep the original meaning, tone, and context.
-                                - Ensure the length is similar, concise but thorough.
-                                - Use varied wording and sentence structures to enhance readability while maintaining key details.
-                                - Do not include any introductory phrases, commentary, or explanations. Only provide the rewritten paragraph.
-
-                                Example:
-                                Original paragraph:
-                                "Sean stood at the edge of the cliff, staring at the horizon. The wind whipped through his hair as he thought about the long journey ahead. He was ready for whatever came next."
-
-                                Rewritten paragraph:
-                                "Standing on the cliff's edge, Sean gazed out at the horizon. The wind tugged at his hair as he contemplated the journey ahead, feeling prepared for whatever challenges awaited him."
+                                Maintain the original meaning, tone, and context.
+                                Ensure the rewritten version is concise but thorough and of similar length.
+                                Use varied wording and sentence structures to improve readability while preserving key details.
+                                Do not include any labels, introductions, or commentary such as "Rewritten paragraph," "Original paragraph," or anything else beyond the rewritten text itself.
 
                                 Here is the paragraph to rewrite:
                                 "${paragraph}"`;
@@ -615,7 +611,7 @@
                             - The title should be no longer than 7 words.
                             - It must reflect the essence of the story, including its mood, theme, and key message.
                             - Ensure the title is clear, relevant, and intriguing without being overly vague or abstract.
-                            - Respond with only the title, avoiding any additional commentary or explanation.
+                            - Respond with only the title, avoiding any additional commentary or explanation, do not add other pre-text such as "Title: " and the like.
                             Here is the story:
                             "${story}"`;
 
@@ -750,6 +746,7 @@
                                     </div>
                                     <div class="message-text">
                                         <p><strong>Story Title:</strong> ${title}</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${title}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(titleMessage);
@@ -776,20 +773,79 @@
                                     </div>
                                     <div class="message-text">
                                         <p><strong>Story Summary:</strong> ${summary}</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(summaryMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Ask if the user wants to save the story as a PDF
-                            const savePDFButton = document.createElement("button");
-                            savePDFButton.innerText = "Save as PDF";
-                            savePDFButton.classList.add("save-pdf-button");
-                            messageContainer.appendChild(savePDFButton);
+                            // Ask the user if they want the full story displayed
+                            const storyOptionContainer = document.createElement("div");
+                            storyOptionContainer.classList.add("story-option-container");
 
-                            savePDFButton.onclick = () => {
-                                generateAndDownloadPDF(title, story);
+                            const storyQuestion = document.createElement("p");
+                            storyQuestion.innerText = "Would you like to see the full story?";
+                            storyOptionContainer.appendChild(storyQuestion);
+
+                            const yesButton = document.createElement("button");
+                            yesButton.innerText = "Yes";
+                            yesButton.classList.add("story-option-button");
+                            storyOptionContainer.appendChild(yesButton);
+
+                            const noButton = document.createElement("button");
+                            noButton.innerText = "No";
+                            noButton.classList.add("story-option-button");
+                            storyOptionContainer.appendChild(noButton);
+
+                            messageContainer.appendChild(storyOptionContainer);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Handle user response
+                            yesButton.onclick = () => {
+                                // Show the full story
+                                const fullStoryMessage = document.createElement("div");
+                                fullStoryMessage.classList.add("message", "bot-message");
+                                fullStoryMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p>${story}</p>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(fullStoryMessage);
+                                makeTextClickable(fullStoryMessage, story); // Allow copying the full story
+                                storyOptionContainer.remove(); // Remove the question after user response
                             };
+
+                            noButton.onclick = () => {
+                                storyOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            // Ask the user if they want to save the story as a PDF
+                            const saveOptionMessage = document.createElement("div");
+                            saveOptionMessage.classList.add("message", "bot-message");
+                            saveOptionMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p>If you'd like to save the story as a PDF, you can do so below.</p>
+                                        <button class="btn btn-primary save-pdf-button">Save as PDF</button>
+                                    </div>
+                                </div>`;
+
+                            messageContainer.appendChild(saveOptionMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Handle the save PDF button click
+                            saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
+                                generateAndDownloadPDF(title, story);
+                                saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your PDF is being downloaded.</p>"; // Update message
+                            };
+
 
                             // Save the conversation
                             const currentUser = localStorage.getItem("currentuser") || "Anonymous";
@@ -938,6 +994,7 @@
                     const inputField = document.getElementById("chat-input");
                     const sendButton = document.getElementById("send-button");
                     const micButton = document.getElementById("mic-button");
+                    const inputContainer = document.getElementById("input-container");
 
                     // Disable input field and buttons
                     inputField.disabled = true;
@@ -951,6 +1008,12 @@
 
                     // Replace the placeholder text in the input field with the lock message
                     inputField.placeholder = "You cannot send more messages at this stage.";
+
+                    // Apply red text to the placeholder
+                    inputField.style.color = "red"; // Makes the placeholder text red
+
+                    // Add red border to the input field by adding the 'locked' class
+                    inputField.classList.add("locked");
                 }
 
 
