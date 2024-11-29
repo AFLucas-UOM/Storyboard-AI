@@ -749,35 +749,42 @@
                                         <i class="bi bi-volume-up speaker-icon" onclick="speakText('${title}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
+
+                            
+                            // Add the redo button
+                            const redoButton = document.createElement("button");
+                            redoButton.innerText = "Redo Title";
+                            redoButton.classList.add("redo-button");
+                            titleMessage.querySelector(".message-text").appendChild(redoButton);
+
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Generate the story summary
-                            const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Focus on the key details that drive the story forward, and omit any unnecessary information. Your summary should be both efficient and informative, capturing the essence of the story in a straightforward manner.
-                            Story: "${story}"`;
-                            const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ prompt: summaryPrompt }),
-                            });
-                            const summaryResult = await summaryResponse.json();
-                            const summary = summaryResult.response || "No summary generated.";
+                                // Generate the story summary
+                                const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
+                                const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: summaryPrompt }),
+                                });
+                                const summaryResult = await summaryResponse.json();
+                                const summary = summaryResult.response || "No summary generated.";
 
-                            // Display the summary to the user
-                            const summaryMessage = document.createElement("div");
-                            summaryMessage.classList.add("message", "bot-message");
-                            summaryMessage.innerHTML = `
-                                <div class="message-content_bot">
-                                    <div class="message-icon_bot">
-                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                    </div>
-                                    <div class="message-text">
-                                        <p><strong>Story Summary:</strong> ${summary}</p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
-                                    </div>
-                                </div>`;
-                            messageContainer.appendChild(summaryMessage);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                                // Display the summary to the user
+                                const summaryMessage = document.createElement("div");
+                                summaryMessage.classList.add("message", "bot-message");
+                                summaryMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p><strong>Story Summary:</strong> ${summary}</p>
+                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(summaryMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
 
                             // Ask the user if they want the full story displayed
                             const storyOptionContainer = document.createElement("div");
@@ -787,12 +794,12 @@
                             storyQuestion.innerText = "Would you like to see the full story?";
                             storyOptionContainer.appendChild(storyQuestion);
 
-                            const yesButton = document.createElement("button");
+                            yesButton = document.createElement("button");
                             yesButton.innerText = "Yes";
                             yesButton.classList.add("story-option-button");
                             storyOptionContainer.appendChild(yesButton);
 
-                            const noButton = document.createElement("button");
+                            noButton = document.createElement("button");
                             noButton.innerText = "No";
                             noButton.classList.add("story-option-button");
                             storyOptionContainer.appendChild(noButton);
