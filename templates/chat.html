@@ -24,6 +24,9 @@
     data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
     data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
+  <!-- GIF for loading -->
+  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/load_anim.gif') }}">
+
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -71,7 +74,12 @@
             <!-- Messages will dynamically load here -->
           </div>
         </div>
-    
+
+        <!-- Progress Bar Container -->
+        <div id="progress-bar-container" style="display: none; margin: 10px 0;">
+            <div id="progress-bar"></div>
+        </div>
+
         <!-- User input container -->
         <div class="input-container">
           <div class="input-group">
@@ -113,6 +121,13 @@
         </p>
       </div>
     </section>
+
+    <!-- Modal Pop-up Box -->
+    <div id="modalPopup" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+        </div>
+    </div>    
 
   <script>
     // Ensure browser compatibility for SpeechRecognition
@@ -349,16 +364,35 @@
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
                     messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                    // Show the loading GIF
+                    const loadingGifMessage = document.createElement("div");
+                    loadingGifMessage.classList.add("message", "bot-message");
+                    loadingGifMessage.innerHTML = `
+                        <div class="message-content_bot">
+                            <div class="message-icon_bot">
+                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                            </div>
+                            <div class="message-text">
+                                <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                    alt="Loading..." 
+                                    style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                            </div>
+                        </div>`;
+                    messageContainer.appendChild(loadingGifMessage);
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
                         You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
                         Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
 
-                        Write the story as a uninterrupted narrative in simple paragraph(s) format. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
+                        Write the story as a uninterrupted narrative in simple paragraph(s) format, with a maximum word count of 400 words. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
                         Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
-                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.`;
+                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.        
+                        `;
                                             
-                    console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
+                    console.log("Final Prompt Sent to Ollama:\n", finalPrompt);
                     // Send the prompt to TinyLlama
                     fetch("http://127.0.0.1:5000/chat", {
                         method: "POST",
@@ -367,6 +401,8 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Remove loading GIF
+                        loadingGifMessage.remove();
                         // Split the response by line breaks (or paragraphs)
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
@@ -480,40 +516,42 @@
 
                             redoButton.onclick = () => {
                                 // Temporarily hide the paragraph while it's being rewritten
-                                messageText.querySelector("p").innerText = "Rewriting...";
+                                const paragraphElement = messageText.querySelector("p");
+                                paragraphElement.innerText = "Rewriting...";
 
                                 // Send the prompt to TinyLlama to re-write the paragraph
                                 rewriteParagraph(paragraph).then(newParagraph => {
-                                    // Update the message with the rewritten paragraph
-                                    messageText.querySelector("p").innerText = newParagraph;
+                                    // Update the paragraph with the rewritten text
+                                    paragraphElement.innerText = newParagraph;
 
                                     // Update the botMessages array with the rewritten paragraph
                                     const paragraphIndex = botMessages.indexOf(paragraph);
                                     if (paragraphIndex !== -1) {
                                         botMessages[paragraphIndex] = newParagraph; // Update the original array
                                     }
+
+                                    // Update the speaker icon to use the new paragraph
+                                    const speakerIcon = messageText.querySelector(".speaker-icon");
+                                    speakerIcon.onclick = () => speakText(newParagraph, speakerIcon);
+
+                                    // Update the copy-to-clipboard functionality to use the new paragraph
+                                    makeTextClickable(typingMessage, newParagraph);
                                 }).catch(error => {
                                     console.error("Error rewriting paragraph:", error);
                                 });
                             };
+
                         }
 
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
-                                const finalPrompt = `You are a rewriting assistant. Your task is to rewrite the following paragraph according to these guidelines:
+                                const finalPrompt = `You are a writing expert whose task is to rewrite the provided paragraph based on these strict guidelines:
 
-                                - Keep the original meaning, tone, and context.
-                                - Ensure the length is similar, concise but thorough.
-                                - Use varied wording and sentence structures to enhance readability while maintaining key details.
-                                - Do not include any introductory phrases, commentary, or explanations. Only provide the rewritten paragraph.
-
-                                Example:
-                                Original paragraph:
-                                "Sean stood at the edge of the cliff, staring at the horizon. The wind whipped through his hair as he thought about the long journey ahead. He was ready for whatever came next."
-
-                                Rewritten paragraph:
-                                "Standing on the cliff's edge, Sean gazed out at the horizon. The wind tugged at his hair as he contemplated the journey ahead, feeling prepared for whatever challenges awaited him."
+                                Maintain the original meaning, tone, and context.
+                                Ensure the rewritten version is concise but thorough and of similar length.
+                                Use varied wording and sentence structures to improve readability while preserving key details.
+                                Do not include any labels, introductions, or commentary such as "Rewritten paragraph," "Original paragraph," or anything else beyond the rewritten text itself.
 
                                 Here is the paragraph to rewrite:
                                 "${paragraph}"`;
@@ -545,24 +583,37 @@
                             paragraphElement.onclick = () => {
                                 copyToClipboard(paragraph); // Call the copyToClipboard function on click
                             };
-                        }
+                            }
 
-                        function copyToClipboard(text) {
-                            // Create a temporary textarea element to hold the text to be copied
-                            const tempTextArea = document.createElement("textarea");
-                            tempTextArea.value = text;
-                            document.body.appendChild(tempTextArea);
+                            function copyToClipboard(text) {
+                                // Create a temporary textarea element to hold the text to be copied
+                                const tempTextArea = document.createElement("textarea");
+                                tempTextArea.value = text;
+                                document.body.appendChild(tempTextArea);
 
-                            // Select the text in the textarea and copy it to the clipboard
-                            tempTextArea.select();
-                            document.execCommand('copy');
+                                // Select the text in the textarea and copy it to the clipboard
+                                tempTextArea.select();
+                                document.execCommand('copy');
 
-                            // Remove the textarea after copying
-                            document.body.removeChild(tempTextArea);
+                                // Remove the textarea after copying
+                                document.body.removeChild(tempTextArea);
 
-                            // Optional: Provide feedback to the user (e.g., alert or visual cue)
-                            alert("Text copied to clipboard!"); // You can change this to a more user-friendly notification
-                        }
+                                // Provide feedback to the user with a modal notification
+                                displayModal("Text copied to clipboard!"); // Use the modal instead of alert
+                            }
+
+                            // Displays a modal with the provided message
+                            function displayModal(message) {
+                                const modal = document.getElementById("modalPopup");
+                                const modalMessage = document.getElementById("modal-message");
+                                modalMessage.textContent = message;
+                                modal.style.display = "block";
+
+                                // Close the modal automatically after 1 second
+                                setTimeout(() => {
+                                    modal.style.display = "none";
+                                }, 1000); // 1000ms = 1 second
+                            }
 
 
                         // Function to blink the cursor twice before disappearing
@@ -604,7 +655,7 @@
                             - The title should be no longer than 7 words.
                             - It must reflect the essence of the story, including its mood, theme, and key message.
                             - Ensure the title is clear, relevant, and intriguing without being overly vague or abstract.
-                            - Respond with only the title, avoiding any additional commentary or explanation.
+                            - Respond with only the title, avoiding any additional commentary or explanation, do not add other pre-text such as "Title: " and the like.
                             Here is the story:
                             "${story}"`;
 
@@ -673,7 +724,9 @@
                             });
                         }
 
-                        (async function() {
+                        (async function () {
+
+                            // Proceed with the typing animation
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
 
@@ -689,19 +742,50 @@
                             const story = botMessages.join(" ");
                             console.log(story);
 
-                            // Prepare the prompt for generating the title
-                            const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
+                            // Show the loading GIF
+                            const loadingGifMessage = document.createElement("div");
+                            loadingGifMessage.classList.add("message", "bot-message");
+                            loadingGifMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                            alt="Loading..." 
+                                            style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(loadingGifMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Send the request to Ollama to generate the title
-                            const response = await fetch("http://127.0.0.1:5000/chat", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ prompt: titlePrompt }),
-                            });
+                            // Generate the story title
+                            const generateTitle = async () => {
+                                const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
+                                const response = await fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: titlePrompt }),
+                                });
+                                const result = await response.json();
+                                return result.response || "Untitled Story";
+                            };
 
-                            const result = await response.json();
-                            const title = result.response || "Untitled Story"; // Fallback in case no reply is received
+                            // Initial title generation
+                            let title = await generateTitle();
 
+                            // Generate the story summary
+                            const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
+                                const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: summaryPrompt }),
+                                });
+                                const summaryResult = await summaryResponse.json();
+                                const summary = summaryResult.response || "No summary generated.";
+
+                            loadingGifMessage.remove();
+                            
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
                             titleMessage.classList.add("message", "bot-message");
@@ -711,77 +795,199 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p><strong>Story Title:</strong> ${title}</p>
+                                        <p><strong>Story Title:</strong> <span id="story-title">${title}</span></p>
+                                        <i class="bi bi-volume-up speaker-icon" id="speaker-icon" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
+
+                            // Add the redo button
+                            const redoButton = document.createElement("button");
+                            redoButton.innerText = "Redo Title";
+                            redoButton.classList.add("redo-button");
+
+                            // Redo title logic
+                            redoButton.onclick = async () => {
+                                const newTitle = await generateTitle();
+                                titleMessage.querySelector("#story-title").textContent = newTitle;
+
+                                // Update TTS click handler for the new title
+                                const speakerIcon = titleMessage.querySelector("#speaker-icon");
+                                speakerIcon.onclick = () => speakText(newTitle, speakerIcon);
+
+                                title = newTitle;
+                            };
+
+                            // Append the redo button to the message
+                            titleMessage.querySelector(".message-text").appendChild(redoButton);
+
+                            // Append the title message to the container
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Prepare the prompt for generating the 100-word summary
-                            const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Focus on the key details that drive the story forward, and omit any unnecessary information. Your summary should be both efficient and informative, capturing the essence of the story in a straightforward manner.
-                            Story: "${story}"`;
+                            // Add the TTS click handler
+                            const speakerIcon = titleMessage.querySelector("#speaker-icon");
+                            speakerIcon.onclick = () => speakText(title, speakerIcon);
 
-                            // Send the request to Ollama to generate the summary
-                            const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ prompt: summaryPrompt }),
-                            });
+                            await delay(5000);
 
-                            const summaryResult = await summaryResponse.json();
-                            const summary = summaryResult.response || "No summary generated."; // Fallback if no summary is generated
 
-                            // Display the summary to the user
-                            const summaryMessage = document.createElement("div");
-                            summaryMessage.classList.add("message", "bot-message");
-                            summaryMessage.innerHTML = `
+                            // Ask the user if they want the summary displayed
+                            const summaryOptionContainer = document.createElement("div");
+                            summaryOptionContainer.classList.add("summary-option-container");
+
+                            const summaryQuestion = document.createElement("div");
+                            summaryQuestion.classList.add("message", "bot-message");
+                            summaryQuestion.innerHTML = `<div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p style="margin-bottom: 14px;">Would you like to see the summary of the story?</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the summary of the story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
+                            summaryOptionContainer.appendChild(summaryQuestion);
+
+                            yesButton = document.createElement("button");
+                            yesButton.innerText = "Yes";
+                            yesButton.classList.add("story-option-button");
+                            summaryOptionContainer.appendChild(yesButton);
+
+                            noButton = document.createElement("button");
+                            noButton.innerText = "No";
+                            noButton.classList.add("story-option-button");
+                            summaryOptionContainer.appendChild(noButton);
+
+                            messageContainer.appendChild(summaryOptionContainer);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+
+                            // Handle user response
+                            yesButton.onclick = () => {
+                                // Show the full summary
+                                
+                                // Display the summary to the user
+                                const summaryMessage = document.createElement("div");
+                                summaryMessage.classList.add("message", "bot-message");
+                                summaryMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p><strong>Story Summary:</strong> ${summary}</p>
+                                        </div>
+                                    </div>`;
+                                    // <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon --> removed since too long and causes errors this way
+                                messageContainer.appendChild(summaryMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+                                makeTextClickable(summaryMessage, summary); // Allow copying the full story
+                                summaryOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            noButton.onclick = () => {
+                                summaryOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            await delay(5000);
+
+                            // Ask the user if they want the full story displayed
+                            const storyOptionContainer = document.createElement("div");
+                            storyOptionContainer.classList.add("story-option-container");
+
+                            const storyQuestion = document.createElement("div");
+                            storyQuestion.classList.add("message", "bot-message");
+                            storyQuestion.innerHTML = `<div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p style="margin-bottom: 14px;">Would you like to see the full story?</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the full story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
+                            storyOptionContainer.appendChild(storyQuestion);
+
+                            yesButton = document.createElement("button");
+                            yesButton.innerText = "Yes";
+                            yesButton.classList.add("story-option-button");
+                            storyOptionContainer.appendChild(yesButton);
+
+                            noButton = document.createElement("button");
+                            noButton.innerText = "No";
+                            noButton.classList.add("story-option-button");
+                            storyOptionContainer.appendChild(noButton);
+
+                            messageContainer.appendChild(storyOptionContainer);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Handle user response
+                            yesButton.onclick = () => {
+                                // Show the full story
+                                const fullStoryMessage = document.createElement("div");
+                                fullStoryMessage.classList.add("message", "bot-message");
+                                fullStoryMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p>${story}</p>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(fullStoryMessage);
+                                makeTextClickable(fullStoryMessage, story); // Allow copying the full story
+                                storyOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            noButton.onclick = () => {
+                                storyOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            await delay(5000);
+
+                            // Ask the user if they want to save the story as a PDF
+                            const saveOptionMessage = document.createElement("div");
+                            saveOptionMessage.classList.add("message", "bot-message");
+                            saveOptionMessage.innerHTML = `
                                 <div class="message-content_bot">
                                     <div class="message-icon_bot">
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p><strong>Story Summary:</strong> ${summary}</p>
+                                        <p>If you would like to save the story as a PDF, you can do so below.</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('If you would like to save the story as a PDF, you can do so below.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                        <button class="btn btn-primary save-pdf-button">Save as PDF</button>
                                     </div>
                                 </div>`;
-                            messageContainer.appendChild(summaryMessage);
+
+                            messageContainer.appendChild(saveOptionMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Ask if the user wants to save the story as a PDF
-                            const savePDFButton = document.createElement("button");
-                            savePDFButton.innerText = "Save as PDF";
-                            savePDFButton.classList.add("save-pdf-button");
-
-                            messageContainer.appendChild(savePDFButton);
-
-                            savePDFButton.onclick = () => {
-                                // Call the function to generate and download the PDF with the title and story
+                            // Handle the save PDF button click
+                            saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
                                 generateAndDownloadPDF(title, story);
+                                saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your PDF is being downloaded.</p>"; // Update message
                             };
 
-                            // Save the conversation to conversations.json
-                            const currentUser = localStorage.getItem("currentuser") || "Anonymous"; // Retrieve username or default to "Anonymous"
+
+                            // Save the conversation
+                            const currentUser = localStorage.getItem("currentuser") || "Anonymous";
                             const conversationData = {
                                 title: title,
                                 userName: currentUser,
                                 story: story
                             };
 
-                            // Send the data to the server to save it in the JSON file
                             fetch("/save-conversation", {
                                 method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
+                                headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify(conversationData)
                             })
-                            .then(response => {
-                                return response.text(); // Get response as text first
-                            })
+                            .then(response => response.text())
                             .then(data => {
-                                console.log(data); // Log the raw response to check for errors
                                 try {
-                                    const jsonData = JSON.parse(data); // Try parsing it manually
-                                    console.log("Response data:", jsonData);
+                                    console.log("Response data:", JSON.parse(data));
                                 } catch (e) {
                                     console.error("Error parsing JSON:", e);
                                 }
@@ -790,7 +996,35 @@
                                 console.error("Error saving conversation:", error);
                             });
 
+                            await delay(5000);
+
+                            // Step: Add finale message asking if the user wants to create a new story
+                            const finaleMessage = document.createElement("div");
+                            finaleMessage.classList.add("message", "bot-message");
+                            finaleMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p>Would you like to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click here</a></p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(finaleMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Handle page refresh when "Click here" is clicked
+                            document.getElementById("refresh-link").onclick = (e) => {
+                                e.preventDefault(); // Prevent the default link behaviour
+                                location.reload(); // Refresh the page
+                            };
+
                         })();
+
+                        function delay(ms) {
+                            return new Promise(resolve => setTimeout(resolve, ms));
+                        }
 
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {
@@ -907,11 +1141,12 @@
                 }
 
                 // Function to lock input and buttons
+                // Function to lock input and buttons
                 function lockInput() {
                     const inputField = document.getElementById("chat-input");
                     const sendButton = document.getElementById("send-button");
                     const micButton = document.getElementById("mic-button");
-                    const inputContainer = document.querySelector(".input-container");
+                    const inputContainer = document.getElementById("input-container");
 
                     // Disable input field and buttons
                     inputField.disabled = true;
@@ -923,18 +1158,16 @@
                     sendButton.style.borderColor = "#d3d3d3";
                     sendButton.style.cursor = "not-allowed"; // Show 'not allowed' cursor on hover
 
-                    // Ensure the red text message is above the input container
-                    const existingLockedMessage = document.getElementById("locked-message");
-                    if (!existingLockedMessage) {
-                        const lockedMessage = document.createElement("p");
-                        lockedMessage.id = "locked-message"; // Add an ID to avoid duplicate messages
-                        lockedMessage.textContent = "You cannot send more messages at this stage.";
-                        lockedMessage.style.color = "red";
-                        lockedMessage.style.marginBottom = "10px"; // Add spacing between the message and the bar
-                        lockedMessage.style.textAlign = "center"; // Align text for better appearance
-                        inputContainer.parentNode.insertBefore(lockedMessage, inputContainer); // Insert above the input bar
-                    }
+                    // Replace the placeholder text in the input field with the lock message
+                    inputField.placeholder = "You cannot send more messages at this stage.";
+
+                    // Apply red text to the placeholder
+                    inputField.style.color = "red"; // Makes the placeholder text red
+
+                    // Add red border to the input field by adding the 'locked' class
+                    inputField.classList.add("locked");
                 }
+
 
                 // Move to next step
                 currentStep++;

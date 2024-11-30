@@ -1089,6 +1089,30 @@ button[type="submit"]:hover {
   text-align: justify; /* Justify the last line (if text wraps) */
 }
 
+/* Progress Bar Container */
+#progress-bar-container {
+  width: 100%; /* Full width of the container */
+  height: 10px; /* Thin bar for a sleek design */
+  background-color: #e0e0e0; /* Light grey background for the container */
+  border-radius: 5px; /* Rounded corners for a polished look */
+  overflow: hidden; /* Ensures progress bar stays within bounds */
+  position: relative; /* Positions the progress bar within the container */
+}
+
+/* Progress Bar */
+#progress-bar {
+  width: 0%; /* Initial width set to 0 (increases dynamically) */
+  height: 100%; /* Matches the container height */
+  background-color: #007bff; /* Blue colour for the active progress bar */
+  transition: width 0.3s ease; /* Smooth width transition */
+  border-radius: 5px; /* Matches container for consistent rounding */
+}
+
+/* Optional: Add a subtle shadow for depth */
+#progress-bar-container {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Speaker icon styling */
 .speaker-icon {
   display: none;
@@ -1210,6 +1234,16 @@ margin-right: 10px;
   visibility: visible; /* Ensure mic button stays visible when input is focused */
 }
 
+/* Apply red border when input is locked */
+#chat-input.locked {
+  border-color: red; /* Set border to red when input is locked */
+}
+
+/* Placeholder text color changes to red when disabled */
+#chat-input:disabled::placeholder {
+  color: red; /* Change placeholder text color to red */
+}
+
 /* Send Button */
 #send-button {
   background-color: var(--accent-color);
@@ -1269,12 +1303,12 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
   background-color: #45a049;
 }
 
-.yes-button {
-  background-color: #4CAF50;
+.yesButton {
+  color: #4CAF50;
 }
 
-.no-button {
-  background-color: #f44336;
+.noButton {
+  color: #f44336;
 }
 
 
@@ -1357,6 +1391,51 @@ color: var(--accent-color);     /* Change text/icon color */
   background-color: #d6e2ef42;
 }
 
+/* Style for the buttons */
+.story-option-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+  transition: all 0.3s ease;
+}
+
+.story-option-button:hover {
+  opacity: 0.8;
+}
+
+/* Blue button for 'Yes' */
+.story-option-button.yes {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Red button for 'No' */
+.story-option-button.no {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Optional: Add an active state when the button is pressed */
+.story-option-button:active {
+  transform: scale(0.98);
+}
+
+/* Styling for the finale link */
+#refresh-link {
+  color: #007bff; /* Adjust to your accent colour */
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#refresh-link:hover {
+  color: #0056b3; /* Darker blue on hover */
+}
+
 /* Styling for Bootstrap icon */
 .redo-button i {
   margin-right: 5px;
@@ -1377,6 +1456,10 @@ color: var(--accent-color);     /* Change text/icon color */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease, transform 0.2s; /* Smooth hover transitions */
   margin-top: 15px; /* Space above the button */
+  display: block; /* Ensure it's not stretched across the entire screen */
+  width: 200px; /* Control the button width */
+  margin-left: auto;
+  margin-right: auto; /* Center the button horizontally */
 }
 
 /* Hover effect */
@@ -1390,3 +1473,50 @@ color: var(--accent-color);     /* Change text/icon color */
   transform: scale(0.98); /* Slight press effect */
   background-color: #0a5fa7; /* Even darker shade on press */
 }
+
+/* Modal container - covers the entire screen */
+.modal {
+  position: fixed;
+  z-index: 1000; /* Ensures it's on top of other elements */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Transparent black background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal content box */
+.modal-content {
+  position: relative; /* Needed for positioning the close button */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%; /* Responsive width */
+  max-width: 400px; /* Maximum width */
+  animation: fadeIn 0.3s ease-in-out; /* Fade-in animation */
+  text-align: center; /* Center text inside the modal */
+}
+
+/* Text content inside the modal */
+#modal-message {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  margin: 20px 0; /* Space around the message */
+}
+
+/* Fade-in animation for the modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
