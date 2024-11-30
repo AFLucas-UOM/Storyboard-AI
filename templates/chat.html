@@ -721,6 +721,23 @@
                             const story = botMessages.join(" ");
                             console.log(story);
 
+                            // Show the loading GIF
+                            const loadingGifMessage = document.createElement("div");
+                            loadingGifMessage.classList.add("message", "bot-message");
+                            loadingGifMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                            alt="Loading..." 
+                                            style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(loadingGifMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
                             // Generate the story title
                             const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
                             const response = await fetch("http://127.0.0.1:5000/chat", {
@@ -740,6 +757,8 @@
                                 });
                                 const summaryResult = await summaryResponse.json();
                                 const summary = summaryResult.response || "No summary generated.";
+
+                            loadingGifMessage.remove();
 
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
@@ -762,6 +781,8 @@
 
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            await delay(5000);
 
 
                             // Ask the user if they want the summary displayed
@@ -822,6 +843,8 @@
                                 summaryOptionContainer.remove(); // Remove the question after user response
                             };
 
+                            await delay(5000);
+
                             // Ask the user if they want the full story displayed
                             const storyOptionContainer = document.createElement("div");
                             storyOptionContainer.classList.add("story-option-container");
@@ -875,6 +898,8 @@
                                 storyOptionContainer.remove(); // Remove the question after user response
                             };
 
+                            await delay(5000);
+
                             // Ask the user if they want to save the story as a PDF
                             const saveOptionMessage = document.createElement("div");
                             saveOptionMessage.classList.add("message", "bot-message");
@@ -925,6 +950,8 @@
                                 console.error("Error saving conversation:", error);
                             });
 
+                            await delay(5000);
+
                             // Step: Add finale message asking if the user wants to create a new story
                             const finaleMessage = document.createElement("div");
                             finaleMessage.classList.add("message", "bot-message");
@@ -949,6 +976,9 @@
 
                         })();
 
+                        function delay(ms) {
+                            return new Promise(resolve => setTimeout(resolve, ms));
+                        }
 
                         // Function to generate and download the PDF
                         function generateAndDownloadPDF(title, story) {
