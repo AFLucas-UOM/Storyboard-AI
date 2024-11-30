@@ -383,16 +383,14 @@
                     messageContainer.scrollTop = messageContainer.scrollHeight;
 
                     // All inputs are gathered, create the final prompt
-                    const finalPrompt = `How are you today?
-                        `;
-                        /*
+                    const finalPrompt = `
                         You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
                         Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
 
                         Write the story as a uninterrupted narrative in simple paragraph(s) format, with a maximum word count of 400 words. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
                         Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
-                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.
-                        */
+                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.        
+                        `;
                                             
                     console.log("Final Prompt Sent to Ollama:\n", finalPrompt);
                     // Send the prompt to TinyLlama
