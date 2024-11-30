@@ -24,6 +24,9 @@
     data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
     data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
+  <!-- GIF for loading -->
+  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/load_anim.gif') }}">
+
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -354,6 +357,24 @@
                         </div>`;
                     messageContainer.appendChild(generatingMessage);
                     messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                    // Show the loading GIF
+                    const loadingGifMessage = document.createElement("div");
+                    loadingGifMessage.classList.add("message", "bot-message");
+                    loadingGifMessage.innerHTML = `
+                        <div class="message-content_bot">
+                            <div class="message-icon_bot">
+                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                            </div>
+                            <div class="message-text">
+                                <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                    alt="Loading..." 
+                                    style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                            </div>
+                        </div>`;
+                    messageContainer.appendChild(loadingGifMessage);
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
                         You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
@@ -363,7 +384,7 @@
                         Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
                         Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.`;
                                             
-                    console.log("Final Prompt Sent to TinyLlama:\n", finalPrompt);
+                    console.log("Final Prompt Sent to Ollama:\n", finalPrompt);
                     // Send the prompt to TinyLlama
                     fetch("http://127.0.0.1:5000/chat", {
                         method: "POST",
@@ -372,6 +393,8 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Remove loading GIF
+                        loadingGifMessage.remove();
                         // Split the response by line breaks (or paragraphs)
                         const botMessages = data.response.split(/\n+/); // Split by one or more newline characters
 
@@ -681,36 +704,8 @@
                         }
 
                         (async function () {
-                            const progressBarContainer = document.getElementById("progress-bar-container");
-                            const progressBar = document.getElementById("progress-bar");
 
-                            // Step 1: Inform the user that the story is generating
-                            const messageContainer = document.getElementById("message-container");
-                            const generatingMessage = document.createElement("div");
-                            generatingMessage.classList.add("message", "bot-message");
-                            messageContainer.appendChild(generatingMessage);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                            // Step 2: Show and update the progress bar
-                            progressBarContainer.style.display = "block"; // Make the progress bar visible
-
-                            let progress = 0;
-                            const progressInterval = setInterval(() => {
-                                progress += 10; // Increment progress
-                                progressBar.style.width = `${progress}%`;
-
-                                if (progress >= 100) {
-                                    clearInterval(progressInterval); // Stop updating when full
-                                }
-                            }, 500); // Update every 500ms
-
-                            // Simulate the model query (you can replace this with the actual request)
-                            await new Promise((resolve) => setTimeout(resolve, 5000)); // Simulated 5-second delay
-
-                            // Hide the progress bar once complete
-                            progressBarContainer.style.display = "none";
-
-                            // Step 3: Proceed with the typing animation
+                            // Proceed with the typing animation
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
 
@@ -736,6 +731,16 @@
                             const result = await response.json();
                             const title = result.response || "Untitled Story";
 
+                            // Generate the story summary
+                            const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
+                                const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: summaryPrompt }),
+                                });
+                                const summaryResult = await summaryResponse.json();
+                                const summary = summaryResult.response || "No summary generated.";
+
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
                             titleMessage.classList.add("message", "bot-message");
@@ -749,8 +754,6 @@
                                         <i class="bi bi-volume-up speaker-icon" onclick="speakText('${title}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
-
-                            
                             // Add the redo button
                             const redoButton = document.createElement("button");
                             redoButton.innerText = "Redo Title";
@@ -760,16 +763,42 @@
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                                // Generate the story summary
-                                const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
-                                const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ prompt: summaryPrompt }),
-                                });
-                                const summaryResult = await summaryResponse.json();
-                                const summary = summaryResult.response || "No summary generated.";
 
+                            // Ask the user if they want the summary displayed
+                            const summaryOptionContainer = document.createElement("div");
+                            summaryOptionContainer.classList.add("summary-option-container");
+
+                            const summaryQuestion = document.createElement("div");
+                            summaryQuestion.classList.add("message", "bot-message");
+                            summaryQuestion.innerHTML = `<div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p style="margin-bottom: 14px;">Would you like to see the summary of the story?</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the summary of the story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
+                            summaryOptionContainer.appendChild(summaryQuestion);
+
+                            yesButton = document.createElement("button");
+                            yesButton.innerText = "Yes";
+                            yesButton.classList.add("story-option-button");
+                            summaryOptionContainer.appendChild(yesButton);
+
+                            noButton = document.createElement("button");
+                            noButton.innerText = "No";
+                            noButton.classList.add("story-option-button");
+                            summaryOptionContainer.appendChild(noButton);
+
+                            messageContainer.appendChild(summaryOptionContainer);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+
+                            // Handle user response
+                            yesButton.onclick = () => {
+                                // Show the full summary
+                                
                                 // Display the summary to the user
                                 const summaryMessage = document.createElement("div");
                                 summaryMessage.classList.add("message", "bot-message");
@@ -780,18 +809,34 @@
                                         </div>
                                         <div class="message-text">
                                             <p><strong>Story Summary:</strong> ${summary}</p>
-                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                         </div>
                                     </div>`;
+                                    // <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon --> removed since too long and causes errors this way
                                 messageContainer.appendChild(summaryMessage);
                                 messageContainer.scrollTop = messageContainer.scrollHeight;
+                                makeTextClickable(summaryMessage, summary); // Allow copying the full story
+                                summaryOptionContainer.remove(); // Remove the question after user response
+                            };
+
+                            noButton.onclick = () => {
+                                summaryOptionContainer.remove(); // Remove the question after user response
+                            };
 
                             // Ask the user if they want the full story displayed
                             const storyOptionContainer = document.createElement("div");
                             storyOptionContainer.classList.add("story-option-container");
 
-                            const storyQuestion = document.createElement("p");
-                            storyQuestion.innerText = "Would you like to see the full story?";
+                            const storyQuestion = document.createElement("div");
+                            storyQuestion.classList.add("message", "bot-message");
+                            storyQuestion.innerHTML = `<div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p style="margin-bottom: 14px;">Would you like to see the full story?</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the full story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
                             storyOptionContainer.appendChild(storyQuestion);
 
                             yesButton = document.createElement("button");
@@ -839,7 +884,8 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p>If you'd like to save the story as a PDF, you can do so below.</p>
+                                        <p>If you would like to save the story as a PDF, you can do so below.</p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('If you would like to save the story as a PDF, you can do so below.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                         <button class="btn btn-primary save-pdf-button">Save as PDF</button>
                                     </div>
                                 </div>`;
@@ -878,6 +924,29 @@
                             .catch(error => {
                                 console.error("Error saving conversation:", error);
                             });
+
+                            // Step: Add finale message asking if the user wants to create a new story
+                            const finaleMessage = document.createElement("div");
+                            finaleMessage.classList.add("message", "bot-message");
+                            finaleMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p>Would you like to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click here</a></p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(finaleMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Handle page refresh when "Click here" is clicked
+                            document.getElementById("refresh-link").onclick = (e) => {
+                                e.preventDefault(); // Prevent the default link behaviour
+                                location.reload(); // Refresh the page
+                            };
+
                         })();
 
 

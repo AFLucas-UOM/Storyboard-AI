@@ -1303,12 +1303,12 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
   background-color: #45a049;
 }
 
-.yes-button {
-  background-color: #4CAF50;
+.yesButton {
+  color: #4CAF50;
 }
 
-.no-button {
-  background-color: #f44336;
+.noButton {
+  color: #f44336;
 }
 
 
@@ -1389,6 +1389,51 @@ color: var(--accent-color);     /* Change text/icon color */
 .redo-button:hover {
   color: #007bff;
   background-color: #d6e2ef42;
+}
+
+/* Style for the buttons */
+.story-option-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+  transition: all 0.3s ease;
+}
+
+.story-option-button:hover {
+  opacity: 0.8;
+}
+
+/* Blue button for 'Yes' */
+.story-option-button.yes {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Red button for 'No' */
+.story-option-button.no {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Optional: Add an active state when the button is pressed */
+.story-option-button:active {
+  transform: scale(0.98);
+}
+
+/* Styling for the finale link */
+#refresh-link {
+  color: #007bff; /* Adjust to your accent colour */
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#refresh-link:hover {
+  color: #0056b3; /* Darker blue on hover */
 }
 
 /* Styling for Bootstrap icon */
