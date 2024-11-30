@@ -122,6 +122,13 @@
       </div>
     </section>
 
+    <!-- Modal Pop-up Box -->
+    <div id="modalPopup" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+        </div>
+    </div>    
+
   <script>
     // Ensure browser compatibility for SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -376,13 +383,16 @@
                     messageContainer.scrollTop = messageContainer.scrollHeight;
 
                     // All inputs are gathered, create the final prompt
-                    const finalPrompt = `
+                    const finalPrompt = `How are you today?
+                        `;
+                        /*
                         You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
                         Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
 
                         Write the story as a uninterrupted narrative in simple paragraph(s) format, with a maximum word count of 400 words. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
                         Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
-                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.`;
+                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.
+                        */
                                             
                     console.log("Final Prompt Sent to Ollama:\n", finalPrompt);
                     // Send the prompt to TinyLlama
@@ -575,24 +585,37 @@
                             paragraphElement.onclick = () => {
                                 copyToClipboard(paragraph); // Call the copyToClipboard function on click
                             };
-                        }
+                            }
 
-                        function copyToClipboard(text) {
-                            // Create a temporary textarea element to hold the text to be copied
-                            const tempTextArea = document.createElement("textarea");
-                            tempTextArea.value = text;
-                            document.body.appendChild(tempTextArea);
+                            function copyToClipboard(text) {
+                                // Create a temporary textarea element to hold the text to be copied
+                                const tempTextArea = document.createElement("textarea");
+                                tempTextArea.value = text;
+                                document.body.appendChild(tempTextArea);
 
-                            // Select the text in the textarea and copy it to the clipboard
-                            tempTextArea.select();
-                            document.execCommand('copy');
+                                // Select the text in the textarea and copy it to the clipboard
+                                tempTextArea.select();
+                                document.execCommand('copy');
 
-                            // Remove the textarea after copying
-                            document.body.removeChild(tempTextArea);
+                                // Remove the textarea after copying
+                                document.body.removeChild(tempTextArea);
 
-                            // Optional: Provide feedback to the user (e.g., alert or visual cue)
-                            alert("Text copied to clipboard!"); // You can change this to a more user-friendly notification
-                        }
+                                // Provide feedback to the user with a modal notification
+                                displayModal("Text copied to clipboard!"); // Use the modal instead of alert
+                            }
+
+                            // Displays a modal with the provided message
+                            function displayModal(message) {
+                                const modal = document.getElementById("modalPopup");
+                                const modalMessage = document.getElementById("modal-message");
+                                modalMessage.textContent = message;
+                                modal.style.display = "block";
+
+                                // Close the modal automatically after 1 second
+                                setTimeout(() => {
+                                    modal.style.display = "none";
+                                }, 1000); // 1000ms = 1 second
+                            }
 
 
                         // Function to blink the cursor twice before disappearing
@@ -739,14 +762,19 @@
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
                             // Generate the story title
-                            const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
-                            const response = await fetch("http://127.0.0.1:5000/chat", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ prompt: titlePrompt }),
-                            });
-                            const result = await response.json();
-                            const title = result.response || "Untitled Story";
+                            const generateTitle = async () => {
+                                const titlePrompt = `You need to generate a title for this story, the title should be less than 6 words maximum and only return the title, nothing else. The story is: ${story}`;
+                                const response = await fetch("http://127.0.0.1:5000/chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ prompt: titlePrompt }),
+                                });
+                                const result = await response.json();
+                                return result.response || "Untitled Story";
+                            };
+
+                            // Initial title generation
+                            let title = await generateTitle();
 
                             // Generate the story summary
                             const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
@@ -759,7 +787,7 @@
                                 const summary = summaryResult.response || "No summary generated.";
 
                             loadingGifMessage.remove();
-
+                            
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
                             titleMessage.classList.add("message", "bot-message");
@@ -769,18 +797,38 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p><strong>Story Title:</strong> ${title}</p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('${title}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                        <p><strong>Story Title:</strong> <span id="story-title">${title}</span></p>
+                                        <i class="bi bi-volume-up speaker-icon" id="speaker-icon" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
+
                             // Add the redo button
                             const redoButton = document.createElement("button");
                             redoButton.innerText = "Redo Title";
                             redoButton.classList.add("redo-button");
+
+                            // Redo title logic
+                            redoButton.onclick = async () => {
+                                const newTitle = await generateTitle();
+                                titleMessage.querySelector("#story-title").textContent = newTitle;
+
+                                // Update TTS click handler for the new title
+                                const speakerIcon = titleMessage.querySelector("#speaker-icon");
+                                speakerIcon.onclick = () => speakText(newTitle, speakerIcon);
+
+                                title = newTitle;
+                            };
+
+                            // Append the redo button to the message
                             titleMessage.querySelector(".message-text").appendChild(redoButton);
 
+                            // Append the title message to the container
                             messageContainer.appendChild(titleMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                            // Add the TTS click handler
+                            const speakerIcon = titleMessage.querySelector("#speaker-icon");
+                            speakerIcon.onclick = () => speakText(title, speakerIcon);
 
                             await delay(5000);
 
