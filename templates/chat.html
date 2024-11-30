@@ -25,7 +25,7 @@
     data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
   <!-- GIF for loading -->
-  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/load_anim.gif') }}">
+  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -374,7 +374,7 @@
                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                             </div>
                             <div class="message-text">
-                                <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                <img src="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}" 
                                     alt="Loading..." 
                                     style="width: 100px; height: 100px; margin: 0 auto; display: block;">
                             </div>
@@ -751,7 +751,7 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <img src="{{ url_for('serve_assets', filename='img/load_anim.gif') }}" 
+                                        <img src="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}" 
                                             alt="Loading..." 
                                             style="width: 100px; height: 100px; margin: 0 auto; display: block;">
                                     </div>
@@ -1204,10 +1204,10 @@
                 Additionally, it uses your browser’s <span class="highlight">SpeechSynthesisUtterance</span> feature to provide text-to-speech functionality, allowing the story to be narrated aloud for a richer, more interactive experience.
             </p>
             <p>
-                <span class="highlight"><b>Disclaimer:</b></span> The stories created by the chatbot are purely fictional and for entertainment purposes, meant to assist with story generation; however, the system may occasionally produce errors or inaccuracies, resulting in unexpected twists or content deviations.
+                <span class="highlight"><b>⚠Disclaimer:</b></span> The stories created by the chatbot are purely fictional and for entertainment purposes, meant to assist with story generation; however, the system may occasionally produce errors or inaccuracies, resulting in unexpected twists or content deviations.
             </p>
             <p>
-                Powered by <a href="https://ollama.com" target="_blank" class="bold-link"><b>&copy; Ollama</b></a> using the <a href="https://ollama.com/library/tinyllama:1.1b-chat" target="_blank" class="bold-link"><b>&copy; TinyLlama:1.1b-chat</b></a> model.
+                Powered by <a href="https://ollama.com" target="_blank" class="bold-link"><b>&copy; Ollama</b></a> using the <a href="https://ollama.com/library/orca-mini" target="_blank" class="bold-link"><b>&copy; Orca-Mini</b></a> model.
             </p>        
         </div>             
     </div>    
