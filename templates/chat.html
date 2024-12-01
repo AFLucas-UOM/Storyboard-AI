@@ -24,9 +24,6 @@
     data-light-icon="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
     data-dark-icon="{{ url_for('serve_assets', filename='img/faviconSBDark.png') }}">
 
-  <!-- GIF for loading -->
-  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}">
-
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -39,9 +36,11 @@
   <link href="{{ url_for('serve_assets', filename='vendor/aos/aos.css') }}" rel="stylesheet">
   <link href="{{ url_for('serve_assets', filename='vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
 
+  <!-- GIF for loading -->
+  <link id="loading-gif" rel="preload" as="image" href="{{ url_for('serve_assets', filename='img/loading.gif') }}">
   <!-- Main CSS File -->
   <link href="{{ url_for('serve_assets', filename='css/main.css') }}" rel="stylesheet">
-
+  <!-- chat.js File -->
   <script src="{{ url_for('serve_assets', filename='js/chat.js') }}" defer></script>
 
   <!-- Include pdfmake library for PDF generation -->
@@ -66,6 +65,14 @@
   </header>
 
   <main class="main">
+
+    <!-- Modal Pop-up Box -->
+    <div id="modalPopup" class="modal" style="display: none;">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+        </div>
+    </div>  
+
     <section class="chatbot">
       <div class="card-body" style="margin: 0cm; padding: 0cm; height: auto; width: 100%;">
         <!-- Chat history container -->
@@ -121,13 +128,6 @@
         </p>
       </div>
     </section>
-
-    <!-- Modal Pop-up Box -->
-    <div id="modalPopup" class="modal" style="display: none;">
-        <div class="modal-content">
-            <p id="modal-message"></p>
-        </div>
-    </div>    
 
   <script>
     // Ensure browser compatibility for SpeechRecognition
@@ -264,8 +264,7 @@
     let storyEnding = "";
     let additionalNotes = "";
     let currentStep = 0; // To track the conversation flow
-    // Fetch the current user's name from localStorage and extract the first name
-    const currentUser = (localStorage.getItem("currentuser") || "").split(" ")[0];
+    const currentUser = (localStorage.getItem("currentuser") || "").split(" ")[0]; // Fetch the current user's name from localStorage and extract the first name
     
     // Function to handle chatbot interaction
     function askForInput() {
@@ -374,7 +373,7 @@
                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                             </div>
                             <div class="message-text">
-                                <img src="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}" 
+                                <img src="{{ url_for('serve_assets', filename='img/loading.gif') }}" 
                                     alt="Loading..." 
                                     style="width: 100px; height: 100px; margin: 0 auto; display: block;">
                             </div>
@@ -384,16 +383,13 @@
 
                     // All inputs are gathered, create the final prompt
                     const finalPrompt = `
-                        You are a brilliant storyteller with a talent for crafting immersive, engaging, and well-structured narratives. Your task is to create a continuous story featuring a character named "${characterName}" within the theme of "${storyTheme}." The narrative should flow seamlessly, with vivid settings, compelling events, and natural dialogue, building toward a "${storyEnding}" ending that feels satisfying and true to the story's tone.
-                        Important: Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes were provided.'}"
+                        You are a masterful storyteller known for crafting immersive and engaging narratives. Your task is to write a seamless story featuring a character named "${characterName}" set within the theme of "${storyTheme}." The narrative should be vivid and captivating, with well-developed settings, natural dialogue, and compelling events that build toward a "${storyEnding}" ending that feels meaningful and true to the story's tone.
 
-                        Write the story as a uninterrupted narrative in simple paragraph(s) format, with a maximum word count of 400 words. Avoid titles, character lists, headings, subheadings, or any structural divisions. Keep the flow natural and seamless, without breaks or pauses between sections. The story should unfold from start to finish in a single, cohesive piece—just one continuous narrative.
-                        Ensure the content is appropriate for all readers of all ages, steering clear of violence, harm, or any offensive material. Focus on creating a thoughtful, imaginative, and uplifting story that appeals to a wide, diverse audience. If the narrative starts to take a negative turn, guide it back to a positive, respectful tone, upholding a sense of inclusivity.
-                        Your storytelling should be creative, captivating, and engaging—leaving readers with a lasting, positive impression. Aim for a memorable and respectful narrative that draws readers in from the first sentence to the last.        
+                        Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes provided.'}"
+                        Write the story in one continuous flow, formatted as simple paragraphs with no titles, headings, or structural divisions. The narrative should be concise yet complete, with a maximum of 400 words, and maintain a positive, uplifting tone suitable for readers of all ages
+                        Avoid violence, harm, or any offensive material, focusing instead on inclusivity, thoughtfulness, and imagination. If the story starts to veer negatively, gently guide it back to a respectful and hopeful tone. Your storytelling should leave a lasting, positive impression—captivating readers from the first word to the last.      
                         `;
-                                            
-                    console.log("Final Prompt Sent to Ollama:\n", finalPrompt);
-                    // Send the prompt to TinyLlama
+                    // Send the prompt to Ollama
                     fetch("http://127.0.0.1:5000/chat", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -430,7 +426,6 @@
                             // Return the typing message for later manipulation (to replace the dots with the actual text)
                             return typingMessage;
                         }
-
 
                         // Function to simulate the typing of '...'
                         function animateDots(typingMessage) {
@@ -519,7 +514,7 @@
                                 const paragraphElement = messageText.querySelector("p");
                                 paragraphElement.innerText = "Rewriting...";
 
-                                // Send the prompt to TinyLlama to re-write the paragraph
+                                // Send the prompt to Ollama to re-write the paragraph
                                 rewriteParagraph(paragraph).then(newParagraph => {
                                     // Update the paragraph with the rewritten text
                                     paragraphElement.innerText = newParagraph;
@@ -556,7 +551,7 @@
                                 Here is the paragraph to rewrite:
                                 "${paragraph}"`;
 
-                                // Send the prompt to TinyLlama
+                                // Send the prompt to Ollama
                                 fetch("http://127.0.0.1:5000/chat", {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
@@ -585,36 +580,47 @@
                             };
                             }
 
+                            // Function to copy text to clipboard
                             function copyToClipboard(text) {
-                                // Create a temporary textarea element to hold the text to be copied
-                                const tempTextArea = document.createElement("textarea");
-                                tempTextArea.value = text;
-                                document.body.appendChild(tempTextArea);
+                                // Use the modern Clipboard API for better support and future compatibility
+                                if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(text)
+                                        .then(() => {
+                                            displayModal("Text copied to clipboard!");
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to copy text: ', err);
+                                            displayModal("Failed to copy text.");
+                                        });
+                                } else {
+                                    // Fallback for older browsers
+                                    const tempTextArea = document.createElement("textarea");
+                                    tempTextArea.value = text;
+                                    document.body.appendChild(tempTextArea);
 
-                                // Select the text in the textarea and copy it to the clipboard
-                                tempTextArea.select();
-                                document.execCommand('copy');
+                                    tempTextArea.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(tempTextArea);
 
-                                // Remove the textarea after copying
-                                document.body.removeChild(tempTextArea);
-
-                                // Provide feedback to the user with a modal notification
-                                displayModal("Text copied to clipboard!"); // Use the modal instead of alert
+                                    displayModal("Text copied to clipboard!");
+                                }
                             }
 
-                            // Displays a modal with the provided message
+                            // Function to display a modal with the provided message
                             function displayModal(message) {
                                 const modal = document.getElementById("modalPopup");
                                 const modalMessage = document.getElementById("modal-message");
+
                                 modalMessage.textContent = message;
                                 modal.style.display = "block";
+                                modal.classList.add("show"); // Add animation class for fade-in
 
-                                // Close the modal automatically after 1 second
+                                // Close the modal after 1 second with a fade-out effect
                                 setTimeout(() => {
-                                    modal.style.display = "none";
+                                    modal.classList.remove("show");
+                                    setTimeout(() => modal.style.display = "none", 300); // Delay hiding the modal for smooth animation
                                 }, 1000); // 1000ms = 1 second
                             }
-
 
                         // Function to blink the cursor twice before disappearing
                         function blinkCursor(typingMessage, paragraph) {
@@ -751,7 +757,7 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <img src="{{ url_for('serve_assets', filename='img/load_anim_v2.gif') }}" 
+                                        <img src="{{ url_for('serve_assets', filename='img/loading.gif') }}" 
                                             alt="Loading..." 
                                             style="width: 100px; height: 100px; margin: 0 auto; display: block;">
                                     </div>
@@ -771,8 +777,15 @@
                                 return result.response || "Untitled Story";
                             };
 
-                            // Initial title generation
+                            /// Initial title generation
                             let title = await generateTitle();
+
+                            // Check if the title starts with "Title:" or "Title"
+                            let storyTitleHTML = "Story Title:"; // Default text for the title
+                            if (title.startsWith("Title:") || title.startsWith("Title") || title.startsWith("title:" || title.startsWith("title") || title.startsWith("Story Title:") || title.startsWith("Story Title"))){
+                                // If the title starts with "Title" or "Title:", remove the <strong> part
+                                storyTitleHTML = ""; // No "Story Title:" label
+                            }
 
                             // Generate the story summary
                             const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
@@ -795,15 +808,15 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p><strong>Story Title:</strong> <span id="story-title">${title}</span></p>
+                                        <p>${storyTitleHTML} <span id="story-title">${title}</span></p>
                                         <i class="bi bi-volume-up speaker-icon" id="speaker-icon" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
 
                             // Add the redo button
                             const redoButton = document.createElement("button");
-                            redoButton.innerText = "Redo Title";
-                            redoButton.classList.add("redo-button");
+                            redoButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Redo`; // Bootstrap icon for redo
+                            redoButton.classList.add("redo-button", "btn", "btn-outline-primary", "btn-sm"); // Bootstrap classes for styling
 
                             // Redo title logic
                             redoButton.onclick = async () => {
@@ -954,10 +967,14 @@
                                     <div class="message-icon_bot">
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
-                                    <div class="message-text">
-                                        <p>If you would like to save the story as a PDF, you can do so below.</p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('If you would like to save the story as a PDF, you can do so below.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
-                                        <button class="btn btn-primary save-pdf-button">Save as PDF</button>
+                                        <div class="message-text">
+                                            <p>Would you like to save you story as a PDF?</p>
+                                            <i class="bi bi-volume-up speaker-icon" 
+                                            onclick="speakText('Would you like to save you story as a PDF? Save Story Button.', this)" 
+                                            style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);">
+                                            </i>
+                                            <button class="btn btn-primary save-pdf-button">Save Story</button>
+                                        </div>
                                     </div>
                                 </div>`;
 
@@ -967,9 +984,8 @@
                             // Handle the save PDF button click
                             saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
                                 generateAndDownloadPDF(title, story);
-                                saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your PDF is being downloaded.</p>"; // Update message
+                                saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>"; 
                             };
-
 
                             // Save the conversation
                             const currentUser = localStorage.getItem("currentuser") || "Anonymous";
@@ -1007,8 +1023,8 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p>Would you like to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click here</a></p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                        <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
+                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(finaleMessage);
@@ -1016,7 +1032,7 @@
 
                             // Handle page refresh when "Click here" is clicked
                             document.getElementById("refresh-link").onclick = (e) => {
-                                e.preventDefault(); // Prevent the default link behaviour
+                                e.preventDefault(); // Prevent the default link behavior
                                 location.reload(); // Refresh the page
                             };
 
@@ -1085,10 +1101,12 @@
                     })
                     .finally(() => {
                         sendButton.disabled = false;
-                        sendButton.innerHTML = "↑";
+                        sendButton.style.backgroundColor = "#E9ECEF"; // Light grey
+                        sendButton.style.border = "1px solid #c82333"; // Red border
+                        sendButton.style.cursor = "pointer"; // Change cursor to pointer
+                        sendButton.style.color = "#c82333"; // Change text color to red
+                        sendButton.innerHTML = '<i class="bi bi-x"></i>'; // Updated to use bi-x icon
                     });
-
-
                     return;
             }
 
@@ -1141,7 +1159,6 @@
                 }
 
                 // Function to lock input and buttons
-                // Function to lock input and buttons
                 function lockInput() {
                     const inputField = document.getElementById("chat-input");
                     const sendButton = document.getElementById("send-button");
@@ -1154,8 +1171,8 @@
                     micButton.disabled = true;
 
                     // Apply styling to permanently grey out the send button
-                    sendButton.style.backgroundColor = "#d3d3d3"; // Light grey
-                    sendButton.style.borderColor = "#d3d3d3";
+                    sendButton.style.backgroundColor = "#E9ECEF"; // Light grey
+                    sendButton.style.borderColor = "#c82333";
                     sendButton.style.cursor = "not-allowed"; // Show 'not allowed' cursor on hover
 
                     // Replace the placeholder text in the input field with the lock message
@@ -1163,11 +1180,15 @@
 
                     // Apply red text to the placeholder
                     inputField.style.color = "red"; // Makes the placeholder text red
-
                     // Add red border to the input field by adding the 'locked' class
                     inputField.classList.add("locked");
-                }
 
+                    // Change send button to cross (✖) using Bootstrap icon
+                    sendButton.innerHTML = '<i class="bi bi-x"></i>'; // Updated to use bi-x icon
+
+                    // Change mic button to mute mic icon (bi bi-mic-mute)
+                    micButton.innerHTML = '<i class="bi bi-mic-mute" aria-hidden="true"></i>'; // Change mic icon to mute state
+                }
 
                 // Move to next step
                 currentStep++;

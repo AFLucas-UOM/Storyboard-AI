@@ -1235,14 +1235,16 @@ margin-right: 10px;
   visibility: visible; /* Ensure mic button stays visible when input is focused */
 }
 
-/* Apply red border when input is locked */
+/* Apply red border when input is locked with a smooth transition */
 #chat-input.locked {
-  border-color: red; /* Set border to red when input is locked */
+  border-color: #c82333; /* Red border when input is locked */
+  transition: border-color 0.3s ease-in-out; /* Smooth transition for border color */
 }
 
-/* Placeholder text color changes to red when disabled */
+/* Placeholder text color changes to red when disabled with a smooth transition */
 #chat-input:disabled::placeholder {
-  color: red; /* Change placeholder text color to red */
+  color: #c82333; /* Red placeholder text when disabled */
+  transition: color 0.3s ease-in-out; /* Smooth transition for placeholder color */
 }
 
 /* Send Button */
@@ -1265,9 +1267,11 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
 
 
 #send-button:disabled {
-  background-color: #ccc; /* Grey out the button */
-  color: #777; /* Change text color when disabled */
+  border: 1px solid #c82333; /* Red border when input is locked */
+  background-color: #E9ECEF; /* Grey out the button */
+  color: #c82333; /* Change text color when disabled */
   cursor: not-allowed; /* Prevent cursor change */
+  transition: color 0.3s ease-in-out; /* Smooth transition for placeholder color */
 }
 
 /* Message Text Style */
@@ -1311,7 +1315,6 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
 .noButton {
   color: #f44336;
 }
-
 
 #mic-button {
 color: #585B5E;
@@ -1475,41 +1478,47 @@ color: var(--accent-color);     /* Change text/icon color */
   background-color: #0a5fa7; /* Even darker shade on press */
 }
 
-/* Modal container - covers the entire screen */
+/* Modal container - covers the top-center of the screen */
 .modal {
   position: fixed;
   z-index: 1000; /* Ensures it's on top of other elements */
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Transparent black background */
+  left: 50%;
+  top: 20px; /* Adjust to place the modal near the top */
+  transform: translateX(-50%); /* Centers the modal horizontally */
+  width: 350px; /* Responsive to screen size */
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: opacity 0.3s ease-in-out; /* Smooth transition for fading */
 }
 
 /* Modal content box */
 .modal-content {
   position: relative; /* Needed for positioning the close button */
   background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%; /* Responsive width */
-  max-width: 400px; /* Maximum width */
-  animation: fadeIn 0.3s ease-in-out; /* Fade-in animation */
-  text-align: center; /* Center text inside the modal */
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 15px; /* Rounded corners */
+  width: 100%; /* Full width within max-width */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  animation: fadeIn 0.4s ease-out; /* Smooth fade-in effect */
+  text-align: center;
+  overflow: hidden; /* Prevent content overflow */
+  border: 1px solid var(--accent-color); /* Light border for definition */
 }
 
 /* Text content inside the modal */
 #modal-message {
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333;
+  font-size: 20px; /* Larger text for readability */
+  line-height: 1.7; /* Improved line spacing */
+  color: var(--accent-color); /* Accent color for text */
+  font-weight: 500;
   margin: 20px 0; /* Space around the message */
 }
 
-/* Fade-in animation for the modal */
+/* Animation for modal fade-in */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1518,6 +1527,17 @@ color: var(--accent-color);     /* Change text/icon color */
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%; /* Adjust the modal size for smaller screens */
+  }
+
+  #modal-message {
+    font-size: 18px; /* Slightly smaller text for mobile */
   }
 }
 
