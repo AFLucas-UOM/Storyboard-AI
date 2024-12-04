@@ -73,10 +73,17 @@
                                 <p class="History-Title">Review Your Past Stories</p>
                             </div>
                         </h2>
-    
+                        <div class="d-flex flex-column align-items-center">
+                           <!-- Search Bar -->
+                            <div class="input-group mb-3" style="width: 80%; max-width: 500px; position: relative;">
+                                <input type="text" id="search-bar" placeholder="Search your stories..." class="form-control" style="padding-left: 30px;" />
+                                <i class="bi bi-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); pointer-events: none; z-index: 999;"></i>
+                            </div>               
+                            <!-- This paragraph will dynamically show the number of previous chats -->
+                            <p id="story-count" class="mb-3" style="font-size: 20px; color: #272829;"></p>
+                        </div>                        
                         <!-- Section to display story titles -->
                         <div id="story-cards-container" class="d-flex flex-column align-items-center"></div>
-    
                     </div>
                 </div>
             </div>

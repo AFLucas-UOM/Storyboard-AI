@@ -1631,23 +1631,73 @@ color: var(--accent-color);     /* Change text/icon color */
   min-width: 500px; /* Set a minimum width */
   padding: 20px;
   margin-bottom: 15px;
-  margin-left: 20px;
+  margin-left: 20px; /* Match the margin-left of #story-count */
   margin-right: 20px;
   border-radius: 20px;
   text-align: left;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-
 /* Hover effect for story cards */
 .story-card:hover {
-    transform: scale(1.05); /* Slight zoom on hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow effect on hover */
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow effect on hover */
 }
 
 .story-card h4 {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
-  color: var(--accent-color); /* Make sure this line is here */
+  color: var(--accent-color); /* Ensure text color matches theme */
+}
+
+/* Align the story count text with the story cards */
+#story-count {
+  margin-left: 20px; /* Match the story card margin */
+  font-size: 20px; /* Ensure it maintains its style */
+  color: #272829;
+}
+
+/* Ensure consistent styling for the wrapper */
+.stories-section {
+  max-width: 1000px; /* Match the card max-width */
+  margin-left: 20px; /* Align with story card */
+}
+
+/* Align the story count text with the story cards */
+#story-count {
+  margin-left: 20px; /* Match the margin-left of .story-card */
+  font-size: 20px;
+  color: #272829;
+}
+
+/* Remove blue glow on input focus */
+input:focus, .form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Styling for the search input */
+#search-bar {
+  font-size: 16px;
+  padding-left: 30px; /* Add space for the icon inside the input */
+  background-color: white;
+  border: 2px solid var(--accent-color);
+  outline: none;
+  position: relative; /* Make the icon position relative to the input */
+}
+
+/* Style the search icon inside the input */
+.bi-search {
+  color: var(--accent-color); /* Accent color for the search icon */
+  position: absolute;
+  left: 10px; /* Position the icon inside the input */
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* Prevent interaction with the icon */
+}
+
+/* Fix the issue with icon disappearing when input is focused */
+#search-bar:focus + .bi-search {
+  color: var(--accent-color); /* Keep the icon visible and colored on focus */
 }
