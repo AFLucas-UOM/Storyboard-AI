@@ -1,16 +1,79 @@
 // Fetch the username from localStorage
 const currentUser = localStorage.getItem('currentuser');
 
-// Helper function to create a story card
+// Helper function to create a story card with a delete icon
 const createStoryCard = (title) => {
     const storyCard = document.createElement('div');
-    storyCard.classList.add('story-card', 'mb-4', 'p-3', 'border', 'rounded');
-
+    storyCard.classList.add('story-card', 'mb-4', 'p-3', 'border', 'rounded', 'position-relative');
+    
+    // Create title
     const titleElement = document.createElement('h4');
     titleElement.textContent = title;
 
+    // Create delete icon (hidden by default)
+    const deleteIcon = document.createElement('i');
+    deleteIcon.classList.add('bi', 'bi-trash', 'story-delete-icon');
+    deleteIcon.style.position = 'absolute';
+    deleteIcon.style.top = '10px';
+    deleteIcon.style.right = '10px';
+    deleteIcon.style.cursor = 'pointer';
+    deleteIcon.style.display = 'none';  // Initially hidden
+
+    // Append title and delete icon to the card
     storyCard.appendChild(titleElement);
+    storyCard.appendChild(deleteIcon);
+
+    // Add the hover effect to show the delete icon
+    storyCard.addEventListener('mouseenter', () => {
+        deleteIcon.style.display = 'block';  // Show the delete icon
+    });
+    
+    storyCard.addEventListener('mouseleave', () => {
+        deleteIcon.style.display = 'none';  // Hide the delete icon
+    });
+
+    // Event listener for the delete icon
+    deleteIcon.addEventListener('click', () => handleDeleteStory(title));
+
     return storyCard;
+};
+
+// Function to handle the delete action
+const handleDeleteStory = (title) => {
+    // Filter out the story based on the title
+    const updatedStories = stories.filter(story => story.title !== title);
+
+    // Update the displayed stories
+    updateStoryDisplay(updatedStories, '');
+
+    // Optionally, update the conversation data in the backend (via AJAX or other methods)
+    fetch(`/delete_story/${encodeURIComponent(title)}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Story deleted successfully');
+            } else {
+                console.error('Failed to delete story');
+            }
+        });
+};
+
+// Function to update the display of stories
+const updateStoryDisplay = (filteredStories, searchTerm) => {
+    storyCardsContainer.innerHTML = '';  // Clear previous content
+
+    // Add story count message
+    if (searchTerm) {
+        storyCountElement.textContent = `There’s ${filteredStories.length} story title${filteredStories.length === 1 ? '' : 's'} with “${searchTerm}”`;
+    } else {
+        storyCountElement.textContent = `You created ${filteredStories.length} previous ${filteredStories.length === 1 ? 'story' : 'stories'} with Storyboard-AI`;
+    }
+
+    // Create and append new story cards
+    filteredStories.forEach(story => {
+        const storyCard = createStoryCard(formatStoryTitle(story.title));
+        storyCardsContainer.appendChild(storyCard);
+    });
 };
 
 // Helper function to sanitize and format story titles
@@ -127,6 +190,7 @@ const displayUserStories = async () => {
         storyCardsContainer.appendChild(errorMessage);
     }
 };
+
 
 // Execute the main function
 displayUserStories();

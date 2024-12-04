@@ -144,10 +144,9 @@ def signup():
 def index2():
     return render_template('index2.html')
 
-
-@app.route('/history')
-def history():
-    return render_template('history.html')
+@app.route('/archive')
+def archive():
+    return render_template('archive.html')
 
 # Serve the conversation.json file
 @app.route('/assets/json/conversations.json')
@@ -161,7 +160,26 @@ def get_conversation_data():
     except Exception as e:
         print(f"Error reading the JSON file: {e}")
         return jsonify({"error": "Failed to load conversations"}), 500
-    
+
+@app.route('/delete_story/<title>', methods=['DELETE'])
+def delete_story(title):
+    try:
+        # Load existing data
+        with open(CONVERSATIONS_FILE_PATH, 'r') as f:
+            conversation_data = json.load(f)
+        
+        # Filter out the story with the given title
+        updated_data = [story for story in conversation_data if story['title'] != title]
+
+        # Save the updated data back to the file
+        with open(CONVERSATIONS_FILE_PATH, 'w') as f:
+            json.dump(updated_data, f, indent=4)
+
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        print(f"Error deleting story: {e}")
+        return jsonify({'error': 'Failed to delete story'}), 500
+
 def load_credentials():
     with open(USER_JSON_PATH, 'r') as f:
         return json.load(f)

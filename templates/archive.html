@@ -13,7 +13,7 @@
   <meta property="og:description" content="Storyboard-AI creates personalized stories with animation, narration, and design tailored to you.">
   <meta property="og:image" content="{{ url_for('serve_assets', filename='img/hero-bg.jpg') }}">
   <meta property="og:type" content="website">
-  <title>History - Storyboard-AI</title>
+  <title>Archive - Storyboard-AI</title>
 
   <!-- Favicons -->
   <link id="favicon" rel="icon" href="{{ url_for('serve_assets', filename='img/faviconSB.png') }}" 
@@ -49,7 +49,7 @@
           <li><a href="/home"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
           <li><a href="/profile"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
           <li><a href="/chat"><i class="bi bi-chat-left-dots"></i><span>Chat</span></a></li>
-          <li><a href="" class="active" aria-current="page"><i class="bi bi-clock-history"></i><span>History</span></a></li>
+          <li><a href="" class="active" aria-current="page"><i class="bi bi-clock-history"></i><span>Archive</span></a></li>
           <li><a href="#" id="signout-btn"><i class="bi bi-box-arrow-right"></i><span>Signout</span></a></li>
         </ul>
       </nav>
@@ -58,29 +58,29 @@
     <main class="main">
         <!-- Hero Section -->
         <section id="hero" class="hero section light-background" aria-labelledby="hero-title">
-            <img src="{{ url_for('serve_assets', filename='img/hero-history-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg">
+            <img src="{{ url_for('serve_assets', filename='img/hero-archive-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg">
             <div class="container" data-aos="zoom-out">
                 <div class="row">
                     <div class="col-12">
-                        <h2 id="hero-title" class="position-relative" style="margin-bottom: 150px; margin-top: -650px;">
+                        <h2 id="hero-title" class="position-relative" style="margin-bottom: 150px; margin-top: -500px; position: fixed;">
                             <!-- Button in Top Right Corner -->
                             <a href="/chat" id="new-story-button" class="position-absolute top-0 end-0 m-4" style="z-index: 5;">
                                 <i class="bi bi-plus-circle"></i> Create New Story
                             </a>                            
-    
+            
                             <!-- Text on Top Left, aligned with the button -->
                             <div class="position-absolute top-0 start-0 m-4" style="z-index: 5;">
-                                <p class="History-Title">Review Your Past Stories</p>
+                                <p class="Archive-Title">Your Story Archive</p> <!-- This text will be dynamically updated (Walter Error Fallback)-->
                             </div>
                         </h2>
-                        <div class="d-flex flex-column align-items-center">
+                        <div id="container-101"  class="d-flex flex-column align-items-center" style="align-items: flex-start; width: 100%;">
                            <!-- Search Bar -->
-                            <div class="input-group mb-3" style="width: 80%; max-width: 500px; position: relative;">
-                                <input type="text" id="search-bar" placeholder="Search your stories..." class="form-control" style="padding-left: 30px;" />
+                            <div class="input-group mb-3" style="width: 80%; max-width: 500px;">
+                                <input type="text" id="search-bar" placeholder="Search your stories..." class="form-control" style="max-width: 800px;" />
                                 <i class="bi bi-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); pointer-events: none; z-index: 999;"></i>
                             </div>               
                             <!-- This paragraph will dynamically show the number of previous chats -->
-                            <p id="story-count" class="mb-3" style="font-size: 20px; color: #272829;"></p>
+                            <p id="story-count" class="mb-3" style="font-size: 20px; color: #272829; width: 80%; max-width: auto;"></p>
                         </div>                        
                         <!-- Section to display story titles -->
                         <div id="story-cards-container" class="d-flex flex-column align-items-center"></div>
@@ -88,7 +88,7 @@
                 </div>
             </div>
         </section>
-    </main>         
+    </main>
 </body>
   
   <!-- Footer Section -->
@@ -122,17 +122,20 @@
 
   <!-- Main JS File -->
   <script src="{{ url_for('serve_assets', filename='js/main.js') }}" defer></script>
-  <script src="{{ url_for('serve_assets', filename='js/history.js') }}" defer></script>
+  <script src="{{ url_for('serve_assets', filename='js/archive.js') }}" defer></script>
 
   <!-- Script to Display Current User -->
   <script>
   window.onload = function() {
-    // Display current user if logged in
-    var currentuser = localStorage.getItem('currentuser');
-    if (currentuser) {
-      // Set the user's name in the hero section
-      document.getElementById('current-user-name').textContent = currentuser;
-    }
+    // Retrieve the username (assumed to be the full name) from localStorage
+    const currentUser = localStorage.getItem('currentuser');
+
+    // Extract the first name (assuming the first word is the first name)
+    const firstName = currentUser ? currentUser.split(' ')[0] : 'User';  // Default to 'User' if no name is found
+
+    // Update the Archive-Title text
+    const archiveTitleElement = document.querySelector('.Archive-Title');
+    archiveTitleElement.textContent = `${firstName}'s Story Archive`;
 
     // Signout functionality
     document.getElementById('signout-btn').addEventListener('click', function(e) {

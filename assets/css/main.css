@@ -1117,7 +1117,7 @@ button[type="submit"]:hover {
 .speaker-icon {
   display: none;
   position: absolute;
-  right: 0.5px; /*Note for andrea, cant get the speaker to appear naturally esp with the buttons so I tried this, feel free to remove as you see fit */
+  right: 0.5px;
   bottom: 10px;
   cursor: pointer;
   font-size: 18px;
@@ -1589,7 +1589,7 @@ color: var(--accent-color);     /* Change text/icon color */
 }
 
 /*----------------------------------------------
-# History
+# Archive
 ----------------------------------------------*/
 
 #new-story-button{
@@ -1609,7 +1609,7 @@ color: var(--accent-color);     /* Change text/icon color */
   transform: scale(1.05); /* Slight pop effect */
 }
 
-.History-Title{
+.Archive-Title{
   color: #0563BB; /* Apply the custom color */
 }
 
@@ -1618,44 +1618,37 @@ color: var(--accent-color);     /* Change text/icon color */
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 /* Story Card Styling */
 .story-card {
   background-color: white;
-  border: 2px solid var(--accent-color) !important; /* Accent color border */
   color: var(--accent-color); /* Accent color text */
   width: 100%; /* Use full width available */
   max-width: 1000px; /* Limit maximum width */
   min-width: 500px; /* Set a minimum width */
-  padding: 20px;
   margin-bottom: 15px;
   margin-left: 20px; /* Match the margin-left of #story-count */
   margin-right: 20px;
-  border-radius: 20px;
+  border-radius: 80px;
+  min-height: 50px; /* Set a minimum height */
   text-align: left;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 /* Hover effect for story cards */
 .story-card:hover {
-  transform: scale(1.05); /* Slight zoom on hover */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow effect on hover */
+  transform: scale(1.035); /* Slight zoom on hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.09); /* Shadow effect on hover */
 }
 
 .story-card h4 {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 1px;
   color: var(--accent-color); /* Ensure text color matches theme */
-}
-
-/* Align the story count text with the story cards */
-#story-count {
-  margin-left: 20px; /* Match the story card margin */
-  font-size: 20px; /* Ensure it maintains its style */
-  color: #272829;
 }
 
 /* Ensure consistent styling for the wrapper */
@@ -1666,12 +1659,12 @@ color: var(--accent-color);     /* Change text/icon color */
 
 /* Align the story count text with the story cards */
 #story-count {
-  margin-left: 20px; /* Match the margin-left of .story-card */
+  padding-left: 30px;
   font-size: 20px;
   color: #272829;
 }
 
-/* Remove blue glow on input focus */
+/* Remove blue glow on input focus and add a green border */
 input:focus, .form-control:focus {
   outline: none;
   box-shadow: none;
@@ -1680,9 +1673,15 @@ input:focus, .form-control:focus {
 /* Styling for the search input */
 #search-bar {
   font-size: 16px;
+  padding: 18px 20px;
+  height: 50px; /* Increase height for better visibility */
+  width: 100%; /* Use full width available */
+  max-width: 900px; /* Limit maximum width */
+  min-width: 500px; /* Set a minimum width */
   padding-left: 30px; /* Add space for the icon inside the input */
   background-color: white;
   border: 2px solid var(--accent-color);
+  border-radius: 10px;
   outline: none;
   position: relative; /* Make the icon position relative to the input */
 }
@@ -1699,5 +1698,33 @@ input:focus, .form-control:focus {
 
 /* Fix the issue with icon disappearing when input is focused */
 #search-bar:focus + .bi-search {
+  box-shadow: #060606;
   color: var(--accent-color); /* Keep the icon visible and colored on focus */
+}
+
+.story-card {
+  position: relative;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: transform 0.3s;
+}
+
+.story-delete-icon {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.story-card:hover .story-delete-icon {
+  display: block;
+}
+
+#loading-spinner {
+  text-align: center;
+  margin-top: 20px;
 }
