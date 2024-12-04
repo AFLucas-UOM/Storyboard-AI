@@ -1117,7 +1117,7 @@ button[type="submit"]:hover {
 .speaker-icon {
   display: none;
   position: absolute;
-  right: 10px;
+  right: 0.5px; /*Note for andrea, cant get the speaker to appear naturally esp with the buttons so I tried this, feel free to remove as you see fit */
   bottom: 10px;
   cursor: pointer;
   font-size: 18px;
@@ -1308,13 +1308,60 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
   background-color: #45a049;
 }
 
-.yesButton {
-  color: #4CAF50;
+/* Yes Button */
+.story-option-button-yes {
+  color: #ffffff; /* White text for better contrast */
+  background-color: #4CAF50; /* Green background */
+  border: none;
+  border-radius: 8px; /* Rounded corners */
+  padding: 12px 20px; /* Padding for button */
+  font-size: 16px; /* Font size */
+  font-weight: 600; /* Bold text */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s; /* Smooth hover transitions */
+  margin-top: 15px; /* Space above the button */
+  display: block; /* Ensure it's treated as a block for centring */
+  width: 200px; /* Consistent button width */
+  margin-left: auto;
+  margin-right: auto; /* Centre the button horizontally */
 }
 
-.noButton {
-  color: #f44336;
+/* No Button */
+.story-option-button-no {
+  color: #ffffff; /* White text for better contrast */
+  background-color: #f44336; /* Red background */
+  border: none;
+  border-radius: 8px; /* Rounded corners */
+  padding: 12px 20px; /* Padding for button */
+  font-size: 16px; /* Font size */
+  font-weight: 600; /* Bold text */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s; /* Smooth hover transitions */
+  margin-top: 15px; /* Space above the button */
+  display: block; /* Ensure it's treated as a block for centring */
+  width: 200px; /* Consistent button width */
+  margin-left: auto;
+  margin-right: auto; /* Centre the button horizontally */
 }
+
+/* Hover effect for Yes Button */
+.story-option-button-yes:hover {
+  background-color: #45a049; /* Slightly darker green on hover */
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+/* Hover effect for No Button */
+.story-option-button-no:hover {
+  background-color: #d32f2f; /* Slightly darker red on hover */
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+/* Optional: Active effect for both buttons */
+.story-option-button-yes:active,
+.story-option-button-no:active {
+  transform: scale(0.98); /* Slight press effect */
+}
+
 
 #mic-button {
 color: #585B5E;

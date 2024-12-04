@@ -324,7 +324,7 @@
                     `And how would you like the story to end? A happy ending, a shocking twist, or something bittersweet?`,
                     `So now let me know how you’d like the story to wrap up. A happy ending, a twist, or maybe something bittersweet?`,
                     `Another question for you.... what kind of ending do you envision for your story? A happy ending, a surprising twist, or a bittersweet finale?`,
-                    `Dam ok... and how do you want the story to end? A happy ending, a shocking twist, or perhaps something bittersweet?`,
+                    `Alright... and how do you want the story to end? A happy ending, a shocking twist, or perhaps something bittersweet?`,
                     `Got it! And what’s your ideal ending for the story? A happy resolution, a twist, or maybe something bittersweet?`
                 ];
                 botMessageText = variations4[Math.floor(Math.random() * variations4.length)];
@@ -802,6 +802,25 @@
                             // Display the title to the user
                             const titleMessage = document.createElement("div");
                             titleMessage.classList.add("message", "bot-message");
+
+                            // Function to generate the appropriate label for the title
+                            const getStoryTitleHTML = (title) => {
+                                if (
+                                    title.startsWith("Title:") || 
+                                    title.startsWith("Title") || 
+                                    title.startsWith("title:") || 
+                                    title.startsWith("title") || 
+                                    title.startsWith("Story Title:") || 
+                                    title.startsWith("Story Title")
+                                ) {
+                                    return ""; // No label if it starts with any of these keywords
+                                }
+                                return "Story Title:"; // Default label
+                            };
+
+                            // Initialise the story title HTML
+                            storyTitleHTML = getStoryTitleHTML(title);
+
                             titleMessage.innerHTML = `
                                 <div class="message-content_bot">
                                     <div class="message-icon_bot">
@@ -820,14 +839,32 @@
 
                             // Redo title logic
                             redoButton.onclick = async () => {
-                                const newTitle = await generateTitle();
-                                titleMessage.querySelector("#story-title").textContent = newTitle;
+                                // Temporarily display "Redoing title"
+                                const titleSpan = titleMessage.querySelector("#story-title");
+                                const originalTitle = titleSpan.textContent;
+                                titleSpan.textContent = "Redoing title...";
 
-                                // Update TTS click handler for the new title
-                                const speakerIcon = titleMessage.querySelector("#speaker-icon");
-                                speakerIcon.onclick = () => speakText(newTitle, speakerIcon);
+                                // Fetch the new title
+                                try {
+                                    const newTitle = await generateTitle();
 
-                                title = newTitle;
+                                    // Update title label dynamically
+                                    storyTitleHTML = getStoryTitleHTML(newTitle);
+
+                                    // Update the content with the new title and label
+                                    titleSpan.textContent = newTitle;
+                                    titleMessage.querySelector(".message-text p").innerHTML = `${storyTitleHTML} <span id="story-title">${newTitle}</span>`;
+
+                                    // Update TTS click handler for the new title
+                                    const speakerIcon = titleMessage.querySelector("#speaker-icon");
+                                    speakerIcon.onclick = () => speakText(newTitle, speakerIcon);
+
+                                    title = newTitle; // Update the global title variable
+                                } catch (error) {
+                                    console.error("Error generating title:", error);
+                                    titleSpan.textContent = originalTitle; // Revert to the original title in case of an error
+                                    alert("Failed to redo the title. Please try again.");
+                                }
                             };
 
                             // Append the redo button to the message
@@ -835,11 +872,14 @@
 
                             // Append the title message to the container
                             messageContainer.appendChild(titleMessage);
+                            makeTextClickable(titleMessage, title);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
                             // Add the TTS click handler
                             const speakerIcon = titleMessage.querySelector("#speaker-icon");
                             speakerIcon.onclick = () => speakText(title, speakerIcon);
+
+
 
                             await delay(5000);
 
@@ -850,36 +890,67 @@
 
                             const summaryQuestion = document.createElement("div");
                             summaryQuestion.classList.add("message", "bot-message");
-                            summaryQuestion.innerHTML = `<div class="message-content_bot">
+                            summaryQuestion.innerHTML = `
+                                <div class="message-content_bot">
                                     <div class="message-icon_bot">
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
                                         <p style="margin-bottom: 14px;">Would you like to see the summary of the story?</p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the summary of the story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
+                                        <i class="bi bi-volume-up speaker-icon" 
+                                        onclick="speakText('Would you like to see the summary of the story?', this)" 
+                                        style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);">
+                                        </i>
+                                        <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                                            <button class="story-option-button story-option-button-yes">Yes</button>
+                                            <button class="story-option-button story-option-button-no">No</button>
+                                        </div>
                                     </div>
                                 </div>`;
-                            summaryOptionContainer.appendChild(summaryQuestion);
 
-                            yesButton = document.createElement("button");
-                            yesButton.innerText = "Yes";
-                            yesButton.classList.add("story-option-button");
-                            summaryOptionContainer.appendChild(yesButton);
-
-                            noButton = document.createElement("button");
-                            noButton.innerText = "No";
-                            noButton.classList.add("story-option-button");
-                            summaryOptionContainer.appendChild(noButton);
-
-                            messageContainer.appendChild(summaryOptionContainer);
+                            messageContainer.appendChild(summaryQuestion);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
+                            let yesButton = summaryQuestion.querySelector(".story-option-button-yes");
+                            let noButton = summaryQuestion.querySelector(".story-option-button-no");
 
-                            // Handle user response
-                            yesButton.onclick = () => {
-                                // Show the full summary
-                                
-                                // Display the summary to the user
+                            const handleUserResponse = (response) => {
+                                // Simulate user response (Yes/No)
+                                const userMessage = document.createElement("div");
+                                userMessage.classList.add("message", "user-message");
+                                userMessage.innerHTML = `
+                                    <div class="message-content_user">
+                                        <div class="message-text_user_input">
+                                            <p>${response}</p> 
+                                        </div>
+                                        <div class="message-icon" style="min-width: 10%">
+                                            <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(userMessage);
+
+                                // Remove the buttons from the container
+                                const buttons = summaryQuestion.querySelector(".story-option-buttons");
+                                if (buttons) {
+                                    buttons.remove(); // Remove the buttons
+                                }
+
+                                // Now proceed to show the summary or full story based on the response
+                                if (response === 'Yes') {
+                                    // Display the summary
+                                    displaySummary();
+                                } else {
+                                    // Skip the summary, directly move to the full story question
+                                    askFullStory();
+                                }
+                            };
+
+                            yesButton.onclick = () => handleUserResponse('Yes');
+                            noButton.onclick = () => handleUserResponse('No');
+
+                            // Function to display the summary
+                            const displaySummary = () => {
+                                // Create the summary message
                                 const summaryMessage = document.createElement("div");
                                 summaryMessage.classList.add("message", "bot-message");
                                 summaryMessage.innerHTML = `
@@ -888,154 +959,181 @@
                                             <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                         </div>
                                         <div class="message-text">
-                                            <p><strong>Story Summary:</strong> ${summary}</p>
+                                            <p>${summary}</p>  <!-- This is the summary of the story -->
+                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
                                         </div>
                                     </div>`;
-                                    // <i class="bi bi-volume-up speaker-icon" onclick="speakText('${summary}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon --> removed since too long and causes errors this way
+
                                 messageContainer.appendChild(summaryMessage);
                                 messageContainer.scrollTop = messageContainer.scrollHeight;
-                                makeTextClickable(summaryMessage, summary); // Allow copying the full story
-                                summaryOptionContainer.remove(); // Remove the question after user response
+                                makeTextClickable(summaryMessage, summary);
+
+                                // Proceed to the next step: asking for the full story
+                                askFullStory();
                             };
 
-                            noButton.onclick = () => {
-                                summaryOptionContainer.remove(); // Remove the question after user response
-                            };
+                            // Function to ask for full story after summary or directly after "No"
+                            const askFullStory = () => {
+                                // Create the story option container
+                                const storyOptionContainer = document.createElement("div");
+                                storyOptionContainer.classList.add("story-option-container");
 
-                            await delay(5000);
-
-                            // Ask the user if they want the full story displayed
-                            const storyOptionContainer = document.createElement("div");
-                            storyOptionContainer.classList.add("story-option-container");
-
-                            const storyQuestion = document.createElement("div");
-                            storyQuestion.classList.add("message", "bot-message");
-                            storyQuestion.innerHTML = `<div class="message-content_bot">
-                                    <div class="message-icon_bot">
-                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                    </div>
-                                    <div class="message-text">
-                                        <p style="margin-bottom: 14px;">Would you like to see the full story?</p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to see the full story?', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
-                                    </div>
-                                </div>`;
-                            storyOptionContainer.appendChild(storyQuestion);
-
-                            yesButton = document.createElement("button");
-                            yesButton.innerText = "Yes";
-                            yesButton.classList.add("story-option-button");
-                            storyOptionContainer.appendChild(yesButton);
-
-                            noButton = document.createElement("button");
-                            noButton.innerText = "No";
-                            noButton.classList.add("story-option-button");
-                            storyOptionContainer.appendChild(noButton);
-
-                            messageContainer.appendChild(storyOptionContainer);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                            // Handle user response
-                            yesButton.onclick = () => {
-                                // Show the full story
-                                const fullStoryMessage = document.createElement("div");
-                                fullStoryMessage.classList.add("message", "bot-message");
-                                fullStoryMessage.innerHTML = `
+                                // Create the story question
+                                const storyQuestion = document.createElement("div");
+                                storyQuestion.classList.add("message", "bot-message");
+                                storyQuestion.innerHTML = `
                                     <div class="message-content_bot">
                                         <div class="message-icon_bot">
                                             <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                         </div>
                                         <div class="message-text">
-                                            <p>${story}</p>
-                                        </div>
-                                    </div>`;
-                                messageContainer.appendChild(fullStoryMessage);
-                                makeTextClickable(fullStoryMessage, story); // Allow copying the full story
-                                storyOptionContainer.remove(); // Remove the question after user response
-                            };
-
-                            noButton.onclick = () => {
-                                storyOptionContainer.remove(); // Remove the question after user response
-                            };
-
-                            await delay(5000);
-
-                            // Ask the user if they want to save the story as a PDF
-                            const saveOptionMessage = document.createElement("div");
-                            saveOptionMessage.classList.add("message", "bot-message");
-                            saveOptionMessage.innerHTML = `
-                                <div class="message-content_bot">
-                                    <div class="message-icon_bot">
-                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                    </div>
-                                        <div class="message-text">
-                                            <p>Would you like to save you story as a PDF?</p>
+                                            <p style="margin-bottom: 14px;">Would you like to see the full story?</p>
                                             <i class="bi bi-volume-up speaker-icon" 
-                                            onclick="speakText('Would you like to save you story as a PDF? Save Story Button.', this)" 
+                                            onclick="speakText('Would you like to see the full story?', this)" 
                                             style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);">
                                             </i>
+                                            <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                                                <button class="story-option-button story-option-button-yes">Yes</button>
+                                                <button class="story-option-button story-option-button-no">No</button>
+                                            </div>
+                                        </div>
+                                    </div>`;
+
+                                // Append the question to the storyOptionContainer
+                                storyOptionContainer.appendChild(storyQuestion);
+
+                                // Append the storyOptionContainer to the messageContainer
+                                messageContainer.appendChild(storyOptionContainer);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                                // Re-assign buttons to handle user input for the new question
+                                let yesButton = storyQuestion.querySelector(".story-option-button-yes");
+                                let noButton = storyQuestion.querySelector(".story-option-button-no");
+                                
+                                delay(5000);
+                                // Handle the response for the full story
+                                yesButton.onclick = () => handleFullStoryResponse('Yes', storyOptionContainer, title, story);
+                                noButton.onclick = () => handleFullStoryResponse('No', storyOptionContainer, title, story);
+                            };
+
+                            // Handle response for the full story question
+                            const handleFullStoryResponse = (response, storyOptionContainer, title, story) => {
+                                // Simulate user response (Yes/No)
+                                const userMessage = document.createElement("div");
+                                userMessage.classList.add("message", "user-message");
+                                userMessage.innerHTML = `
+                                    <div class="message-content_user">
+                                        <div class="message-text_user_input">
+                                            <p>${response}</p>
+                                        </div>
+                                        <div class="message-icon" style="min-width: 10%">
+                                            <img src="{{ url_for('static', filename=user_info['profile_pic']) }}" alt="User Icon" class="user-icon">
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(userMessage);
+
+                                // Remove the buttons for the full story question
+                                const buttons = storyOptionContainer.querySelector(".story-option-buttons");
+                                if (buttons) {
+                                    buttons.remove(); // Remove the buttons
+                                }
+
+                                // Display the full story or a message based on the response
+                                if (response === 'Yes') {
+                                    const fullStoryMessage = document.createElement("div");
+                                    fullStoryMessage.classList.add("message", "bot-message");
+                                    fullStoryMessage.innerHTML = `
+                                        <div class="message-content_bot">
+                                            <div class="message-icon_bot">
+                                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                            </div>
+                                            <div class="message-text">
+                                                <p>${story}</p>
+                                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('${story}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                            </div>
+                                        </div>`;
+                                    messageContainer.appendChild(fullStoryMessage);
+                                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                                }
+
+                                // Ask the user if they want to save the story as a PDF
+                                const saveOptionMessage = document.createElement("div");
+                                saveOptionMessage.classList.add("message", "bot-message");
+                                saveOptionMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p>Would you like to save your story as a PDF?</p>
+                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to save your story as a PDF? Save Story Button.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
                                             <button class="btn btn-primary save-pdf-button">Save Story</button>
                                         </div>
-                                    </div>
-                                </div>`;
+                                    </div>`;
 
-                            messageContainer.appendChild(saveOptionMessage);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                                messageContainer.appendChild(saveOptionMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Handle the save PDF button click
-                            saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
-                                generateAndDownloadPDF(title, story);
-                                saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>"; 
+                                // Handle the save PDF button click
+                                saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
+                                    generateAndDownloadPDF(title, story);
+                                    saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
+                                };
+
+                                // Display the final message for creating a new story
+                                const finaleMessage = document.createElement("div");
+                                finaleMessage.classList.add("message", "bot-message");
+                                finaleMessage.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
+                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                        </div>
+                                    </div>`;
+                                messageContainer.appendChild(finaleMessage);
+                                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                                // Handle page refresh and saving conversation
+                                document.getElementById("refresh-link").onclick = async (e) => {
+                                    e.preventDefault(); // Prevent the default link behaviour
+
+                                    // Save the conversation
+                                    const currentUser = localStorage.getItem("currentuser") || "Anonymous";
+                                    const conversationData = {
+                                        title: title,
+                                        userName: currentUser,
+                                        story: story
+                                    };
+
+                                    try {
+                                        const response = await fetch("/save-conversation", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(conversationData)
+                                        });
+
+                                        const data = await response.text();
+                                        console.log("Response data:", JSON.parse(data));
+
+                                        // Refresh the page after saving
+                                        location.reload();
+                                    } catch (error) {
+                                        console.error("Error saving conversation:", error);
+
+                                        // Optionally notify the user if saving failed
+                                        alert("Failed to save the conversation. Please try again.");
+                                    }
+                                };
                             };
 
-                            // Save the conversation
-                            const currentUser = localStorage.getItem("currentuser") || "Anonymous";
-                            const conversationData = {
-                                title: title,
-                                userName: currentUser,
-                                story: story
-                            };
 
-                            fetch("/save-conversation", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(conversationData)
-                            })
-                            .then(response => response.text())
-                            .then(data => {
-                                try {
-                                    console.log("Response data:", JSON.parse(data));
-                                } catch (e) {
-                                    console.error("Error parsing JSON:", e);
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error saving conversation:", error);
-                            });
 
-                            await delay(5000);
 
-                            // Step: Add finale message asking if the user wants to create a new story
-                            const finaleMessage = document.createElement("div");
-                            finaleMessage.classList.add("message", "bot-message");
-                            finaleMessage.innerHTML = `
-                                <div class="message-content_bot">
-                                    <div class="message-icon_bot">
-                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                    </div>
-                                    <div class="message-text">
-                                        <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
-                                        <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i> <!-- Speaker icon -->
-                                    </div>
-                                </div>`;
-                            messageContainer.appendChild(finaleMessage);
-                            messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Handle page refresh when "Click here" is clicked
-                            document.getElementById("refresh-link").onclick = (e) => {
-                                e.preventDefault(); // Prevent the default link behavior
-                                location.reload(); // Refresh the page
-                            };
-
+                            
                         })();
 
                         function delay(ms) {
