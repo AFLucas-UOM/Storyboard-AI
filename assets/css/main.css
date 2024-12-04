@@ -1588,3 +1588,66 @@ color: var(--accent-color);     /* Change text/icon color */
   }
 }
 
+/*----------------------------------------------
+# History
+----------------------------------------------*/
+
+#new-story-button{
+  background-color: var(--accent-color); /* Accent color for button */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#new-story-button:hover {
+  background-color: #1179dae9; /* Darker blue on hover */
+  transform: scale(1.05); /* Slight pop effect */
+}
+
+.History-Title{
+  color: #0563BB; /* Apply the custom color */
+}
+
+/* Story Cards Container Styling */
+#story-cards-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+}
+
+/* Story Card Styling */
+.story-card {
+  background-color: white;
+  border: 2px solid var(--accent-color) !important; /* Accent color border */
+  color: var(--accent-color); /* Accent color text */
+  width: 100%; /* Use full width available */
+  max-width: 1000px; /* Limit maximum width */
+  min-width: 500px; /* Set a minimum width */
+  padding: 20px;
+  margin-bottom: 15px;
+  margin-left: 20px;
+  margin-right: 20px;
+  border-radius: 20px;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+/* Hover effect for story cards */
+.story-card:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow effect on hover */
+}
+
+.story-card h4 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--accent-color); /* Make sure this line is here */
+}

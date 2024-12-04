@@ -144,6 +144,24 @@ def signup():
 def index2():
     return render_template('index2.html')
 
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+# Serve the conversation.json file
+@app.route('/assets/json/conversations.json')
+def get_conversation_data():
+    try:
+        # Open and read the JSON file
+        with open(CONVERSATIONS_FILE_PATH, 'r') as f:
+            conversation_data = json.load(f)  # Ensure it's a Python object (list)
+
+        return jsonify(conversation_data)  # Return as JSON response
+    except Exception as e:
+        print(f"Error reading the JSON file: {e}")
+        return jsonify({"error": "Failed to load conversations"}), 500
+    
 def load_credentials():
     with open(USER_JSON_PATH, 'r') as f:
         return json.load(f)
