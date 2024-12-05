@@ -89,6 +89,9 @@ const createStoryCard = (title, stories, updateDisplay) => {
         borderRadius: '50%', // Circle shape by default
         textAlign: 'center', // Center the icon
         lineHeight: '24px', // Vertically align the icon
+        paddingLeft:'2px', // Add padding for width effect
+        paddingRight: '2px', // Symmetrical padding
+        paddingTop: '2px', // Add slight padding on top
     });
 
     // Append title and delete icon to the card
