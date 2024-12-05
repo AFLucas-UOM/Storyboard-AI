@@ -161,24 +161,35 @@ def get_conversation_data():
         print(f"Error reading the JSON file: {e}")
         return jsonify({"error": "Failed to load conversations"}), 500
 
-@app.route('/delete_story/<title>', methods=['DELETE'])
-def delete_story(title):
+@app.route('/delete_story', methods=['POST'])
+def delete_story():
     try:
-        # Load existing data
-        with open(CONVERSATIONS_FILE_PATH, 'r') as f:
-            conversation_data = json.load(f)
-        
-        # Filter out the story with the given title
-        updated_data = [story for story in conversation_data if story['title'] != title]
+        # Get the title from the request
+        data = request.get_json()
+        title_to_delete = data.get('title')
 
-        # Save the updated data back to the file
-        with open(CONVERSATIONS_FILE_PATH, 'w') as f:
-            json.dump(updated_data, f, indent=4)
+        if not title_to_delete:
+            return jsonify({'success': False, 'message': 'Title not provided'}), 400
 
-        return jsonify({'success': True}), 200
+        # Load the JSON file
+        if not os.path.exists(CONVERSATIONS_FILE_PATH ):
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+
+        with open(CONVERSATIONS_FILE_PATH, 'r') as file:
+            stories = json.load(file)
+
+        # Filter out the story with the matching title
+        updated_stories = [story for story in stories if story['title'] != title_to_delete]
+
+        # Save the updated list back to the file
+        with open(CONVERSATIONS_FILE_PATH , 'w') as file:
+            json.dump(updated_stories, file, indent=4)
+
+        return jsonify({'success': True, 'message': 'Story deleted successfully'})
+
     except Exception as e:
-        print(f"Error deleting story: {e}")
-        return jsonify({'error': 'Failed to delete story'}), 500
+        print(f'Error: {e}')
+        return jsonify({'success': False, 'message': 'An error occurred'}), 500
 
 def load_credentials():
     with open(USER_JSON_PATH, 'r') as f:
@@ -269,6 +280,12 @@ def signout():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    # You can log the error here if needed
+    return render_template('404.html'), 500
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
