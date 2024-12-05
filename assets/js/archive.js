@@ -36,12 +36,17 @@ const createDeleteModal = (title, onConfirm) => {
     });
 
     const modalText = createElement('p');
-    modalText.textContent = `Are you sure you want to delete \n"${title}" ?`;
+    modalText.textContent = `Are you sure you want to delete: \n"${title}" ?`;
 
-    const buttonContainer = createElement('div', ['button-container'], { marginTop: '15px' });
+    const buttonContainer = createElement('div', ['button-container'], {
+        marginTop: '15px',
+        display: 'flex', // Flexbox for centering buttons
+        justifyContent: 'center', // Center buttons horizontally
+        gap: '15px', // Add space between buttons
+    });
 
     // Cancel button
-    const cancelButton = createElement('button', ['btn', 'btn-secondary'], { marginRight: '10px' });
+    const cancelButton = createElement('button', ['btn', 'btn-secondary']);
     cancelButton.textContent = 'Cancel';
     cancelButton.addEventListener('click', () => modal.remove());
 
