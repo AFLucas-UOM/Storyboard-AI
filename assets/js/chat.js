@@ -15,9 +15,11 @@ function toggleInfo() {
     
     // Adjust footer padding based on visibility of info section
     if (isHidden) {
-        footer.style.paddingBottom = "15px";  // Add extra padding when info is shown
+        footer.style.paddingBottom = "-10px";  // Add extra padding when info is shown
+        footer.style.marginBottom = "0px !important";  // Add extra padding when info is shown
     } else {
-        footer.style.paddingBottom = "15px";     // Reset padding when info is hidden
+        footer.style.paddingBottom = "-15px";     // Reset padding when info is hidden
+        footer.style.marginBottom = "0px !important";  // Add extra padding when info is shown
     }
     // Make footer text slightly bold
     footer.style.fontWeight = "500";  // Slightly bold footer text
