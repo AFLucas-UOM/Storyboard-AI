@@ -1041,8 +1041,10 @@ button[type="submit"]:hover {
   height: calc(72vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
   position: relative;
   overflow: hidden; /* Prevents the chatbox itself from growing */
-  width: 100%;
+  width: 110%;
   justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Messages Container - Fixed height with scrolling */
@@ -1054,8 +1056,7 @@ button[type="submit"]:hover {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 65%; /* Slightly increased width */
-  margin: 0 auto; /* Centers the messages container */
+  width: 100%; /* Slightly increased width */
   height: 100%; /* Make sure it fills the available space */
 }
 
@@ -1194,14 +1195,12 @@ margin-right: 10px;
   display: flex;
   align-items: center;
   background-color: white;
-  padding: 15px 50px;
-  padding-top: 5px;
   display: flex;
   gap: 10px;
   border-radius: 8px;
   margin-left: auto;
   margin-right: auto;
-  width: 50%; /* Center the input container */
+  width: 100%; /* Center the input container */
 }
 
 /* Input Field */
@@ -1228,6 +1227,7 @@ margin-right: 10px;
 /* Ensure the input group container is positioned relative */
 .input-group {
   position: relative; /* This ensures the mic button is positioned relative to the input group */
+  margin-bottom: 2px !important;
 }
 
 /* Mic button to stay visible even when the input is focused */
@@ -1257,6 +1257,8 @@ margin-right: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease, opacity 0.3s ease;
   font-size: large;
+  width: 6.5% !important;
+  margin-bottom: 4px !important;
 }
 
 #send-button:hover {
@@ -1282,6 +1284,7 @@ box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1)
   text-align: justify; /* Ensure text is always justified */
   word-wrap: break-word; /* Prevent text from overflowing */
   position: relative; /* Position for the speaker icon */
+  margin-top: 15px !important;
 }
 
 
@@ -1591,7 +1594,6 @@ color: var(--accent-color);     /* Change text/icon color */
 /*----------------------------------------------
 # Archive
 ----------------------------------------------*/
-
 #new-story-button{
   background-color: var(--accent-color); /* Accent color for button */
   color: #ffffff; /* White text */

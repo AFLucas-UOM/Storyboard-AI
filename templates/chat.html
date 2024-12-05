@@ -49,81 +49,82 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.69/vfs_fonts.js"></script>
 </head>
 
-<body class="index-page" style="margin-top: 0px; height: 100%;">
-  <!-- Header Section -->
-  <header id="header" class="header d-flex flex-column justify-content-center" role="banner">
-    <i class="header-toggle d-xl-none bi bi-list" aria-label="Toggle navigation menu"></i>
-    <nav id="navmenu" class="navmenu" role="navigation">
-      <ul>
-        <li><a href="/home"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
-        <li><a href="/profile"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
-        <li><a href="" class="active" aria-current="page"><i class="bi bi-chat-left-dots"></i><span>Chat</span></a></li>
-        <li><a href="/archive"><i class="bi bi-clock-history"></i><span>Archive</span></a></li>
-        <li><a href="#" id="signout-btn"><i class="bi bi-box-arrow-right"></i><span>Signout</span></a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main class="main">
-
-    <!-- Modal Pop-up Box -->
-    <div id="modalPopup" class="modal" style="display: none;">
-        <div class="modal-content">
-            <p id="modal-message"></p>
-        </div>
-    </div>  
-
-    <section class="chatbot">
-      <div class="card-body" style="margin: 0cm; padding: 0cm; height: auto; width: 100%;">
-        <!-- Chat history container -->
-        <div class="chatbox">
-          <div class="messages" id="message-container" aria-live="polite" aria-atomic="true">
-            <!-- Messages will dynamically load here -->
+<body class="index-page" style="margin: 0; height: 100%; display: flex; justify-content: center; align-items: center;">
+    <!-- Header Section -->
+    <header id="header" class="header d-flex flex-column justify-content-center" role="banner">
+      <i class="header-toggle d-xl-none bi bi-list" aria-label="Toggle navigation menu"></i>
+      <nav id="navmenu" class="navmenu" role="navigation">
+        <ul>
+          <li><a href="/home"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
+          <li><a href="/profile"><i class="bi bi-person navicon"></i><span>Profile</span></a></li>
+          <li><a href="" class="active" aria-current="page"><i class="bi bi-chat-left-dots"></i><span>Chat</span></a></li>
+          <li><a href="/archive"><i class="bi bi-clock-history"></i><span>Archive</span></a></li>
+          <li><a href="#" id="signout-btn"><i class="bi bi-box-arrow-right"></i><span>Signout</span></a></li>
+        </ul>
+      </nav>
+    </header>
+  
+    <main class="main d-flex justify-content-center align-items-center" style="height: 100vh; width: 100%;">
+      <!-- Modal Pop-up Box -->
+      <div id="modalPopup" class="modal" style="display: none;">
+          <div class="modal-content">
+              <p id="modal-message"></p>
           </div>
-        </div>
-
-        <!-- User input container -->
-        <div class="input-container">
-          <div class="input-group">
-            <!-- Input field for user message -->
-            <input 
-              type="text" 
-              id="chat-input" 
-              class="form-control" 
-              placeholder="Message Storyboard-AI" 
-              aria-label="Enter your message for Storyboard-AI"
-              style="padding-right: 3rem;" 
-            />
-            
-            <!-- Microphone button for speech recognition -->
+      </div>  
+  
+      <section class="chatbot d-flex flex-column justify-content-center align-items-center" style="width: 100%; max-width: 750px;">
+        <div class="card-body" style="margin: 0; padding: 0; width: 100%;">
+          <!-- Chat history container -->
+          <div class="chatbox border rounded shadow p-3" style="max-height: 60vh; overflow-y: auto; margin-bottom: 1rem;">
+            <div class="messages" id="message-container" aria-live="polite" aria-atomic="true">
+              <!-- Messages will dynamically load here -->
+            </div>
+          </div>
+  
+          <!-- User input container -->
+          <div class="input-container">
+            <div class="input-group mb-3">
+              <!-- Input field for user message -->
+              <input 
+                type="text" 
+                id="chat-input" 
+                class="form-control" 
+                placeholder="Message Storyboard-AI" 
+                aria-label="Enter your message for Storyboard-AI"
+                style="padding-right: 3rem;" 
+              />
+              
+              <!-- Microphone button for speech recognition -->
+              <button 
+                class="btn btn-outline-secondary input-group-text" 
+                type="button" 
+                id="mic-button" 
+                aria-label="Enable voice input"
+              >
+                <i class="bi bi-mic" aria-hidden="true"></i>
+              </button>
+            </div>
+      
+            <!-- Send message button -->
             <button 
-              class="btn btn-outline-secondary input-group-text" 
-              type="button" 
-              id="mic-button" 
-              aria-label="Enable voice input"
+              id="send-button" 
+              class="btn btn-primary w-100" 
+              style="font-size: large;" 
+              aria-label="Send message"
             >
-              <i class="bi bi-mic" aria-hidden="true"></i>
-            </button>
-          </div>
-    
-          <!-- Send message button -->
-          <button 
-            id="send-button" 
-            class="btn btn-primary" 
-            style="font-size: large;" 
-            aria-label="Send message"
-          >
             ↑
           </button>
         </div>
     
         <!-- Disclaimer message -->
-        <p class="message-text text-muted small mt-2">
-            Storyboard-AI may generate content that doesn't fully align with your vision.
-        </p>
-      </div>
-    </section>
-
+          <p class="message-text text-muted small mt-2 text-center">
+              Storyboard-AI may generate content that doesn't fully align with your vision.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+  
   <script>
     // Ensure browser compatibility for SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
