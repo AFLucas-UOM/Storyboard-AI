@@ -1,3 +1,9 @@
+// Function to clean the title
+function cleanTitle(title) {
+    // Regex to remove "Title:" or "Story Title:" at the start, case-insensitive
+    return title.replace(/^(Title:|Story Title:)\s*/i, '').trim();
+}
+
 // Fetch the username from localStorage
 const currentUser = localStorage.getItem('currentuser');
 
@@ -11,6 +17,9 @@ const createElement = (tag, classes = [], styles = {}) => {
 
 // Create modal for delete confirmation
 const createDeleteModal = (title, onConfirm) => {
+    // Clean the title
+    const cleanedTitle = cleanTitle(title);
+
     // Modal container
     const modal = createElement('div', ['delete-modal']);
     Object.assign(modal.style, {
@@ -36,7 +45,7 @@ const createDeleteModal = (title, onConfirm) => {
     });
 
     const modalText = createElement('p');
-    modalText.textContent = `Are you sure you want to delete: \n"${title}" ?`;
+    modalText.textContent = `Are you sure you want to delete: \n"${cleanedTitle}" ?`;
 
     const buttonContainer = createElement('div', ['button-container'], {
         marginTop: '15px',
@@ -71,11 +80,14 @@ const createDeleteModal = (title, onConfirm) => {
 
 // Helper function to create a story card
 const createStoryCard = (title, stories, updateDisplay) => {
+    // Clean the title
+    const cleanedTitle = cleanTitle(title);
+
     const storyCard = createElement('div', ['story-card', 'mb-4', 'p-3', 'border', 'rounded', 'position-relative']);
 
     // Create title
     const titleElement = createElement('h4');
-    titleElement.textContent = title;
+    titleElement.textContent = cleanedTitle;
 
     // Create delete icon (default style)
     const deleteIcon = createElement('i', ['bi', 'bi-trash', 'story-delete-icon'], {
@@ -222,18 +234,23 @@ const displayUserStories = async () => {
         updateStoryDisplay(userStories, '', storyCardsContainer, storyCountElement);
 
         // Listen for search input to filter stories dynamically
-        searchBar.addEventListener('input', (event) => {
-            const searchTerm = event.target.value.toLowerCase();
+        searchBar.addEventListener('input', () => {
+            const searchTerm = searchBar.value.toLowerCase();
             const filteredStories = userStories.filter(story =>
-                story.title.toLowerCase().includes(searchTerm)
+                cleanTitle(story.title).toLowerCase().includes(searchTerm)
             );
             updateStoryDisplay(filteredStories, searchTerm, storyCardsContainer, storyCountElement);
         });
+
+        // Show search icon only when search input is available
+        searchBar.style.display = 'block';
+        searchIcon.style.display = 'block';
+        storyCountElement.style.display = 'block';
+
     } catch (error) {
-        console.error('Error loading stories:', error);
-        document.getElementById('story-cards-container').innerHTML = '<p style="text-align:center; margin-top:20px;">An error occurred while loading your stories. Please try again later.</p>';
+        console.error('Error fetching stories:', error);
     }
 };
 
-// Execute the main function
+// Call displayUserStories on page load
 displayUserStories();
