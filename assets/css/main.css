@@ -1625,7 +1625,7 @@ color: var(--accent-color);     /* Change text/icon color */
 .story-card {
   background-color: white;
   color: var(--accent-color); /* Accent color text */
-  width: 100%; /* Use full width available */
+  width: 95%; /* Use full width available */
   max-width: 1000px; /* Limit maximum width */
   min-width: 500px; /* Set a minimum width */
   margin-bottom: 15px;
@@ -1640,7 +1640,7 @@ color: var(--accent-color);     /* Change text/icon color */
 
 /* Hover effect for story cards */
 .story-card:hover {
-  transform: scale(1.035); /* Slight zoom on hover */
+  transform: scale(1.05); /* Slight zoom on hover */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.09); /* Shadow effect on hover */
 }
 
@@ -1727,4 +1727,17 @@ input:focus, .form-control:focus {
 #loading-spinner {
   text-align: center;
   margin-top: 20px;
+}
+
+.chatbox_2 {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px 20px;
+  background-color: transparent;
+  border: none;
+  height: calc(72vh - 1px); /* Dynamically calculate height based on viewport, adjust for padding or other elements */
+  position: relative;
+  overflow: hidden; /* Prevents the chatbox itself from growing */
+  justify-content: center;
 }

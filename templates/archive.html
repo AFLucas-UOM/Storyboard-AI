@@ -56,39 +56,44 @@
     </header>
   
     <main class="main">
-        <!-- Hero Section -->
-        <section id="hero" class="hero section light-background" aria-labelledby="hero-title">
-            <img src="{{ url_for('serve_assets', filename='img/hero-archive-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg">
-            <div class="container" data-aos="zoom-out">
-                <div class="row">
-                    <div class="col-12">
-                        <h2 id="hero-title" class="position-relative" style="margin-bottom: 150px; margin-top: -150px; position: fixed;">
-                            <!-- Button in Top Right Corner -->
-                            <a href="/chat" id="new-story-button" class="position-absolute top-0 end-0 m-4" style="z-index: 5;">
-                                <i class="bi bi-plus-circle"></i> Create New Story
-                            </a>                            
-            
-                            <!-- Text on Top Left, aligned with the button -->
-                            <div class="position-absolute top-0 start-0 m-4" style="z-index: 5;">
-                                <p class="Archive-Title">Your Story Archive</p> <!-- This text will be dynamically updated (Walter Error Fallback)-->
-                            </div>
-                        </h2>
-                        <div id="container-101"  class="d-flex flex-column align-items-center" style="align-items: flex-start; width: 100%;">
-                           <!-- Search Bar -->
-                            <div class="input-group mb-3" style="width: 80%; max-width: 500px;">
-                                <input type="text" id="search-bar" placeholder="Search your stories..." class="form-control" style="max-width: 800px;" />
-                                <i class="bi bi-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); pointer-events: none; z-index: 999;"></i>
-                            </div>               
-                            <!-- This paragraph will dynamically show the number of previous chats -->
-                            <p id="story-count" class="mb-3" style="font-size: 20px; color: #272829; width: 80%; max-width: auto;"></p>
-                        </div>                        
-                        <!-- Section to display story titles -->
-                        <div id="story-cards-container" class="d-flex flex-column align-items-center"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+      <!-- Hero Section -->
+      <section id="hero" class="hero section light-background" aria-labelledby="hero-title">
+          <img src="{{ url_for('serve_assets', filename='img/hero-archive-bg.jpg') }}" alt="Storyboard-AI Background Image" class="hero-bg">
+          <div class="container" data-aos="zoom-out">
+              <div class="row">
+                  <div class="col-12">
+                      <h2 id="hero-title" class="position-relative" style="margin-bottom: 125px; position: fixed;">
+                          <!-- Button in Top Right Corner -->
+                          <a href="/chat" id="new-story-button" class="position-absolute top-0 end-0 m-4" style="z-index: 5;">
+                              <i class="bi bi-plus-circle"></i> Create New Story
+                          </a>                            
+                          <!-- Text on Top Left, aligned with the button -->
+                          <div class="position-absolute top-0 start-0 m-4" style="z-index: 5;">
+                              <p class="Archive-Title">Your Story Archive</p>
+                          </div>
+                      </h2>
+                      <!-- Card Container -->
+                      <div class="card chatbox_2">
+                          <div id="container-101" class="d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: auto;">
+                              <!-- Search Bar -->
+                              <div class="input-group mb-3" style="width: 80%; max-width: 500px; position: relative;">
+                                  <input type="text" id="search-bar" placeholder="Search your stories..." class="form-control" style="padding-left: 40px;" />
+                                  <i class="bi bi-search" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); pointer-events: none; z-index: 999;"></i>
+                              </div>               
+                              <!-- This paragraph will dynamically show the number of previous chats -->
+                              <p id="story-count" class="mb-3 text-center" style="font-size: 20px; color: #272829; width: 80%; max-width: 800px; padding-left: 0;"></p>
+                          </div>
+                          <!-- Section to display story titles -->
+                          <div id="story-cards-container" class="d-flex flex-column align-items-center overflow-auto" style="height: calc(72vh - 100px); width: 100%;">
+                              <!-- Story cards will be appended here dynamically -->
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+  </main>
+  
 </body>
   
   <!-- Footer Section -->
