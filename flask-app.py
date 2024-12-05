@@ -286,7 +286,6 @@ def handle_error(e):
     # You can log the error here if needed
     return render_template('404.html'), 500
 
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 

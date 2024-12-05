@@ -94,9 +94,9 @@ h6 {
 
 @media (max-width: 1199px) {
   .header {
-    background-color: var(--background-color);
-    border-right: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
-    width: 300px;
+    background-color: var(--nav-mobile-background-color);
+    border-right: 1px none color-mix(in srgb, var(--default-color), transparent 90%);
+    width: 200px;
     left: -100%;
   }
 }
@@ -119,7 +119,7 @@ h6 {
 .header .header-toggle {
   color: var(--contrast-color);
   background-color: var(--accent-color);
-  font-size: 22px;
+  font-size: 23px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,8 +128,8 @@ h6 {
   border-radius: 50%;
   cursor: pointer;
   position: fixed;
-  top: 15px;
-  right: 15px;
+  top: 16px;
+  left: 16px;
   z-index: 9999;
   transition: background-color 0.3s;
 }
@@ -1178,12 +1178,13 @@ margin-right: 10px;
   border-radius: 10px;
   padding: 10px;
   max-width: 75%;
+  margin-right: 15px;
   animation: fadeIn 0.5s ease;
   text-align: right;
 }
 
 .user-icon {
-  width: 100%;
+  width: auto;
   height: 100%;
   max-width: 100%;
   max-height: 100%;
@@ -1643,7 +1644,6 @@ color: var(--accent-color);     /* Change text/icon color */
 /* Hover effect for story cards */
 .story-card:hover {
   transform: scale(1.05); /* Slight zoom on hover */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.09); /* Shadow effect on hover */
 }
 
 .story-card h4 {
@@ -1682,10 +1682,13 @@ input:focus, .form-control:focus {
   min-width: 500px; /* Set a minimum width */
   padding-left: 30px; /* Add space for the icon inside the input */
   background-color: white;
-  border: 2px solid var(--accent-color);
   border-radius: 10px;
   outline: none;
   position: relative; /* Make the icon position relative to the input */
+}
+
+#search-bar:focus {
+  border: 2.25px solid var(--accent-color); /* Blue border on focus */
 }
 
 /* Style the search icon inside the input */

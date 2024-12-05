@@ -75,7 +75,7 @@
       <section class="chatbot d-flex flex-column justify-content-center align-items-center" style="width: 100%; max-width: 750px;">
         <div class="card-body" style="margin: 0; padding: 0; width: 100%;">
           <!-- Chat history container -->
-          <div class="chatbox border rounded shadow p-3" style="max-height: 60vh; overflow-y: auto; margin-bottom: 1rem;">
+          <div class="chatbox border rounded shadow p-3" style="max-height: 60vh; overflow-y: auto; margin-bottom: 0; padding-bottom: 0 !important;">
             <div class="messages" id="message-container" aria-live="polite" aria-atomic="true">
               <!-- Messages will dynamically load here -->
             </div>
@@ -742,7 +742,6 @@
 
                             // Combine all paragraphs into a single story text
                             const story = botMessages.join(" ");
-                            console.log(story);
 
                             // Show the loading GIF
                             const loadingGifMessage = document.createElement("div");
@@ -838,7 +837,7 @@
                                 // Temporarily display "Redoing title"
                                 const titleSpan = titleMessage.querySelector("#story-title");
                                 const originalTitle = titleSpan.textContent;
-                                titleSpan.textContent = "Redoing title...";
+                                titleSpan.textContent = "Rewriting Title...";
 
                                 // Fetch the new title
                                 try {
