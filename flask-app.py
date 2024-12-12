@@ -330,7 +330,7 @@ def query_ollama(prompt):
             start_ollama()
         
         # Construct the command for querying
-        command = [ollama_path, 'run', 'orca-mini:latest'] #tinyllama:1.1b-chat <- testing model
+        command = [ollama_path, 'run', 'tinyllama:1.1b-chat'] #tinyllama:1.1b-chat <- testing model orca-mini:latest <-- actual model we use
         print(f"Sending prompt: {prompt}")  # Debugging log
 
         # Run the subprocess to query Ollama
@@ -412,6 +412,90 @@ def save_conversation():
     except Exception as e:
         print(f"Error saving conversation: {e}")
         return jsonify({"message": "Error saving conversation"}), 500
+    
+@app.route('/update-title', methods=['POST'])
+def update_title():
+    try:
+        # Get the JSON data from the request
+        data = request.get_json()
+        story_id = data.get('story_id')
+        new_title = data.get('newTitle')
+
+        # Check if story_id and newTitle are provided
+        if not story_id or not new_title:
+            return jsonify({"message": "Missing story_id or newTitle"}), 400
+
+        # Read the existing conversations from the file
+        if os.path.exists(CONVERSATIONS_FILE_PATH):
+            with open(CONVERSATIONS_FILE_PATH, 'r') as file:
+                conversations = json.load(file)
+        else:
+            return jsonify({"message": "Conversations file not found"}), 404
+
+        # Find and update the title for the matching story_id
+        updated = False
+        for conversation in conversations:
+            if conversation.get("story_id") == story_id:
+                conversation["title"] = new_title
+                updated = True
+                break
+
+        # If no conversation with the matching story_id is found
+        if not updated:
+            return jsonify({"message": "Story ID not found"}), 404
+
+        # Save the updated conversations back to the JSON file
+        with open(CONVERSATIONS_FILE_PATH, 'w') as file:
+            json.dump(conversations, file, indent=4)
+
+        return jsonify({"message": "Title updated successfully"}), 200
+
+    except Exception as e:
+        print(f"Error updating title: {e}")
+        return jsonify({"message": "Error updating title"}), 500
+    
+@app.route('/update-story', methods=['POST'])
+def update_story():
+    try:
+        # Get the JSON data from the request
+        data = request.get_json()
+        story_id = int(data.get('story_id'))  # Convert story_id to an integer
+        new_story = data.get('story')
+
+        # Check if story_id and new_story are provided
+        if not story_id or not new_story:
+            return jsonify({"message": "Missing story_id or new story content"}), 400
+
+        # Read the existing conversations from the file
+        if os.path.exists(CONVERSATIONS_FILE_PATH):
+            with open(CONVERSATIONS_FILE_PATH, 'r') as file:
+                conversations = json.load(file)
+        else:
+            return jsonify({"message": "Conversations file not found"}), 404
+
+        # Find and update the story for the matching story_id
+        updated = False
+        for conversation in conversations:
+            if conversation.get("story_id") == story_id:
+                conversation["story"] = new_story  # Update the story content
+                updated = True
+                break
+
+        # If no conversation with the matching story_id is found
+        if not updated:
+            return jsonify({"message": "Story ID not found"}), 404
+
+        # Save the updated conversations back to the JSON file
+        with open(CONVERSATIONS_FILE_PATH, 'w') as file:
+            json.dump(conversations, file, indent=4)
+
+        return jsonify({"message": "Story updated successfully"}), 200
+
+    except Exception as e:
+        print(f"Error updating story: {e}")
+        return jsonify({"message": "Error updating story"}), 500
+
+
     
 if __name__ == '__main__':
     app.run(debug=True)
