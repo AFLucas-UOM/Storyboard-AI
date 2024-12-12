@@ -330,7 +330,7 @@ def query_ollama(prompt):
             start_ollama()
         
         # Construct the command for querying
-        command = [ollama_path, 'run', 'orca-mini:latest']
+        command = [ollama_path, 'run', 'orca-mini:latest'] #tinyllama:1.1b-chat <- testing model
         print(f"Sending prompt: {prompt}")  # Debugging log
 
         # Run the subprocess to query Ollama

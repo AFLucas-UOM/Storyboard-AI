@@ -932,11 +932,15 @@
 
                                 // Now proceed to show the summary or full story based on the response
                                 if (response === 'Yes') {
-                                    // Display the summary
-                                    displaySummary();
+                                    // Add a delay before displaying the summary
+                                    setTimeout(() => {
+                                        displaySummary();
+                                    }, 3000); // 3-second delay
                                 } else {
-                                    // Skip the summary, directly move to the full story question
-                                    askFullStory();
+                                    // Add a delay before skipping to the full story question
+                                    setTimeout(() => {
+                                        askFullStory();
+                                    }, 3000); // 3-second delay
                                 }
                             };
 
@@ -1033,95 +1037,98 @@
                                     buttons.remove(); // Remove the buttons
                                 }
 
-                                // Display the full story or a message based on the response
-                                if (response === 'Yes') {
-                                    const fullStoryMessage = document.createElement("div");
-                                    fullStoryMessage.classList.add("message", "bot-message");
-                                    fullStoryMessage.innerHTML = `
+                                // Add a 3-second delay before displaying the full story
+                                setTimeout(() => {
+                                    // Display the full story
+                                    if (response === 'Yes') {
+                                        const fullStoryMessage = document.createElement("div");
+                                        fullStoryMessage.classList.add("message", "bot-message");
+                                        fullStoryMessage.innerHTML = `
+                                            <div class="message-content_bot">
+                                                <div class="message-icon_bot">
+                                                    <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                                </div>
+                                                <div class="message-text">
+                                                    <p>${story}</p>
+                                                    <i class="bi bi-volume-up speaker-icon" onclick="speakText('${story}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                                </div>
+                                            </div>`;
+                                        messageContainer.appendChild(fullStoryMessage);
+                                        messageContainer.scrollTop = messageContainer.scrollHeight;
+                                    }
+
+                                    // Ask the user if they want to save the story as a PDF
+                                    const saveOptionMessage = document.createElement("div");
+                                    saveOptionMessage.classList.add("message", "bot-message");
+                                    saveOptionMessage.innerHTML = `
                                         <div class="message-content_bot">
                                             <div class="message-icon_bot">
                                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                             </div>
                                             <div class="message-text">
-                                                <p>${story}</p>
-                                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('${story}', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                                <p>Would you like to save your story as a PDF?</p>
+                                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to save your story as a PDF? Save Story Button.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                                <button class="btn btn-primary save-pdf-button">Save Story</button>
                                             </div>
                                         </div>`;
-                                    messageContainer.appendChild(fullStoryMessage);
+
+                                    messageContainer.appendChild(saveOptionMessage);
                                     messageContainer.scrollTop = messageContainer.scrollHeight;
-                                }
 
-                                // Ask the user if they want to save the story as a PDF
-                                const saveOptionMessage = document.createElement("div");
-                                saveOptionMessage.classList.add("message", "bot-message");
-                                saveOptionMessage.innerHTML = `
-                                    <div class="message-content_bot">
-                                        <div class="message-icon_bot">
-                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                        </div>
-                                        <div class="message-text">
-                                            <p>Would you like to save your story as a PDF?</p>
-                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('Would you like to save your story as a PDF? Save Story Button.', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
-                                            <button class="btn btn-primary save-pdf-button">Save Story</button>
-                                        </div>
-                                    </div>`;
-
-                                messageContainer.appendChild(saveOptionMessage);
-                                messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                                // Handle the save PDF button click
-                                saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
-                                    generateAndDownloadPDF(title, story);
-                                    saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
-                                };
-
-                                // Display the final message for creating a new story
-                                const finaleMessage = document.createElement("div");
-                                finaleMessage.classList.add("message", "bot-message");
-                                finaleMessage.innerHTML = `
-                                    <div class="message-content_bot">
-                                        <div class="message-icon_bot">
-                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
-                                        </div>
-                                        <div class="message-text">
-                                            <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
-                                            <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
-                                        </div>
-                                    </div>`;
-                                messageContainer.appendChild(finaleMessage);
-                                messageContainer.scrollTop = messageContainer.scrollHeight;
-
-                                // Handle page refresh and saving conversation
-                                document.getElementById("refresh-link").onclick = async (e) => {
-                                    e.preventDefault(); // Prevent the default link behaviour
-
-                                    // Save the conversation
-                                    const currentUser = localStorage.getItem("currentuser") || "Anonymous";
-                                    const conversationData = {
-                                        title: title,
-                                        userName: currentUser,
-                                        story: story
+                                    // Handle the save PDF button click
+                                    saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
+                                        generateAndDownloadPDF(title, story);
+                                        saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
                                     };
 
-                                    try {
-                                        const response = await fetch("/save-conversation", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify(conversationData)
-                                        });
+                                    // Display the final message for creating a new story
+                                    const finaleMessage = document.createElement("div");
+                                    finaleMessage.classList.add("message", "bot-message");
+                                    finaleMessage.innerHTML = `
+                                        <div class="message-content_bot">
+                                            <div class="message-icon_bot">
+                                                <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                            </div>
+                                            <div class="message-text">
+                                                <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
+                                                <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
+                                            </div>
+                                        </div>`;
+                                    messageContainer.appendChild(finaleMessage);
+                                    messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                                        const data = await response.text();
-                                        console.log("Response data:", JSON.parse(data));
+                                    // Handle page refresh and saving conversation
+                                    document.getElementById("refresh-link").onclick = async (e) => {
+                                        e.preventDefault(); // Prevent the default link behaviour
 
-                                        // Refresh the page after saving
-                                        location.reload();
-                                    } catch (error) {
-                                        console.error("Error saving conversation:", error);
+                                        // Save the conversation
+                                        const currentUser = localStorage.getItem("currentuser") || "Anonymous";
+                                        const conversationData = {
+                                            title: title,
+                                            userName: currentUser,
+                                            story: story
+                                        };
 
-                                        // Optionally notify the user if saving failed
-                                        alert("Failed to save the conversation. Please try again.");
-                                    }
-                                };
+                                        try {
+                                            const response = await fetch("/save-conversation", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify(conversationData)
+                                            });
+
+                                            const data = await response.text();
+                                            console.log("Response data:", JSON.parse(data));
+
+                                            // Refresh the page after saving
+                                            location.reload();
+                                        } catch (error) {
+                                            console.error("Error saving conversation:", error);
+
+                                            // Optionally notify the user if saving failed
+                                            alert("Failed to save the conversation. Please try again.");
+                                        }
+                                    };
+                                }, 3000); // 3-second delay
                             };
 
 
