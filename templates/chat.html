@@ -378,8 +378,13 @@
                     messageContainer.scrollTop = messageContainer.scrollHeight;
 
                     // All inputs are gathered, create the final prompt
-                    const finalPrompt = `
-                        what is 1+1?`;
+                    const finalPrompt = `You are a masterful storyteller known for crafting immersive and engaging narratives. Your task is to write a seamless story featuring a character named "${characterName}" set within the theme of "${storyTheme}." The narrative should be vivid and captivating, with well-developed settings, natural dialogue, and compelling events that build toward a "${storyEnding}" ending that feels meaningful and true to the story's tone.
+
+                        Incorporate the following user note(s) where relevant: "${additionalNotes || 'No additional notes provided.'}"
+                        Write the story in one continuous flow, formatted as simple paragraphs with no titles, headings, or structural divisions. The narrative should be concise yet complete, with a maximum of 400 words, and maintain a positive, uplifting tone suitable for readers of all ages
+                        Avoid violence, harm, or any offensive material, focusing instead on inclusivity, thoughtfulness, and imagination. If the story starts to veer negatively, gently guide it back to a respectful and hopeful tone. Your storytelling should leave a lasting, positive impression—captivating readers from the first word to the last.      
+                        
+                        `;
                     // Send the prompt to Ollama
                     fetch("http://127.0.0.1:5000/chat", {
                         method: "POST",
