@@ -80,11 +80,6 @@ const createDeleteModal = (title, onConfirm) => {
 
 // Function to generate and download the PDF
 function generateAndDownloadPDF(title, story) {
-    if (!title || !story) {
-        alert("Title and story content are required to generate the PDF.");
-        return;
-    }
-
     // Generate a static filename
     const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
 
@@ -126,7 +121,7 @@ function generateAndDownloadPDF(title, story) {
         pdfMake.createPdf(docDefinition).download(fileName);
     } catch (error) {
         console.error("Error generating PDF:", error);
-        alert("An error occurred while generating the PDF. Please try again.");
+        alert("An error occurred while generating the PDF. Please try again later.");
     }
 }
 
