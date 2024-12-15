@@ -49,9 +49,9 @@ const createDeleteModal = (title, onConfirm) => {
 
     const buttonContainer = createElement('div', ['button-container'], {
         marginTop: '15px',
-        display: 'flex', // Flexbox for centering buttons
-        justifyContent: 'center', // Center buttons horizontally
-        gap: '15px', // Add space between buttons
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
     });
 
     // Cancel button
@@ -78,6 +78,82 @@ const createDeleteModal = (title, onConfirm) => {
     document.body.appendChild(modal);
 };
 
+// Function to generate and download the PDF
+function generateAndDownloadPDF(title, story) {
+    if (!title || !story) {
+        alert("Title and story content are required to generate the PDF.");
+        return;
+    }
+
+    // Generate a static filename
+    const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
+
+    const docDefinition = {
+        info: {
+            title: title,
+            author: "Storyboard-AI", // Customize the author name
+            subject: "Generated Story", // Short description
+            keywords: "story, AI, PDF" // Tags
+        },
+        content: [
+            { text: title, style: 'header' },
+            { text: story, style: 'story' },
+            { text: "------- The End -------", style: 'footer', alignment: 'center' }
+        ],
+        styles: {
+            header: {
+                fontSize: 20,
+                bold: true,
+                margin: [0, 0, 0, 15]
+            },
+            story: {
+                fontSize: 14,
+                lineHeight: 1.5,
+                margin: [0, 10, 0, 10]
+            },
+            footer: {
+                fontSize: 12,
+                italics: true,
+                margin: [0, 20, 0, 0],
+                color: 'gray'
+            }
+        },
+        pageMargins: [40, 60, 40, 60]
+    };
+
+    try {
+        // Generate PDF and trigger download
+        pdfMake.createPdf(docDefinition).download(fileName);
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("An error occurred while generating the PDF. Please try again.");
+    }
+}
+
+// Helper function to handle the delete action
+const handleDeleteStory = async (title, stories, onCardRemoved) => {
+    try {
+        // Notify backend to delete the story
+        const response = await fetch('/delete_story', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title }), 
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Story deleted successfully');
+            // Update UI
+            onCardRemoved();
+        } else {
+            throw new Error('Failed to delete story on the server');
+        }
+    } catch (error) {
+        console.error('Error deleting story:', error);
+    }
+};
+
 // Helper function to create a story card
 const createStoryCard = (title, stories, updateDisplay) => {
     // Clean the title
@@ -89,6 +165,63 @@ const createStoryCard = (title, stories, updateDisplay) => {
     const titleElement = createElement('h4');
     titleElement.textContent = cleanedTitle;
 
+    // Create download icon (default style)
+    const downloadIcon = createElement('i', ['bi', 'bi-download', 'story-download-icon'], {
+        position: 'absolute',
+        top: '10px',
+        right: '40px', 
+        cursor: 'pointer',
+        display: 'none',
+        width: '24px',
+        height: '24px',
+        borderRadius: '50%',
+        textAlign: 'center',
+        lineHeight: '24px',
+    });
+
+    // Hover effect for the download icon
+    downloadIcon.addEventListener('mouseenter', () => {
+        downloadIcon.style.backgroundColor = 'rgba(128, 128, 128, 0.1)';
+        downloadIcon.style.borderRadius = '10%';
+        downloadIcon.style.paddingLeft = '2px';
+        downloadIcon.style.paddingRight = '2px';
+        downloadIcon.style.paddingTop = '2px';
+    });
+
+    downloadIcon.addEventListener('mouseleave', () => {
+        downloadIcon.style.backgroundColor = '';
+        downloadIcon.style.borderRadius = '50%';
+        downloadIcon.style.paddingLeft = '0px';
+        downloadIcon.style.paddingRight = '0px';
+        downloadIcon.style.paddingTop = '2px';
+    });
+
+    // Download icon click event
+    downloadIcon.addEventListener('click', async () => {
+        try {
+            // Find the storyData by title
+            const storyData = stories.find(s => s.title === title);
+            if (!storyData) {
+                alert("Story data not found.");
+                return;
+            }
+
+            // The JSON uses "story" not "content"
+            const storyContent = storyData.story;
+            if (!storyContent) {
+                alert("No story content available for download.");
+                return;
+            }
+
+            // Generate and download PDF
+            generateAndDownloadPDF(cleanedTitle, storyContent);
+
+        } catch (error) {
+            console.error("Error downloading story:", error);
+            alert("An error occurred while downloading the story. Please try again.");
+        }
+    });
+
     // Create delete icon (default style)
     const deleteIcon = createElement('i', ['bi', 'bi-trash', 'story-delete-icon'], {
         position: 'absolute',
@@ -96,36 +229,31 @@ const createStoryCard = (title, stories, updateDisplay) => {
         right: '10px',
         cursor: 'pointer',
         display: 'none',
-        width: '24px', // Set fixed width for the icon
-        height: '24px', // Set fixed height for the icon
-        borderRadius: '50%', // Circle shape by default
-        textAlign: 'center', // Center the icon
-        lineHeight: '24px', // Vertically align the icon
-        paddingLeft:'2px', // Add padding for width effect
-        paddingRight: '2px', // Symmetrical padding
-        paddingTop: '2px', // Add slight padding on top
+        width: '24px',
+        height: '24px',
+        borderRadius: '50%',
+        textAlign: 'center',
+        lineHeight: '24px',
+        paddingLeft:'2px',
+        paddingRight: '2px',
+        paddingTop: '2px',
     });
-
-    // Append title and delete icon to the card
-    storyCard.appendChild(titleElement);
-    storyCard.appendChild(deleteIcon);
 
     // Hover effect for the delete icon
     deleteIcon.addEventListener('mouseenter', () => {
-        deleteIcon.style.backgroundColor = 'rgba(128, 128, 128, 0.1)'; // Add hover background color
-        deleteIcon.style.borderRadius = '10%'; // Slightly rounded shape
-        deleteIcon.style.paddingLeft = '2px'; // Add padding for width effect
-        deleteIcon.style.paddingRight = '2px'; // Symmetrical padding
-        deleteIcon.style.paddingTop = '2px'; // Add slight padding on top
+        deleteIcon.style.backgroundColor = 'rgba(128, 128, 128, 0.1)';
+        deleteIcon.style.borderRadius = '10%';
+        deleteIcon.style.paddingLeft = '2px';
+        deleteIcon.style.paddingRight = '2px';
+        deleteIcon.style.paddingTop = '2px';
     });
 
     deleteIcon.addEventListener('mouseleave', () => {
-        // Reset styles to default
-        deleteIcon.style.backgroundColor = ''; // Remove hover background color
-        deleteIcon.style.borderRadius = '50%'; // Reset to circular shape
-        deleteIcon.style.paddingLeft = '0px'; // Reset padding
-        deleteIcon.style.paddingRight = '0px'; // Reset padding
-        deleteIcon.style.paddingTop = '2px'; // Reset top padding
+        deleteIcon.style.backgroundColor = '';
+        deleteIcon.style.borderRadius = '50%';
+        deleteIcon.style.paddingLeft = '0px';
+        deleteIcon.style.paddingRight = '0px';
+        deleteIcon.style.paddingTop = '2px';
     });
 
     // Delete icon click event
@@ -135,41 +263,23 @@ const createStoryCard = (title, stories, updateDisplay) => {
         });
     });
 
-    // Show delete icon when hovering over the card
+    // Append title and icons to the card
+    storyCard.appendChild(titleElement);
+    storyCard.appendChild(downloadIcon);
+    storyCard.appendChild(deleteIcon);
+
+    // Show icons when hovering over the card
     storyCard.addEventListener('mouseenter', () => {
+        downloadIcon.style.display = 'block';
         deleteIcon.style.display = 'block';
     });
 
     storyCard.addEventListener('mouseleave', () => {
+        downloadIcon.style.display = 'none';
         deleteIcon.style.display = 'none';
     });
 
     return storyCard;
-};
-
-// Helper function to handle the delete action
-const handleDeleteStory = async (title, stories, onCardRemoved) => {
-    try {
-        // Notify backend to delete the story
-        const response = await fetch('/delete_story', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title }), // Send exact title to backend
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            console.log('Story deleted successfully');
-
-            // Update UI
-            onCardRemoved();
-        } else {
-            throw new Error('Failed to delete story on the server');
-        }
-    } catch (error) {
-        console.error('Error deleting story:', error);
-    }
 };
 
 // Function to update the display of stories
