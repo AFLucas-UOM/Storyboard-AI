@@ -168,7 +168,7 @@ const createStoryCard = (title, stories, updateDisplay) => {
     // Create download icon (default style)
     const downloadIcon = createElement('i', ['bi', 'bi-download', 'story-download-icon'], {
         position: 'absolute',
-        top: '10px',
+        top: '14px',
         right: '40px', 
         cursor: 'pointer',
         display: 'none',
@@ -177,6 +177,9 @@ const createStoryCard = (title, stories, updateDisplay) => {
         borderRadius: '50%',
         textAlign: 'center',
         lineHeight: '24px',
+        paddingLeft:'2px',
+        paddingRight: '2px',
+        paddingTop: '2px',
     });
 
     // Hover effect for the download icon
@@ -225,7 +228,7 @@ const createStoryCard = (title, stories, updateDisplay) => {
     // Create delete icon (default style)
     const deleteIcon = createElement('i', ['bi', 'bi-trash', 'story-delete-icon'], {
         position: 'absolute',
-        top: '10px',
+        top: '14px',
         right: '10px',
         cursor: 'pointer',
         display: 'none',
