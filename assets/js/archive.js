@@ -276,7 +276,6 @@ const createStoryCard = (title, stories, updateDisplay) => {
         downloadIcon.style.display = 'none';
         deleteIcon.style.display = 'none';
     });
-
     return storyCard;
 };
 
