@@ -7,12 +7,161 @@ function cleanTitle(title) {
 // Fetch the username from localStorage
 const currentUser = localStorage.getItem('currentuser');
 
-// Helper function to create a DOM element with classes and styles
+// Helper function to create a DOM element with classes and inline styles
 const createElement = (tag, classes = [], styles = {}) => {
     const element = document.createElement(tag);
     if (classes.length) element.classList.add(...classes);
     Object.assign(element.style, styles);
     return element;
+};
+
+// Create a modal to display the full story
+const createStoryModal = (title, story) => {
+    // Clean up the title
+    const cleanedTitle = cleanTitle(title);
+
+    // Modal overlay
+    const modalOverlay = createElement('div', ['story-modal-overlay'], {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.35)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: '9999',
+        padding: '20px',
+        boxSizing: 'border-box',
+    });
+
+    // Disable background scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Modal container
+    const modalContainer = createElement('div', ['story-modal-container'], {
+        backgroundColor: '#fff',
+        padding: '20px',
+        borderRadius: '8px',
+        maxWidth: '600px',
+        width: '100%',
+        position: 'relative',
+        boxSizing: 'border-box',
+        maxHeight: '80vh',  // Limit height so it doesn't overflow screen
+        overflowY: 'auto',  // Scroll if story is long
+    });
+
+    // Title
+    const titleElement = createElement('h2', [], {
+        fontSize: '18px',
+        color: '#0563BB',
+        marginBottom: '15px'
+    });
+    titleElement.textContent = cleanedTitle;
+
+    // Story text (justified alignment)
+    const storyElement = createElement('p', [], {
+        textAlign: 'justify',
+        lineHeight: '1.5'
+    });
+    storyElement.textContent = story;
+
+    // Container for the close and copy icons
+    const iconContainer = createElement('div', [], {
+        position: 'absolute',
+        top: '15px',
+        right: '18px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px'
+    });
+
+    // Close icon (using Bootstrap icon bi-x)
+    const closeIcon = createElement('i', ['bi', 'bi-x'], {
+        fontSize: '24px',
+        cursor: 'pointer',
+        color: 'grey',
+    });
+
+    // Hover effect on close icon: turn red on hover
+    closeIcon.addEventListener('mouseenter', () => {
+        closeIcon.style.color = '#BB2D3B';
+    });
+    closeIcon.addEventListener('mouseleave', () => {
+        closeIcon.style.color = 'grey';
+    });
+
+    // Close icon click
+    closeIcon.addEventListener('click', () => {
+        // Remove the modal
+        document.body.removeChild(modalOverlay);
+        // Re-enable background scrolling
+        document.body.style.overflow = '';
+    });
+
+    // Copy icon (using Bootstrap icon bi-clipboard)
+    const copyIcon = createElement('i', ['bi', 'bi-copy'], {
+        fontSize: '18px',
+        cursor: 'pointer',
+        color: 'grey'
+    });
+
+    // Hover effect on copy icon
+    copyIcon.addEventListener('mouseenter', () => {
+        copyIcon.style.color = '#0D6EFD'; // a bootstrap-like blue
+    });
+    copyIcon.addEventListener('mouseleave', () => {
+        copyIcon.style.color = 'grey';
+    });
+
+    // Create a small label to show "Copied!" message
+    const copyLabel = createElement('span', [], {
+        fontSize: '12px',
+        color: '#0563BB',
+        display: 'none',      // hidden by default
+        position: 'absolute',
+        top: '40px',
+        right: '0',
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderRadius: '4px',
+        padding: '3px 6px',
+        boxShadow: '0 0 5px rgba(0, 0, 0, 0.15)',
+    });
+    copyLabel.textContent = 'Copied';
+
+    // Copy icon click event
+    copyIcon.addEventListener('click', async () => {
+        try {
+            // Copy both the title and the story
+            await navigator.clipboard.writeText(`${cleanedTitle}\n\n${story}`);
+
+            // Show the "Copied!" label briefly
+            copyLabel.style.display = 'inline';
+            setTimeout(() => {
+                copyLabel.style.display = 'none';
+            }, 1200);
+        } catch (error) {
+            console.error('Failed to copy text:', error);
+            alert('Failed to copy text.');
+        }
+    });
+
+    // Append copyLabel, copyIcon, and closeIcon to the iconContainer
+    iconContainer.appendChild(copyLabel);
+    iconContainer.appendChild(copyIcon);
+    iconContainer.appendChild(closeIcon);
+
+    // Append elements to modal container
+    modalContainer.appendChild(iconContainer);
+    modalContainer.appendChild(titleElement);
+    modalContainer.appendChild(storyElement);
+
+    // Append modalContainer to overlay
+    modalOverlay.appendChild(modalContainer);
+
+    // Finally, append the overlay to the body
+    document.body.appendChild(modalOverlay);
 };
 
 // Create modal for delete confirmation
@@ -45,7 +194,7 @@ const createDeleteModal = (title, onConfirm) => {
     });
 
     const modalText = createElement('p');
-    modalText.textContent = `Are you sure you want to delete: \n"${cleanedTitle}" ?`;
+    modalText.textContent = `Are you sure you want to delete:\n"${cleanedTitle}" ?`;
 
     const buttonContainer = createElement('div', ['button-container'], {
         marginTop: '15px',
@@ -132,7 +281,7 @@ const handleDeleteStory = async (title, stories, onCardRemoved) => {
         const response = await fetch('/delete_story', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title }), 
+            body: JSON.stringify({ title }),
         });
 
         const data = await response.json();
@@ -154,17 +303,20 @@ const createStoryCard = (title, stories, updateDisplay) => {
     // Clean the title
     const cleanedTitle = cleanTitle(title);
 
-    const storyCard = createElement('div', ['story-card', 'mb-4', 'p-3', 'border', 'rounded', 'position-relative']);
+    // Create the card
+    const storyCard = createElement('div', ['story-card', 'mb-4', 'p-3', 'border', 'rounded', 'position-relative'], {
+        cursor: 'pointer' // so user sees it's clickable
+    });
 
-    // Create title
+    // Create title element
     const titleElement = createElement('h4');
     titleElement.textContent = cleanedTitle;
 
-    // Create download icon (default style)
+    // Create download icon
     const downloadIcon = createElement('i', ['bi', 'bi-download', 'story-download-icon'], {
         position: 'absolute',
         top: '14px',
-        right: '40px', 
+        right: '40px',
         cursor: 'pointer',
         display: 'none',
         width: '24px',
@@ -172,12 +324,12 @@ const createStoryCard = (title, stories, updateDisplay) => {
         borderRadius: '50%',
         textAlign: 'center',
         lineHeight: '24px',
-        paddingLeft:'2px',
+        paddingLeft: '2px',
         paddingRight: '2px',
         paddingTop: '2px',
     });
 
-    // Hover effect for the download icon
+    // Hover effect for download icon
     downloadIcon.addEventListener('mouseenter', () => {
         downloadIcon.style.backgroundColor = 'rgba(128, 128, 128, 0.1)';
         downloadIcon.style.borderRadius = '10%';
@@ -185,7 +337,6 @@ const createStoryCard = (title, stories, updateDisplay) => {
         downloadIcon.style.paddingRight = '2px';
         downloadIcon.style.paddingTop = '2px';
     });
-
     downloadIcon.addEventListener('mouseleave', () => {
         downloadIcon.style.backgroundColor = '';
         downloadIcon.style.borderRadius = '50%';
@@ -195,7 +346,10 @@ const createStoryCard = (title, stories, updateDisplay) => {
     });
 
     // Download icon click event
-    downloadIcon.addEventListener('click', async () => {
+    downloadIcon.addEventListener('click', async (e) => {
+        // Prevent the story card click from triggering
+        e.stopPropagation();
+
         try {
             // Find the storyData by title
             const storyData = stories.find(s => s.title === title);
@@ -203,14 +357,11 @@ const createStoryCard = (title, stories, updateDisplay) => {
                 alert("Story data not found.");
                 return;
             }
-
-            // The JSON uses "story" not "content"
             const storyContent = storyData.story;
             if (!storyContent) {
                 alert("No story content available for download.");
                 return;
             }
-
             // Generate and download PDF
             generateAndDownloadPDF(cleanedTitle, storyContent);
 
@@ -220,7 +371,7 @@ const createStoryCard = (title, stories, updateDisplay) => {
         }
     });
 
-    // Create delete icon (default style)
+    // Create delete icon
     const deleteIcon = createElement('i', ['bi', 'bi-trash', 'story-delete-icon'], {
         position: 'absolute',
         top: '14px',
@@ -237,7 +388,7 @@ const createStoryCard = (title, stories, updateDisplay) => {
         paddingTop: '2px',
     });
 
-    // Hover effect for the delete icon
+    // Hover effect for delete icon
     deleteIcon.addEventListener('mouseenter', () => {
         deleteIcon.style.backgroundColor = 'rgba(128, 128, 128, 0.1)';
         deleteIcon.style.borderRadius = '10%';
@@ -245,7 +396,6 @@ const createStoryCard = (title, stories, updateDisplay) => {
         deleteIcon.style.paddingRight = '2px';
         deleteIcon.style.paddingTop = '2px';
     });
-
     deleteIcon.addEventListener('mouseleave', () => {
         deleteIcon.style.backgroundColor = '';
         deleteIcon.style.borderRadius = '50%';
@@ -255,7 +405,10 @@ const createStoryCard = (title, stories, updateDisplay) => {
     });
 
     // Delete icon click event
-    deleteIcon.addEventListener('click', () => {
+    deleteIcon.addEventListener('click', (e) => {
+        // Prevent the story card click from triggering
+        e.stopPropagation();
+
         createDeleteModal(title, async () => {
             await handleDeleteStory(title, stories, () => storyCard.remove());
         });
@@ -271,11 +424,23 @@ const createStoryCard = (title, stories, updateDisplay) => {
         downloadIcon.style.display = 'block';
         deleteIcon.style.display = 'block';
     });
-
     storyCard.addEventListener('mouseleave', () => {
         downloadIcon.style.display = 'none';
         deleteIcon.style.display = 'none';
     });
+
+    // Click on the story card to open the modal with the full story
+    storyCard.addEventListener('click', () => {
+        // Find the story data
+        const storyData = stories.find(s => s.title === title);
+        if (!storyData) {
+            alert("Story data not found for display.");
+            return;
+        }
+        // Show the full story in a popup modal
+        createStoryModal(storyData.title, storyData.story);
+    });
+
     return storyCard;
 };
 
@@ -294,9 +459,13 @@ const updateStoryDisplay = (stories, searchTerm, container, countElement) => {
     // Display stories or a "no stories" message
     if (stories.length) {
         const fragment = document.createDocumentFragment();
-        stories.forEach(story => fragment.appendChild(createStoryCard(story.title, stories, (filteredStories, term) => {
-            updateStoryDisplay(filteredStories, term, container, countElement);
-        })));
+        stories.forEach(story => 
+            fragment.appendChild(
+                createStoryCard(story.title, stories, (filteredStories, term) => {
+                    updateStoryDisplay(filteredStories, term, container, countElement);
+                })
+            )
+        );
         container.appendChild(fragment);
     } else {
         const noStoriesMessage = createElement('p', [], { textAlign: 'center', fontStyle: 'italic' });
