@@ -79,7 +79,7 @@ const createStoryModal = (title, story) => {
 
     // Close icon (using Bootstrap icon bi-x)
     const closeIcon = createElement('i', ['bi', 'bi-x'], {
-        fontSize: '24px',
+        fontSize: '25px',
         cursor: 'pointer',
         color: 'grey',
     });
@@ -451,7 +451,14 @@ const updateStoryDisplay = (stories, searchTerm, container, countElement) => {
 
     // Update count message
     if (searchTerm) {
-        countElement.textContent = `There’s ${stories.length} story title${stories.length === 1 ? '' : 's'} with “${searchTerm}”`;
+        countElement.textContent = `There ${
+            stories.length === 1 ? 'is' : 'are'
+          } ${stories.length} story title${
+            stories.length === 1 ? '' : 's'
+          } with ${
+            searchTerm.trim().split(/\s+/).length >= 2 ? 'the words ' : ''
+          }"${searchTerm}"`;
+          
     } else {
         countElement.textContent = `You created ${stories.length} previous ${stories.length === 1 ? 'story' : 'stories'} with Storyboard-AI`;
     }
