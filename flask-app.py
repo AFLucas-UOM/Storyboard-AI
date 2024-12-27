@@ -494,8 +494,6 @@ def update_story():
     except Exception as e:
         print(f"Error updating story: {e}")
         return jsonify({"message": "Error updating story"}), 500
-
-
     
 if __name__ == '__main__':
     app.run(debug=True)
