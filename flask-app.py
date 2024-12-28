@@ -4,6 +4,13 @@ from werkzeug.utils import secure_filename
 from datetime import timedelta
 import os, json, bleach # sanitized input
 import subprocess, sys, time, psutil
+import torch
+from diffusers import StableDiffusionPipeline
+import os
+from PIL import Image
+from upscaler import iterative_upscale  # Import your upscaling function
+from authtoken import auth_token
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
@@ -14,6 +21,12 @@ CONVERSATIONS_FILE_PATH = os.path.join('json', 'conversations.json') # Path to t
 DEFAULT_PFP = 'default.png'  # Default Profile Picture
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit for profile pictures
+
+# Define the path to save generated images
+GENERATED_IMAGES_FOLDER = os.path.join('static', 'img', 'GeneratedImages')
+
+# Create the folder if it doesn't exist
+os.makedirs(GENERATED_IMAGES_FOLDER, exist_ok=True)
 
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
@@ -43,6 +56,35 @@ def authenticate_user(email, password):
 # Sanitize input to avoid XSS
 def sanitize_input(input_data):
     return bleach.clean(input_data)
+
+# Load the Stable Diffusion model
+def load_model():
+    model_id = "CompVis/stable-diffusion-v1-4"
+    if torch.cuda.is_available():
+        device = "cuda"
+        dtype = torch.float16
+    elif torch.backends.mps.is_available():
+        device = "mps"
+        dtype = torch.float16
+    else:
+        device = "cpu"
+        dtype = torch.float32
+
+    print(f"Using device: {device}")
+    try:
+        pipe = StableDiffusionPipeline.from_pretrained(
+            model_id,
+            torch_dtype=dtype,
+            use_auth_token=auth_token  # Replace with your token
+        )
+        pipe.to(device)
+        return pipe, device
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None, None
+
+# Initialise model and device
+model, device = load_model()
 
 # Main route (Home Page)
 @app.route('/')
@@ -494,6 +536,48 @@ def update_story():
     except Exception as e:
         print(f"Error updating story: {e}")
         return jsonify({"message": "Error updating story"}), 500
+
+@app.route('/generate', methods=['POST'])
+def generate_image():
+    """Generate and upscale the image using the prompt sent from HTML."""
+    if not model:
+        return jsonify({"error": "Model not loaded"}), 500
+
+    # Get the prompt and story_id from the request
+    data = request.json
+    prompt = data.get("prompt")
+    story_id = data.get("story_id")  # Get the story_id from the request
+    if not prompt or not story_id:
+        return jsonify({"error": "Prompt and story_id are required"}), 400
+
+    try:
+        # Run model inference
+        if device == "cuda":
+            with torch.autocast("cuda"), torch.no_grad():
+                result = model(prompt, guidance_scale=8.5)
+        else:
+            with torch.no_grad():
+                result = model(prompt, guidance_scale=8.5)
+
+        # Save the generated image locally with the story_id as the filename
+        image = result.images[0]
+        generated_image_path = os.path.join(GENERATED_IMAGES_FOLDER, f"{story_id}.png")
+        image.save(generated_image_path)
+
+        # Upscale the image
+        image = Image.open(generated_image_path).convert("RGB")
+        upscaled_image = iterative_upscale(image, scale_factor=3.0, steps=2)
+
+        # Save the upscaled image with the story_id
+        upscaled_image_path = os.path.join(GENERATED_IMAGES_FOLDER, f"{story_id}_upscaled.png")
+        upscaled_image.save(upscaled_image_path)
+
+        # Return the relative URL path (not the file system path)
+        upscaled_image_url = f"/static/img/GeneratedImages/{story_id}_upscaled.png"
+        return jsonify({"message": "Image generated and upscaled successfully", "image_url": upscaled_image_url})
+    except Exception as e:
+        print(f"Error generating image: {e}")
+        return jsonify({"error": "Failed to generate image"}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)

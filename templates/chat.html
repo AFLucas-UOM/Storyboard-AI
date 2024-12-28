@@ -803,7 +803,7 @@
                             // Generate a random 8-digit number for the story ID
                             const story_id = Math.floor(10000000 + Math.random() * 90000000);
 
-                            // Log the generated story ID (optional for debugging)
+                            // Log the generated story ID
                             console.log("Generated Story ID:", story_id);
 
                             // Store the story_id in localStorage for future use
@@ -867,13 +867,9 @@
                             };
 
                             // Call the function to save the conversation
-                            await saveConversation();
+                            await saveConversation();                                                        
 
-
-                            // SAVE STORY HERE COMBINE ALL PARAGPHS and save - when redo, combine all paragraphs AGAIN and save title - paragraph 
-                            // ON PARAGRAPH REDO, RE-SAVE FULL STORY IF ID EXISTS, ELSE DO NOTHING AND LET IT FLOW NORMALLY - so if still generating story nothing changes
-                            // but if story changes after title generated then we can save it safely.
-
+                            
                             // Generate the story summary
                             const summaryPrompt = `You are a summarizer, tasked with condensing the following story into 100 words or less. Your role is to provide a concise, clear overview of the plot, highlighting the main events, central conflict, and resolution. Story: "${story}"`;
                                 const summaryResponse = await fetch("http://127.0.0.1:5000/chat", {
@@ -993,7 +989,111 @@
                             const speakerIcon = titleMessage.querySelector("#speaker-icon");
                             speakerIcon.onclick = () => speakText(title, speakerIcon);
 
+                            // Show the "Image is being generated" message for 2 seconds
+                            const imageGenerationMessage = document.createElement("div");
+                            imageGenerationMessage.classList.add("message", "bot-message");
+                            imageGenerationMessage.innerHTML = `
+                                <div class="message-content_bot">
+                                    <div class="message-icon_bot">
+                                        <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                    </div>
+                                    <div class="message-text">
+                                        <p>Image is being generated for the story...</p>
+                                    </div>
+                                </div>`;
+                            messageContainer.appendChild(imageGenerationMessage);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
 
+                            // Remove the message after 2 seconds
+                            setTimeout(() => {
+                                messageContainer.removeChild(imageGenerationMessage);
+                            }, 2000);
+
+                            // Show the loading GIF while the image is being generated
+                            const loadingGifMessage1 = document.createElement("div");
+                            loadingGifMessage1.classList.add("message", "bot-message");
+                            loadingGifMessage1.innerHTML = `
+                                    <div class="message-content_bot">
+                                        <div class="message-icon_bot">
+                                            <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                        </div>
+                                        <div class="message-text">
+                                            <img src="{{ url_for('serve_assets', filename='img/loading.gif') }}" 
+                                                alt="Loading..." 
+                                                style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                                        </div>
+                                    </div>`;
+                            messageContainer.appendChild(loadingGifMessage1);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+
+                            // Generate the image prompt from the LLM based on the story
+                            const generateImagePrompt = async () => {
+                                const imagePrompt = `Based on the following story, generate a prompt for an image generation model, make sure the prompt is only 1 sentence and ecapsulates this story: ${story}`;
+                                
+                                try {
+                                    const response = await fetch("http://127.0.0.1:5000/chat", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ prompt: imagePrompt }),
+                                    });
+
+                                    const result = await response.json();
+                                    return result.response || "Default image prompt";
+                                } catch (error) {
+                                    console.error("Error generating image prompt:", error);
+                                    return "Failed to generate image prompt.";
+                                }
+                            };
+
+                            // Get the image prompt from the LLM
+                            const imagePromptFromLLM = await generateImagePrompt();
+
+                            const generateImage = async () => {
+                                try {
+                                    const response = await fetch("/generate", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({ 
+                                            prompt: imagePromptFromLLM,
+                                            story_id: story_id, // Send the story_id in the request 
+                                        }),
+                                    });
+
+                                    const imageData = await response.json();
+
+                                    if (imageData.image_url) {
+                                        // Remove the loading GIF once the image is ready
+                                        messageContainer.removeChild(loadingGifMessage1);
+
+                                        // Display the generated image on the page
+                                        const imageMessage = document.createElement("div");
+                                        imageMessage.classList.add("message", "bot-message");
+                                        imageMessage.innerHTML = `
+                                            <div class="message-content_bot">
+                                                <div class="message-icon_bot">
+                                                    <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
+                                                </div>
+                                                <div class="message-text">
+                                                    <img src="${imageData.image_url}" alt="Generated Image" style="width: 100%; height: auto;">
+                                                </div>
+                                            </div>`;
+                                        messageContainer.appendChild(imageMessage);
+                                        messageContainer.scrollTop = messageContainer.scrollHeight;
+                                    } else {
+                                        alert("Error generating image");
+                                    }
+
+                                } catch (error) {
+                                    console.error("Error generating image:", error);
+                                    alert("Failed to generate the image. Please try again.");
+                                }
+                            };
+
+                            // Call the function to generate the image with the LLM-generated prompt
+                            await generateImage();
 
                             await delay(5000);
 
@@ -1196,7 +1296,8 @@
 
                                     // Handle the save PDF button click
                                     saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
-                                        generateAndDownloadPDF(title, story);
+                                        const upscaledImageUrl = data.image_url;  // This will be "/static/img/GeneratedImages/{story_id}_upscaled.png"
+                                        generateAndDownloadPDF(title, story, story_id, upscaledImageUrl);
                                         saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
                                     };
 
@@ -1233,50 +1334,78 @@
                             return new Promise(resolve => setTimeout(resolve, ms));
                         }
 
+                        // Function to fetch an image and convert it to a Base64 data URL
+                        async function fetchImageAsBase64(imageUrl) {
+                            try {
+                                const response = await fetch(imageUrl);
+                                const blob = await response.blob();
+
+                                return new Promise((resolve, reject) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.onerror = reject;
+                                    reader.readAsDataURL(blob);
+                                });
+                            } catch (error) {
+                                console.error("Error fetching image:", error);
+                                throw new Error("Failed to fetch the image");
+                            }
+                        }
+
                         // Function to generate and download the PDF
-                        function generateAndDownloadPDF(title, story) {
-                            if (!title || !story) {
-                                alert("Title and story content are required to generate the PDF.");
+                        async function generateAndDownloadPDF(title, story, story_id, upscaledImageUrl) {
+                            if (!title || !story || !story_id) {
+                                alert("Title, story content, and story ID are required to generate the PDF.");
                                 return;
                             }
 
-                            // Generate a static filename
-                            const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
-
-                            const docDefinition = {
-                                info: {
-                                    title: title,
-                                    author: "Storyboard-AI", // Customize the author name
-                                    subject: "Generated Story", // Short description
-                                    keywords: "story, AI, PDF" // Tags
-                                },
-                                content: [
-                                    { text: title, style: 'header' },
-                                    { text: story, style: 'story' },
-                                    { text: "------- The End -------", style: 'footer', alignment: 'center' }
-                                ],
-                                styles: {
-                                    header: {
-                                        fontSize: 20,
-                                        bold: true,
-                                        margin: [0, 0, 0, 15]
-                                    },
-                                    story: {
-                                        fontSize: 14,
-                                        lineHeight: 1.5,
-                                        margin: [0, 10, 0, 10]
-                                    },
-                                    footer: {
-                                        fontSize: 12,
-                                        italics: true,
-                                        margin: [0, 20, 0, 0],
-                                        color: 'gray'
-                                    }
-                                },
-                                pageMargins: [40, 60, 40, 60] // Top, right, bottom, left margins
-                            };
-
                             try {
+                                // Fetch the image as a Base64 data URL
+                                const imageBase64 = await fetchImageAsBase64(upscaledImageUrl);
+
+                                // Generate a static filename
+                                const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
+
+                                const docDefinition = {
+                                    info: {
+                                        title: title,
+                                        author: "Storyboard-AI", // Customise the author name
+                                        subject: "Generated Story", // Short description
+                                        keywords: "story, AI, PDF" // Tags
+                                    },
+                                    content: [
+                                        { text: title, style: 'header' },
+                                        { text: story, style: 'story' },
+                                        // Add the base64 image to the PDF
+                                        {
+                                            image: imageBase64,
+                                            width: 300, // Adjust the image width as needed
+                                            alignment: 'center', // Centre the image
+                                            margin: [0, 20, 0, 20] // Add margin for spacing
+                                        },
+                                        { text: "------- The End -------", style: 'footer', alignment: 'center' }
+                                    ],
+                                    styles: {
+                                        header: {
+                                            fontSize: 20,
+                                            bold: true,
+                                            margin: [0, 0, 0, 15]
+                                        },
+                                        story: {
+                                            fontSize: 14,
+                                            lineHeight: 1.5,
+                                            margin: [0, 10, 0, 10]
+                                        },
+                                        footer: {
+                                            fontSize: 12,
+                                            italics: true,
+                                            margin: [0, 20, 0, 0],
+                                            color: 'gray'
+                                        }
+                                    },
+                                    pageMargins: [40, 60, 40, 60] // Top, right, bottom, left margins
+                                };
+
                                 // Generate PDF and trigger download
                                 pdfMake.createPdf(docDefinition).download(fileName);
                             } catch (error) {
@@ -1284,6 +1413,8 @@
                                 alert("An error occurred while generating the PDF. Please try again.");
                             }
                         }
+
+
 
                     })
                     .catch(error => {
