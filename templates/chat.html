@@ -1067,6 +1067,10 @@
                                     if (imageData.image_url) {
                                         // Remove the loading GIF once the image is ready
                                         messageContainer.removeChild(loadingGifMessage1);
+                                        console.log("The image url is: ", imageData.image_url);
+
+                                        // Save the URL to localStorage
+                                        localStorage.setItem("upscaledImageUrl", imageData.image_url);
 
                                         // Display the generated image on the page
                                         const imageMessage = document.createElement("div");
@@ -1091,6 +1095,7 @@
                                     alert("Failed to generate the image. Please try again.");
                                 }
                             };
+
 
                             // Call the function to generate the image with the LLM-generated prompt
                             await generateImage();
@@ -1296,10 +1301,15 @@
 
                                     // Handle the save PDF button click
                                     saveOptionMessage.querySelector(".save-pdf-button").onclick = () => {
-                                        const upscaledImageUrl = data.image_url;  // This will be "/static/img/GeneratedImages/{story_id}_upscaled.png"
-                                        generateAndDownloadPDF(title, story, story_id, upscaledImageUrl);
-                                        saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
+                                        const upscaledImageUrl = localStorage.getItem("upscaledImageUrl"); // Retrieve the saved URL
+                                        if (upscaledImageUrl) {
+                                            generateAndDownloadPDF(title, story, story_id, upscaledImageUrl);
+                                            saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
+                                        } else {
+                                            alert("Upscaled image URL is missing. Please generate the image again.");
+                                        }
                                     };
+
 
                                     // Display the final message for creating a new story
                                     const finaleMessage = document.createElement("div");
@@ -1360,6 +1370,7 @@
                             }
 
                             try {
+                                console.log("Image URL:", upscaledImageUrl);
                                 // Fetch the image as a Base64 data URL
                                 const imageBase64 = await fetchImageAsBase64(upscaledImageUrl);
 

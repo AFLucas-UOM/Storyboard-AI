@@ -588,6 +588,11 @@ def generate_image():
 
         # Return the relative URL path (not the file system path)
         upscaled_image_url = f"/static/img/GeneratedImages/{story_id}_upscaled.png"
+        print("Generated image path:", generated_image_path)
+        print("Upscaled image path:", upscaled_image_path)
+        print("Upscaled image URL:", upscaled_image_url)
+
+
         return jsonify({"message": "Image generated and upscaled successfully", "image_url": upscaled_image_url})
     except Exception as e:
         print(f"Error generating image: {e}")
