@@ -598,5 +598,26 @@ def generate_image():
         print(f"Error generating image: {e}")
         return jsonify({"error": "Failed to generate image"}), 500
     
+@app.route('/delete-image', methods=['POST'])
+def delete_image():
+    data = request.get_json()
+    image_url = data.get('image_url')
+
+    if not image_url:
+        return jsonify({"success": False, "message": "No image URL provided."})
+
+    # Extract the file path from the URL
+    image_path = os.path.join(app.root_path, image_url.lstrip('/'))
+
+    try:
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            return jsonify({"success": True, "message": "Image deleted successfully."})
+        else:
+            return jsonify({"success": False, "message": "Image file not found."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
+    
 if __name__ == '__main__':
     app.run(debug=True)
