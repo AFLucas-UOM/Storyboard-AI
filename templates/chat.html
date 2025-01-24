@@ -1049,30 +1049,34 @@
                             // Get the image prompt from the LLM
                             const imagePromptFromLLM = await generateImagePrompt();
 
-                            const generateImage = async () => {
+                            // Generate the image with redo functionality
+                            const generateImageWithRedo = async () => {
                                 try {
                                     const response = await fetch("/generate", {
                                         method: "POST",
                                         headers: {
                                             "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({ 
+                                        body: JSON.stringify({
                                             prompt: imagePromptFromLLM,
-                                            story_id: story_id, // Send the story_id in the request 
+                                            story_id: story_id, // Send the story_id in the request
                                         }),
                                     });
 
                                     const imageData = await response.json();
 
                                     if (imageData.image_url) {
-                                        // Remove the loading GIF once the image is ready
-                                        messageContainer.removeChild(loadingGifMessage1);
-                                        console.log("The image url is: ", imageData.image_url);
+                                        // Remove the loading GIF if it exists
+                                        if (loadingGifMessage1 && messageContainer.contains(loadingGifMessage1)) {
+                                            messageContainer.removeChild(loadingGifMessage1);
+                                        }
+
+                                        console.log("The image URL is: ", imageData.image_url);
 
                                         // Save the URL to localStorage
                                         localStorage.setItem("upscaledImageUrl", imageData.image_url);
 
-                                        // Display the generated image on the page
+                                        // Create a container for the image and redo button
                                         const imageMessage = document.createElement("div");
                                         imageMessage.classList.add("message", "bot-message");
                                         imageMessage.innerHTML = `
@@ -1084,21 +1088,91 @@
                                                     <img src="${imageData.image_url}" alt="Generated Image" style="width: 100%; height: auto;">
                                                 </div>
                                             </div>`;
+
+                                        // Add the redo button below the image
+                                        const redoButton = document.createElement("button");
+                                        redoButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Redo`;
+                                        redoButton.classList.add("redo-button", "btn", "btn-outline-primary", "btn-sm"); // Styling for the button
+                                        redoButton.style.marginTop = "10px"; // Add spacing
+                                        redoButton.onclick = async () => {
+                                            await redoImage(imageMessage, imageData.image_url);
+                                        };
+
+                                        // Append the redo button to the message content
+                                        const messageContent = imageMessage.querySelector(".message-content_bot");
+                                        messageContent.appendChild(redoButton);
+
+                                        // Append the entire image message to the container
                                         messageContainer.appendChild(imageMessage);
                                         messageContainer.scrollTop = messageContainer.scrollHeight;
                                     } else {
                                         alert("Error generating image");
                                     }
-
                                 } catch (error) {
                                     console.error("Error generating image:", error);
                                     alert("Failed to generate the image. Please try again.");
                                 }
                             };
 
+                            // Function to handle redo logic
+                            const redoImage = async (imageMessage, originalImageUrl) => {
+                                try {
+                                    // Temporarily show loading feedback
+                                    const imageElement = imageMessage.querySelector(".message-text img");
+                                    imageElement.src = "/assets/img/loading.gif";
 
-                            // Call the function to generate the image with the LLM-generated prompt
-                            await generateImage();
+                                    // Delete the existing image on the server
+                                    const deleteResponse = await fetch("/delete-image", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({ image_url: originalImageUrl }),
+                                    });
+
+                                    const deleteResult = await deleteResponse.json();
+                                    if (!deleteResult.success) {
+                                        throw new Error("Failed to delete the previous image.");
+                                    }
+
+                                    // Generate a new image
+                                    const newImageResponse = await fetch("/generate", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                            prompt: imagePromptFromLLM,
+                                            story_id: story_id, // Send the story_id in the request
+                                        }),
+                                    });
+
+                                    const newImageData = await newImageResponse.json();
+
+                                    if (newImageData.image_url) {
+                                        // Append a query string (timestamp) to the image URL to avoid caching issues
+                                        const newImageUrl = `${newImageData.image_url}?t=${new Date().getTime()}`;
+
+                                        // Update the image in the DOM with the new URL
+                                        imageElement.src = newImageUrl;
+
+                                        // Save the new URL to localStorage
+                                        localStorage.setItem("upscaledImageUrl", newImageUrl);
+
+                                        console.log("New image generated:", newImageUrl);
+                                    } else {
+                                        throw new Error("Failed to generate the new image.");
+                                    }
+                                } catch (error) {
+                                    console.error("Error during image redo:", error);
+                                    alert("Failed to redo the image. Please try again.");
+                                }
+                            };
+
+
+                            // Call the function to generate the image with the redo button
+                            await generateImageWithRedo();
+
 
                             await delay(5000);
 
