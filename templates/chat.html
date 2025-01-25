@@ -571,9 +571,6 @@
                             };
                         }
 
-
-
-
                         function rewriteParagraph(paragraph) {
                             return new Promise(resolve => {
                                 // Define a stronger prompt to rewrite the paragraph
@@ -767,7 +764,6 @@
                         }
 
                         (async function () {
-
                             // Proceed with the typing animation
                             for (let i = 0; i < botMessages.length; i++) {
                                 const typingMessage = showTypingAnimation(botMessages[i]); // Create a new element for each message
@@ -1194,9 +1190,9 @@
                                         onclick="speakText('Would you like to see the summary of the story?', this)" 
                                         style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);">
                                         </i>
-                                        <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                                            <button class="story-option-button story-option-button-yes">Yes</button>
-                                            <button class="story-option-button story-option-button-no">No</button>
+                                        <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; margin-left: 10px;">
+                                            <button class="story-option-button story-option-button-yes" style="background-color: #2E6F40 !important; color: white !important;">Yes</button>
+                                            <button class="story-option-button story-option-button-no" style="background-color: #C82333 !important; color: white !important;">No</button>
                                         </div>
                                     </div>
                                 </div>`;
@@ -1289,9 +1285,9 @@
                                             onclick="speakText('Would you like to see the full story?', this)" 
                                             style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);">
                                             </i>
-                                            <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
-                                                <button class="story-option-button story-option-button-yes">Yes</button>
-                                                <button class="story-option-button story-option-button-no">No</button>
+                                            <div class="story-option-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; margin-left: 10px;">
+                                                <button class="story-option-button story-option-button-yes" style="background-color: #2E6F40 !important; color: white !important;">Yes</button>
+                                                <button class="story-option-button story-option-button-no" style="background-color: #C82333 !important; color: white !important;">No</button>
                                             </div>
                                         </div>
                                     </div>`;
@@ -1498,8 +1494,6 @@
                                 alert("An error occurred while generating the PDF. Please try again.");
                             }
                         }
-
-
 
                     })
                     .catch(error => {
