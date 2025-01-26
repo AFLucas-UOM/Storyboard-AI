@@ -24,7 +24,7 @@
 
 ### Media Generation  
 
-- **Image and Video Integration**: AI-generated visuals and videos are embedded into the story creation process to enhance storytelling.  
+- **Image Integration**: AI-generated visuals are embedded into the story creation process to enhance storytelling.  
 - **Interactive Animations**: Enhances the story presentation with animated elements.
 
 ## Motivation
