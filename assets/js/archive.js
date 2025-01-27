@@ -228,44 +228,56 @@ const createDeleteModal = (title, onConfirm) => {
 };
 
 // Function to generate and download the PDF
-function generateAndDownloadPDF(title, story) {
+async function generateAndDownloadPDF(title, story, storyId) {
     // Generate a static filename
     const fileName = `${title.replace(/\s+/g, '_')}.pdf`;
 
-    const docDefinition = {
-        info: {
-            title: title,
-            author: "Storyboard-AI", // Customize the author name
-            subject: "Generated Story", // Short description
-            keywords: "story, AI, PDF" // Tags
-        },
-        content: [
-            { text: title, style: 'header' },
-            { text: story, style: 'story' },
-            { text: "------- The End -------", style: 'footer', alignment: 'center' }
-        ],
-        styles: {
-            header: {
-                fontSize: 20,
-                bold: true,
-                margin: [0, 0, 0, 15]
-            },
-            story: {
-                fontSize: 14,
-                lineHeight: 1.5,
-                margin: [0, 10, 0, 10]
-            },
-            footer: {
-                fontSize: 12,
-                italics: true,
-                margin: [0, 20, 0, 0],
-                color: 'gray'
-            }
-        },
-        pageMargins: [40, 60, 40, 60]
-    };
+    // Construct the image path based on the story_id
+    const imagePath = `../static/img/GeneratedImages/${storyId}_upscaled.png`;
 
     try {
+        // Fetch and convert the image to a base64 data URL
+        const base64Image = await loadImageAsBase64(imagePath);
+
+        const docDefinition = {
+            info: {
+                title: title,
+                author: "Storyboard-AI", // Customise the author name
+                subject: "Generated Story", // Short description
+                keywords: "story, AI, PDF" // Tags
+            },
+            content: [
+                { text: title, style: 'header' },
+                { text: story, style: 'story', alignment: 'justify' },
+                {
+                    image: base64Image, // Include the image as a base64 string
+                    width: 300, // Adjust the width as needed
+                    alignment: 'center', // Centre the image
+                    margin: [0, 20, 0, 20] // Add spacing around the image
+                },
+                { text: "------- The End -------", style: 'footer', alignment: 'center' }
+            ],
+            styles: {
+                header: {
+                    fontSize: 20,
+                    bold: true,
+                    margin: [0, 0, 0, 15]
+                },
+                story: {
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    margin: [0, 10, 0, 10]
+                },
+                footer: {
+                    fontSize: 12,
+                    italics: true,
+                    margin: [0, 20, 0, 0],
+                    color: 'gray'
+                }
+            },
+            pageMargins: [40, 60, 40, 60]
+        };
+
         // Generate PDF and trigger download
         pdfMake.createPdf(docDefinition).download(fileName);
     } catch (error) {
@@ -273,6 +285,23 @@ function generateAndDownloadPDF(title, story) {
         alert("An error occurred while generating the PDF. Please try again later.");
     }
 }
+
+// Helper function to load an image and convert it to a base64 data URL
+async function loadImageAsBase64(imagePath) {
+    const response = await fetch(imagePath);
+    if (!response.ok) {
+        throw new Error(`Failed to load image: ${imagePath}`);
+    }
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+
 
 // Helper function to handle the delete action
 const handleDeleteStory = async (title, stories, onCardRemoved) => {
@@ -351,25 +380,38 @@ const createStoryCard = (title, stories, updateDisplay) => {
         e.stopPropagation();
 
         try {
-            // Find the storyData by title
-            const storyData = stories.find(s => s.title === title);
-            if (!storyData) {
-                alert("Story data not found.");
+            // Fetch the conversations.json file
+            const response = await fetch('/assets/json/conversations.json');
+            if (!response.ok) {
+                throw new Error("Failed to fetch conversations.json");
+            }
+
+            const conversations = await response.json();
+
+            // Match the uncleaned title to find the story_id
+            const matchedStory = conversations.find(conversation => conversation.title === title);
+            if (!matchedStory) {
+                alert("No matching story found in conversations.json.");
                 return;
             }
-            const storyContent = storyData.story;
+
+            const storyId = matchedStory.story_id; // Extract story_id
+            const storyContent = stories.find(s => s.title === title)?.story; // Get the story content
+
             if (!storyContent) {
                 alert("No story content available for download.");
                 return;
             }
+
             // Generate and download PDF
-            generateAndDownloadPDF(cleanedTitle, storyContent);
+            generateAndDownloadPDF(cleanedTitle, storyContent, storyId);
 
         } catch (error) {
             console.error("Error downloading story:", error);
             alert("An error occurred while downloading the story. Please try again.");
         }
     });
+
 
     // Create delete icon
     const deleteIcon = createElement('i', ['bi', 'bi-trash', 'story-delete-icon'], {

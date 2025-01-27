@@ -985,7 +985,7 @@
                             const speakerIcon = titleMessage.querySelector("#speaker-icon");
                             speakerIcon.onclick = () => speakText(title, speakerIcon);
 
-                            // Show the "Image is being generated" message for 2 seconds
+                            // Show the "Image is being generated" message
                             const imageGenerationMessage = document.createElement("div");
                             imageGenerationMessage.classList.add("message", "bot-message");
                             imageGenerationMessage.innerHTML = `
@@ -994,16 +994,12 @@
                                         <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                     </div>
                                     <div class="message-text">
-                                        <p>Image is being generated for the story...</p>
+                                        <p style="margin-bottom:12px">Image is being generated...</p>
                                     </div>
                                 </div>`;
                             messageContainer.appendChild(imageGenerationMessage);
                             messageContainer.scrollTop = messageContainer.scrollHeight;
 
-                            // Remove the message after 2 seconds
-                            setTimeout(() => {
-                                messageContainer.removeChild(imageGenerationMessage);
-                            }, 2000);
 
                             // Show the loading GIF while the image is being generated
                             const loadingGifMessage1 = document.createElement("div");
@@ -1064,6 +1060,7 @@
                                     if (imageData.image_url) {
                                         // Remove the loading GIF if it exists
                                         if (loadingGifMessage1 && messageContainer.contains(loadingGifMessage1)) {
+                                            messageContainer.removeChild(imageGenerationMessage);
                                             messageContainer.removeChild(loadingGifMessage1);
                                         }
 
@@ -1088,7 +1085,7 @@
                                         // Add the redo button below the image
                                         const redoButton = document.createElement("button");
                                         redoButton.innerHTML = `<i class="bi bi-arrow-repeat"></i> Redo`;
-                                        redoButton.classList.add("redo-button", "btn", "btn-outline-primary", "btn-sm"); // Styling for the button
+                                        redoButton.classList.add("redo-button-image", "btn", "btn-outline-primary", "btn-sm"); // Styling for the button
                                         redoButton.style.marginTop = "10px"; // Add spacing
                                         redoButton.onclick = async () => {
                                             await redoImage(imageMessage, imageData.image_url);
@@ -1374,7 +1371,7 @@
                                         const upscaledImageUrl = localStorage.getItem("upscaledImageUrl"); // Retrieve the saved URL
                                         if (upscaledImageUrl) {
                                             generateAndDownloadPDF(title, story, story_id, upscaledImageUrl);
-                                            saveOptionMessage.querySelector(".message-text").innerHTML = "<p>Your story is being downloaded.</p>";
+                                            saveOptionMessage.querySelector(".message-text").innerHTML = "<p style='margin-bottom:12px'>Downloading your PDF!</p>";
                                         } else {
                                             alert("Upscaled image URL is missing. Please generate the image again.");
                                         }
@@ -1390,7 +1387,7 @@
                                                 <img src="${getCurrentFavicon()}" alt="SB-AI Logo" class="bot-icon">
                                             </div>
                                             <div class="message-text">
-                                                <p>Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
+                                                <p style="margin-bottom:12px">Want to create a new story? <a href="#" id="refresh-link" style="color: var(--accent-color); text-decoration: underline; cursor: pointer;">Click Here</a></p>
                                                 <i class="bi bi-volume-up speaker-icon" onclick="speakText('Want to create a new story? Click here', this)" style="font-size: 1.2em; cursor: pointer; color: var(--accent-color);"></i>
                                             </div>
                                         </div>`;
@@ -1456,7 +1453,7 @@
                                     },
                                     content: [
                                         { text: title, style: 'header' },
-                                        { text: story, style: 'story' },
+                                        { text: story, style: 'story', alignment: 'justify' }, // Centre-align the story text
                                         // Add the base64 image to the PDF
                                         {
                                             image: imageBase64,
@@ -1494,6 +1491,7 @@
                                 alert("An error occurred while generating the PDF. Please try again.");
                             }
                         }
+
 
                     })
                     .catch(error => {
