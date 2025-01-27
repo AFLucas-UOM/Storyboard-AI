@@ -1118,7 +1118,7 @@ button[type="submit"]:hover {
 .speaker-icon {
   display: none;
   position: absolute;
-  right: 0.5px;
+  right: -11px;
   bottom: 10px;
   cursor: pointer;
   font-size: 18px;
@@ -1438,6 +1438,30 @@ color: var(--accent-color);     /* Change text/icon color */
   color: #007bff;
   cursor: pointer;
   transition: color 0.3s ease;
+}
+
+.redo-button-image {
+  padding: 5px 10px;
+  margin-left: 25px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+/* Hover effect for redo button */
+.redo-button-image:hover {
+  color: #007bff;
+  background-color: #d6e2ef42;
+}
+
+.redo-button-image i {
+  margin-right: 5px;
 }
 
 /* Hover effect for redo button */
