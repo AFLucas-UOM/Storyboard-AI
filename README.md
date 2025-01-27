@@ -1,37 +1,57 @@
 # Storyboard-AI
 
-**Storyboard-AI** is a dynamic storytelling platform powered by AI, designed to assist users in crafting engaging, multimedia-rich stories. With an interactive chatbot interface, it guides users through the creative process by collecting essential details, generating personalized narratives, and producing accompanying visuals. The platform also includes features for saving, and enhancing stories for a seamless storytelling experience.
+**Storyboard-AI** is an AI-driven storytelling platform designed to help users craft engaging, multimedia-rich narratives effortlessly. Featuring an interactive chatbot interface, the platform collects user inputs, generates personalized stories, and creates accompanying visuals, offering a seamless and immersive storytelling experience. With features like saving, editing, and narrating stories, Storyboard-AI empowers users to bring their creative ideas to life.
 
-## Key Features
+---
 
-- **Interactive Chatbot**: A user-friendly conversational interface gathers input for personalized story creation.  
-- **AI-Generated Content**: Automatically produces complete stories enhanced with custom visuals.  
-- **Read-Aloud Functionality**: Stories can be narrated aloud (feature under active development).  
-- **Copy and Rewrite Options**: Enables users to copy story text and allows option to rewrite the paragraph  
-- **Save as PDF**: Stories, images, and videos are saved locally and can be easily shared or revisited.  
+## **Key Features**
 
-## Technical Details
+- **Interactive Chatbot Interface**  
+  A conversational chatbot guides users through the storytelling process, collecting inputs like themes, characters, and plot details.  
 
-### Frontend  
+- **AI-Generated Stories**  
+  Automatically generates complete, personalized narratives enhanced with custom AI-generated visuals.  
 
-- **Technologies**: HTML, CSS, JavaScript, and localStorage for responsive and interactive user experiences.  
-- **Dynamic UI**: Incorporates animations and intuitive design elements for seamless navigation.  
+- **Multimedia Integration**  
+  Enriches stories with visually engaging images and animations for enhanced storytelling.  
 
-### Backend  
+- **Read-Aloud Functionality**
+  Adds an auditory layer to storytelling, allowing users to listen to their narratives.  
 
-- **Framework**: Python Flask manages user input, story generation, and multimedia processing.  
-- **Data Management**: User inputs, generated content, and metadata are securely stored locally in JSON format.  
+- **Editable Content**  
+  Features like paragraph rewriting and copy options provide flexibility for refining stories.  
 
-### Media Generation  
+- **Save and Share**  
+  Stories, along with images and metadata, can be saved locally as PDFs for easy sharing and future reference.  
 
-- **Image Integration**: AI-generated visuals are embedded into the story creation process to enhance storytelling.  
-- **Interactive Animations**: Enhances the story presentation with animated elements.
 
-## Motivation
+---
 
-**Storyboard-AI** was inspired by the increasing demand for creative tools that simplify storytelling. Its mission is to empower individuals, educators, and content creators to transform ideas into captivating narratives with minimal effort. By integrating text, visuals, and videos, the platform serves as a versatile tool for personal projects, presentations, and entertainment.
+## **Technical Details**
 
-The project emphasizes accessibility, interactivity, and creativity, enabling users to generate professional-quality content regardless of technical expertise
+### **Frontend**
+- **Technologies Used**: HTML, CSS, JavaScript, and localStorage ensure responsive and interactive user experiences.  
+- **Dynamic UI Design**: Incorporates smooth animations and intuitive layouts for seamless navigation.  
+
+### **Backend**
+- **Framework**: Built with Python Flask to manage user inputs, story generation, and multimedia processing.  
+- **Data Management**: User inputs and generated content are securely stored locally in JSON files to ensure privacy.  
+
+### **Media Generation**
+- **Image Creation**: AI-generated visuals are integrated into stories to enhance creativity and engagement.  
+- **Interactive Animations**: Adds a dynamic touch, making the storytelling experience immersive and professional.  
+
+---
+
+## **Motivation**
+
+**Storyboard-AI** was developed to meet the increasing demand for creative tools that simplify storytelling. Its mission is to empower individuals, educators, and content creators to transform their ideas into captivating narratives with minimal effort. By seamlessly combining text, visuals, and multimedia elements, the platform serves as a versatile tool for personal projects, educational purposes, and entertainment.
+
+The platform emphasizes **accessibility**, **interactivity**, and **creativity**, enabling users of all technical expertise levels to generate professional-quality content with ease.
+
+---
+
+## **Getting Started**
 
 ## Clone the repository:
   ```bash
@@ -43,9 +63,13 @@ The project emphasizes accessibility, interactivity, and creativity, enabling us
   flask --app flask-app run
   ```
 
+---
+
 ## Acknowledgments
 
 This project was developed as part of the `ARI3333` course at the `University of Malta`.
+
+---
 
 ## Contact
 
