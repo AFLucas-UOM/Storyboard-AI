@@ -2,7 +2,6 @@
 
 **Storyboard-AI** is an AI-driven storytelling platform designed to help users craft engaging, multimedia-rich narratives effortlessly. Featuring an interactive chatbot interface, the platform collects user inputs, generates personalized stories, and creates accompanying visuals, offering a seamless and immersive storytelling experience. With features like saving, editing, and narrating stories, Storyboard-AI empowers users to bring their creative ideas to life.
 
----
 
 ## **Key Features**
 
@@ -25,8 +24,6 @@
   Stories, along with images and metadata, can be saved locally as PDFs for easy sharing and future reference.  
 
 
----
-
 ## **Technical Details**
 
 ### **Frontend**
@@ -41,7 +38,6 @@
 - **Image Creation**: AI-generated visuals are integrated into stories to enhance creativity and engagement.  
 - **Interactive Animations**: Adds a dynamic touch, making the storytelling experience immersive and professional.  
 
----
 
 ## **Motivation**
 
@@ -49,7 +45,6 @@
 
 The platform emphasizes **accessibility**, **interactivity**, and **creativity**, enabling users of all technical expertise levels to generate professional-quality content with ease.
 
----
 
 ## **Getting Started**
 
@@ -63,13 +58,11 @@ The platform emphasizes **accessibility**, **interactivity**, and **creativity**
   flask --app flask-app run
   ```
 
----
 
 ## Acknowledgments
 
 This project was developed as part of the `ARI3333` course at the `University of Malta`.
 
----
 
 ## Contact
 
