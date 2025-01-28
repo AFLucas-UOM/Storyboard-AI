@@ -8,9 +8,6 @@ import torch
 from diffusers import StableDiffusionPipeline
 from PIL import Image, ImageFilter
 
-# Replace with your actual Hugging Face token
-auth_token = "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"
-
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Use a secure secret key
 app.permanent_session_lifetime = timedelta(minutes=60)  # Session expiry after 60 minutes of inactivity
