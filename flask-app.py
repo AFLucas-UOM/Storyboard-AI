@@ -77,7 +77,6 @@ def load_model():
         pipe = StableDiffusionPipeline.from_pretrained(
             model_id,
             torch_dtype=dtype,
-            use_auth_token=auth_token,  # Replace with your token
             cache_dir="sd_cache"        # Local cache directory
         )
         pipe.to(device_choice)
