@@ -265,9 +265,17 @@ def update_profile():
     password = sanitize_input(request.form['password'])
     profile_pic = DEFAULT_PFP
 
+    # Get the current logged-in user's email
+    current_email = session.get('user')
+    if not current_email:
+        return redirect(url_for('login'))
+
     user_credentials = load_credentials()
-    user = next((u for u in user_credentials if u['email'] == email), None)
+
+    # Find the user using the current email (not the updated one)
+    user = next((u for u in user_credentials if u['email'] == current_email), None)
     if user:
+        # Handle profile picture changes
         if request.form.get('remove_profile_pic') == "true":
             existing_pic = user.get('profile_pic')
             if existing_pic and existing_pic != DEFAULT_PFP:
@@ -285,6 +293,7 @@ def update_profile():
                 profile_pic = f"{name}_{pic_filename}"
                 pic.save(os.path.join('static/img/PFPs', profile_pic))
 
+        # Update user information
         if password:
             if not check_password_hash(user['password'], password):
                 hashed_password = generate_password_hash(password)
@@ -307,9 +316,14 @@ def update_profile():
                 'profile_pic': profile_pic
             })
 
+        # Save the updated user data
         save_credentials_pretty(user_credentials)
 
+        # Update the session with the new email
+        session['user'] = email
+
     return redirect(url_for('profile'))
+
 
 @app.route('/signout')
 def signout():
