@@ -2,6 +2,9 @@
 
 **Storyboard-AI** is an AI-driven storytelling platform designed to help users craft engaging, multimedia-rich narratives effortlessly. Featuring an interactive chatbot interface, the platform collects user inputs, generates personalized stories, and creates accompanying visuals, offering a seamless and immersive storytelling experience. With features like saving, editing, and narrating stories, Storyboard-AI empowers users to bring their creative ideas to life.
 
+## Demo Video
+
+[![Watch the video](githubAssets/Thumbnail.png)](https://drive.google.com/file/d/150W0rOrV0d4w68vspjjVJ3Ylge9kvH74/view?usp=drive_link)
 
 ## **Key Features**
 
