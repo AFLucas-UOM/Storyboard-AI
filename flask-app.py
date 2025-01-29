@@ -233,10 +233,6 @@ def load_credentials():
         return json.load(f)
 
 def iterative_upscale(image, scale_factor=3.0, steps=2):
-    """
-    Upscale an image by 'scale_factor' in multiple steps
-    using the LANCZOS resampling filter.
-    """
     width, height = image.size
     step_factor = scale_factor ** (1 / steps)  # e.g., 3^(1/2) ~ 1.732 if steps=2
     
